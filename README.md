@@ -1,4 +1,5 @@
 # Background Download / Upload plugin for the NativeScript framework
+[How to use the plugin, see: source/README.md](source/)
 
 ## Prerequisites
  - [nodejs](https://nodejs.org/)
@@ -24,3 +25,9 @@ Or
 ```
 grunt android
 ```
+
+## iOS
+The iOS API is implemented in JavaScript.
+
+## Android
+The minimum supported API level is 18 and the background file upload is handled by the [android-upload-service](https://github.com/alexbbb/android-upload-service) Open-Source library.
