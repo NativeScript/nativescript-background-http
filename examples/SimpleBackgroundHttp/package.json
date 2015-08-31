@@ -1,0 +1,14 @@
+{
+  "nativescript": {
+    "id": "org.nativescript.SimpleBackgroundHttp",
+    "tns-ios": {
+      "version": "1.2.2"
+    },
+    "tns-android": {
+      "version": "1.2.1"
+    }
+  },
+  "dependencies": {
+    "background-http": "file:../../dist/package"
+  }
+}
