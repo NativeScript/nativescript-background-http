@@ -32,7 +32,7 @@ module.exports = function(grunt) {
     copy: {
       package: {
         files: [
-          { expand: true, cwd: 'source', src: ['**/*.js', '**/*.xml', 'package.json', 'README.md', 'imagepicker.d.ts'], dest: 'dist/package' }
+          { expand: true, cwd: 'source', src: ['**/*.js', '**/*.xml', '**/*.jar', 'package.json', 'README.md', 'imagepicker.d.ts'], dest: 'dist/package' }
         ]
       }
     },
@@ -62,14 +62,15 @@ module.exports = function(grunt) {
 
       var fileName = request.headers["file-name"];
       console.log(request.method + "Request! Content-Length: " + request.headers["content-length"] + ", file-name: " + fileName);
+      console.dir(request.headers);
 
       var out = "tests/www/uploads/upload-" + new Date().getTime() + "-" + fileName;
       console.log("Output in: " + out);
-      request.pipe(new Throttle({ rate: 1024 * 128 })).pipe(fs.createWriteStream(out, { flags: 'w', encoding: null, fd: null, mode: 0666 }));
+      request.pipe(new Throttle({ rate: 1024 * 512 })).pipe(fs.createWriteStream(out, { flags: 'w', encoding: null, fd: null, mode: 0666 }));
 
       request.on('end', function () {
         setTimeout(function() {
-          console.log("Sending back response... (" + out + ")");
+          console.log("Done (" + out + ")");
           var body = "Upload complete!";
           response.writeHead(200, "Done!", { "Content-Type": "text/plain", "Content-Length": body.length });
           response.write(body);
@@ -83,7 +84,7 @@ module.exports = function(grunt) {
       });
     });
 
-    server.listen(8282);
+    server.listen(8083);
     console.log("Server is listening");
   });
 

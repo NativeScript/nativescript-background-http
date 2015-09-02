@@ -1,4 +1,5 @@
-var Observable = require("data/observable").Observable;
+import data_observable = require("data/observable");
+import Observable = data_observable.Observable;
 
 var runloop = CFRunLoopGetCurrent();
 var defaultRunLoopMode = NSString.stringWithString(kCFRunLoopCommonModes);
@@ -95,7 +96,7 @@ var SessionDelegate = NSObject.extend({
 
 // TODO: Create a mechanism to clean sessions from the cache that have all their tasks completed, canceled or errored out.
 var sessions = {};
-function session(id) {
+function session(id): Observable {
 
 	var jsSession = sessions[id];
 	if (jsSession) {
@@ -104,7 +105,7 @@ function session(id) {
 
 	var delegate = SessionDelegate.alloc().init();
 	var configuration = NSURLSessionConfiguration.backgroundSessionConfigurationWithIdentifier(id);
-	session = NSURLSession.sessionWithConfigurationDelegateDelegateQueue(configuration, delegate, null);
+	var session = NSURLSession.sessionWithConfigurationDelegateDelegateQueue(configuration, delegate, null);
 
 	function uploadFile(fileUri, options) {
 
@@ -140,8 +141,8 @@ function session(id) {
 exports.session = session;
 
 var tasks = new WeakMap();
-function getTask(nsSession, nsTask) {
-	var jsTask = tasks.get(nsTask);
+function getTask(nsSession, nsTask): Observable {
+	var jsTask = <Observable>tasks.get(nsTask);
 	if (jsTask) {
 		return jsTask;
 	}
@@ -159,3 +160,4 @@ function getTask(nsSession, nsTask) {
 
 	return jsTask;
 }
+

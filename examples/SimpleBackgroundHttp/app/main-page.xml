@@ -1,7 +1,15 @@
 <Page xmlns="http://www.nativescript.org/tns.xsd" loaded="pageLoaded">
-  <StackLayout>
-    <Label text="Tap the button" cssClass="title"/>
-    <Button text="TAP" tap="{{ tapAction }}" />
-    <Label text="{{ message }}" cssClass="message" textWrap="true"/>
-  </StackLayout>
+  <GridLayout rows="*, auto">
+    <ListView items="{{ $value }}">
+		<ListView.itemTemplate>
+			<GridLayout rows="auto, auto, auto" columns="auto, *">
+				<Label margin="5" text="uploading:" />
+				<Label col="1" margin="5" text="{{ upload, upload + ' / ' + totalUpload }}" />
+				<Progress row="1" colSpan="2" margin="5" value="{{ upload }}" maxValue="{{ totalUpload }}" />
+				<Label row="2" margin="5" text="{{ description }}" />
+			</GridLayout>
+		</ListView.itemTemplate>
+    </ListView>
+    <Button row="1" margin="5" text="Upload!" tap="upload" />
+  </GridLayout>
 </Page>

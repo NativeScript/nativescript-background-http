@@ -1,109 +1,139 @@
-var application = require("application");
-var frame = require("ui/frame");
+import application = require("application");
+import frame = require("ui/frame");
+import data_observable = require("data/observable");
 
-var servicePackage = com.alexbbb.uploadservice;
+var servicePackage = (<any>com).alexbbb.uploadservice;
 
-var progressReceiverClass = servicePackage.AbstractUploadServiceReceiver.extend({
+var ProgressReceiver = servicePackage.AbstractUploadServiceReceiver.extend({
     onProgress: function(uploadId, progress) {
-
+        // TODO: We will have to either change the iOS version to give a progress percentage or have here upload / total upload pair.
+        console.log("onProgress: " + uploadId + " " + progress);
+        Task.fromId(uploadId).setUpload(progress);
+        Task.fromId(uploadId).setTotalUpload(100);
     },
 
     onError: function(uploadId, error) {
-        console.log("" + error);
+        console.log("onError: " + uploadId + " " + error);
     },
 
     onCompleted: function(uploadId, responseCode, responseMessage) {
+        console.log("onCompleted: " + uploadId + " " + responseCode + " " + responseMessage);
         // TODO: We may want to track active uploads and when there is no such to close the broadcast receiver
-    }
-})
-
-var uploadServer;
-var receiver;
-var requestId = 1;
-var OPEN_CODE = 100;
-var OPEN_AND_UPLOAD_CODE = 1000;
-
-// handle the onActivityResult notification
-application.android.on("activityResult", function(e) {
-    if(e.resultCode == android.app.Activity.RESULT_CANCELED) {
-        // TODO: Raise an error here?
-        return;
-    }
-
-    if(e.requestCode == OPEN_AND_UPLOAD_CODE) {
-        doUpload(e);
-    } else {
-        // TODO: Think of possible user scenarios that are not related to upload only
     }
 });
 
-function queryAbsolutePath(uri) {
-    var context = application.android.context;
-    var filePathColumn = [android.provider.MediaStore.MediaColumns.DATA];
-    var cursor = context.getContentResolver().query(uri, filePathColumn, null, null, null);
-    cursor.moveToFirst();
-    var columnIndex = cursor.getColumnIndex(filePathColumn[0]);
-    var filePath = cursor.getString(columnIndex);
-    cursor.close();
+var receiver;
 
-    return filePath;
+export function session(id: string) {
+
+    if (!receiver) {
+        // TODO: While there are interested parties:
+        var context = application.android.context;
+        receiver = new ProgressReceiver();
+        receiver.register(context);
+    }
+
+    // TODO: Cache.
+    return new Session(id);
 }
 
-function doUpload(args) {
-    var intent = args.intent;
-    var items = intent.getClipData();
-    if(items == null) {
-        return;
+class ObservableBase extends data_observable.Observable {
+    protected notifyPropertyChanged(propertyName: string, value: any): void {
+        this.notify({ object: this, eventName: data_observable.Observable.propertyChangeEvent, propertyName: propertyName, value: value });
+    }
+}
+
+class Session {
+    private _id: string;
+    
+    constructor(id: string) {
+        this._id = id;
     }
 
-    var count = items.getItemCount();
-    if(count == 0) {
-        // no items selected
-        return;
+    public uploadFile(file: string, options: any): Task {
+        // TODO: These should belong to a session. You should be able to retrieve them after app restart if the service continued work.
+        return Task.create(this, file, options);
     }
 
-    var context = application.android.context;
-    var request = new servicePackage.UploadRequest(context, (++requestId).toString(), uploadServer);
-
-    for(var i = 0; i < count; i++) {
-        var fileUri = items.getItemAt(i).getUri();
-        var filePath = queryAbsolutePath(fileUri);
-        request.addFileToUpload(filePath, fileUri.getPath(), null, servicePackage.ContentType.APPLICATION_OCTET_STREAM);
+    get id(): string {
+        return this._id;
     }
+}
 
-    try {
-        servicePackage.UploadService.startUpload(request);
-        if(!receiver) {
-            receiver = new progressReceiverClass();
-            receiver.register(context);
+class Task extends ObservableBase {
+
+    private static taskCount = 0;
+    private static cache = {};
+
+    private _session;
+    private _id;
+
+    private _upload: number;
+    private _totalUpload: number;
+
+    static create(session: Session, file: string, options: any): Task {
+        var task = new Task();
+        task._session = session;
+        task._id = session.id + "{" + ++Task.taskCount + "}";
+
+        var context = application.android.context;
+
+        // TODO: The Java send multipart, instead implement request with a single file.
+        // TODO: The id should be in a "session id" + "task id".
+        var request = new servicePackage.UploadRequest(context, task._id, options.url);
+        request.addFileToUpload(file, "file", null, servicePackage.ContentType.APPLICATION_OCTET_STREAM);
+
+        var headers = options.headers;
+        if (headers) {
+            for (var header in headers) {
+                request.addHeader(header, headers[header]);
+                console.log("Set header: " + header + " " + headers[header]);
+            }
         }
+
+        // TODO: It seems some fields such as "customUserAgent" in the UploadRequest are set by means other than headers. They will need extra care.
+
+        request.setMethod(options.method ? options.method : "GET");
+        // TODO: Description.
+
+        servicePackage.UploadService.startUpload(request);
+
+        Task.cache[task._id] = task;
+
+        return task;
     }
-    catch(ex) {
-        android.widget.Toast.makeText(
-            context, 
-            "Malformed upload request. " + ex, 
-            android.widget.Toast.LENGTH_SHORT
-            )
-            .show();
+
+    static fromId(id: string): Task {
+        return Task.cache[id];
+    }
+
+    get upload(): number {
+        return this._upload;
+    }
+
+    get totalUpload(): number {
+        return this._totalUpload;
+    }
+
+    get description(): string {
+        // TODO: We need a way to store a description in the task...
+        return "";
+    }
+
+    get session(): Session {
+        return this._session;
+    }
+
+    setTotalUpload(value: number) {
+        this._totalUpload = value;
+        this.notifyPropertyChanged("totalUpload", value);
+    }
+
+    setUpload(value: number) {
+        this._upload = value;
+        this.notifyPropertyChanged("upload", value);
     }
 }
 
-exports.init = function(appNamespace, server) {
-    servicePackage.UploadService.NAMESPACE = appNamespace;
-    uploadServer = server;
-}
 
-exports.openUpload = function() {
-    if(!uploadServer) {
-        throw new Error("No upload server specified. Call init(namespace, server) method.")
-    }
 
-    var activity = application.android.currentContext;
-    var intent = new android.content.Intent(android.content.Intent.ACTION_PICK);
-    intent.setType("image/*");
-    intent.putExtra(android.content.Intent.EXTRA_ALLOW_MULTIPLE, true);
-
-    activity.startActivityForResult(intent, OPEN_AND_UPLOAD_CODE);
-
-    // TODO: Return a promise to resolve/reject later
-}
