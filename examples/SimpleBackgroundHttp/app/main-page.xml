@@ -1,15 +1,24 @@
 <Page xmlns="http://www.nativescript.org/tns.xsd" loaded="pageLoaded">
-  <GridLayout rows="*, auto">
-    <ListView items="{{ $value }}">
+  <GridLayout rows="3*, 2*, auto" columns="*, *">
+    <ListView colSpan="2" items="{{ tasks }}">
 		<ListView.itemTemplate>
-			<GridLayout rows="auto, auto, auto" columns="auto, *">
-				<Label margin="5" text="uploading:" />
-				<Label col="1" margin="5" text="{{ upload, upload + ' / ' + totalUpload }}" />
-				<Progress row="1" colSpan="2" margin="5" value="{{ upload }}" maxValue="{{ totalUpload }}" />
-				<Label row="2" margin="5" text="{{ description }}" />
-			</GridLayout>
+			<StackLayout>
+				<Label text="{{ upload, 'Uploading: ' + upload + ' / ' + totalUpload }}" />
+				<Progress value="{{ upload }}" maxValue="{{ totalUpload }}" />
+				<Label text="{{ description, 'description: ' + description }}" />
+				<Label text="{{ status, 'status: ' + status }}" />
+			</StackLayout>
 		</ListView.itemTemplate>
     </ListView>
-    <Button row="1" margin="5" text="Upload!" tap="upload" />
+    <ListView row="1" colSpan="2" items="{{ events }}">
+    	<ListView.itemTemplate>
+    		<StackLayout>
+    			<Label text="{{ eventTitle }} " />
+    			<Label text="{{ eventData }}" />
+    		</StackLayout>
+    	</ListView.itemTemplate>
+    </ListView>
+    <Button row="2" margin="2" text="Upload!" tap="upload" />
+    <Button row="2" col="1" margin="2" text="Erro-Up!" tap="upload_error" />
   </GridLayout>
 </Page>

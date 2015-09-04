@@ -66,7 +66,28 @@ module.exports = function(grunt) {
 
       var out = "tests/www/uploads/upload-" + new Date().getTime() + "-" + fileName;
       console.log("Output in: " + out);
+
+      var total = request.headers["content-length"];
+      var current = 0;
+
+      var shouldFail = request.headers["should-fail"];
+
       request.pipe(new Throttle({ rate: 1024 * 512 })).pipe(fs.createWriteStream(out, { flags: 'w', encoding: null, fd: null, mode: 0666 }));
+
+      request.on('data', function(chunk) {
+        current += chunk.length;
+        
+        if (shouldFail && (current / total > 0.25)) {
+          console.log("Error ");
+          var body = "Denied!";
+          response.writeHead(408, "Die!", { "Content-Type": "text/plain", "Content-Length": body.length, "Connection": "close" });
+          response.write(body);
+          response.end();
+          console.log("Terminated with error: [" + out + "]: " + current + " / " + total + "  " + Math.floor(100 * current / total) + "%");
+        } else {
+          console.log("Data [" + out + "]: " + current + " / " + total + "  " + Math.floor(100 * current / total) + "%");
+        }
+      });
 
       request.on('end', function () {
         setTimeout(function() {
