@@ -8,8 +8,8 @@ var ProgressReceiver = servicePackage.AbstractUploadServiceReceiver.extend({
     onProgress: function(uploadId, currentBytes, totalBytes) {
         if (arguments.length === 3) {
             var task = Task.fromId(uploadId);
-            task.setUpload(currentBytes);
             task.setTotalUpload(totalBytes);
+            task.setUpload(currentBytes);
             task.setStatus("uploading");
             task.notify({ eventName: "progress", object: task, currentBytes: currentBytes, totalBytes: totalBytes });
         }
@@ -22,7 +22,6 @@ var ProgressReceiver = servicePackage.AbstractUploadServiceReceiver.extend({
     },
 
     onCompleted: function(uploadId, responseCode, responseMessage) {
-        console.log("onCompleted: " + uploadId + " " + responseCode + " " + responseMessage);
         var task = Task.fromId(uploadId);
 
         var totalUpload = task.totalUpload;
@@ -104,7 +103,6 @@ class Task extends ObservableBase {
                 var value = headers[header];
                 if (value !== null && value !== void 0) {
                     request.addHeader(header, value.toString());
-                    console.log("Set header: " + header + " " + headers[header]);
                 }
             }
         }

@@ -26,12 +26,20 @@ var SessionDelegate = NSObject.extend({
 	},
 
 	// NSURLSessionTaskDelegate
-	URLSessionTaskDidCompleteWithError: function(session, task, error) {
-		//console.log("URLSessionTaskDidCompleteWithError:");
-		//console.log("   " + task.taskDescription);
-		//console.log(" - session: " + session);
-		//console.log(" - task:    " + task);
-		//console.log(" - error:   " + error);
+	URLSessionTaskDidCompleteWithError: function(session, nsTask, error) {
+		var jsTask = getTask(session, nsTask);
+		if (error) {
+			jsTask.set("status", "error");
+			jsTask.notify({ eventName: "error", object: jsTask, error: error });
+		} else {
+			jsTask.set("upload", nsTask.countOfBytesSent);
+			jsTask.set("totalUpload", nsTask.countOfBytesExpectedToSend);
+
+			jsTask.set("status", "complete");
+			jsTask.notify({ eventName: "progress", object: jsTask, currentBytes: nsTask.countOfBytesSent, totalBytes: nsTask.countOfBytesExpectedToSend });
+			jsTask.notify({ eventName: "complete", object: jsTask });
+			
+		}
 	},
 	URLSessionTaskDidReceiveChallengeCompletionHandler: function(session, task, challenge, completionHandler) {
 		//console.log("URLSessionTaskDidReceiveChallengeCompletionHandler: " + session + " " + task + " " + challenge);
@@ -42,10 +50,10 @@ var SessionDelegate = NSObject.extend({
 	URLSessionTaskDidSendBodyDataTotalBytesSentTotalBytesExpectedToSend: function(session, task, data, sent, expectedTotal) {
 		invokeOnMainRunLoop(function() {
 			var jsTask = getTask(session, task);
-			//console.log("Old: " + jsTask.upload + " new " + sent);
-			jsTask.set("upload", sent);
 			jsTask.set("totalUpload", expectedTotal);
-			//console.log("Notified! " + sent + " / " + expectedTotal);
+			jsTask.set("upload", sent);
+			jsTask.set("status", "uploading");
+            jsTask.notify({ eventName: "progress", object: jsTask, currentBytes: sent, totalBytes: expectedTotal });
 		});
 		//console.log("Sending: " + sent + " / " + expectedTotal);
 	},
@@ -115,7 +123,10 @@ function session(id): Observable {
 		var headers = options.headers;
 		if (headers) {
 			for (var header in headers) {
-				request.setValueForHTTPHeaderField(headers[header], header);
+				var value = headers[header];
+                if (value !== null && value !== void 0) {
+                    request.setValueForHTTPHeaderField(value.toString(), header);
+                }
 			}
 		}
 
@@ -152,8 +163,24 @@ function getTask(nsSession, nsTask): Observable {
 	jsTask.set("ios", nsTask);
 	jsTask.set("session", nsSession);
 	jsTask.set("description", nsTask.taskDescription);
-	jsTask.set("upload", 0);
-	jsTask.set("totalUpload", 1);
+
+	jsTask.set("upload", nsTask.countOfBytesSent);
+	jsTask.set("totalUpload", nsTask.countOfBytesExpectedToSend);
+
+	if (nsTask.error) {
+		// TODO: Consider adding error property on the task.
+		jsTask.set("status", "error");
+	} else {
+		if (nsTask.state == NSURLSessionTaskState.NSURLSessionTaskStateRunning) {
+			jsTask.set("status", "uploading");
+		} else if (nsTask.state == NSURLSessionTaskState.NSURLSessionTaskStateCompleted) {
+			jsTask.set("status", "complete");
+		} else if (nsTask.state == NSURLSessionTaskState.NSURLSessionTaskStateCanceling) {
+			jsTask.set("status", "error");
+		} else if (nsTask.state == NSURLSessionTaskState.NSURLSessionTaskStateSuspended) {
+			jsTask.set("status", "pending");
+		}
+	}
 
 	// Put in the cache
 	tasks.set(nsTask, jsTask);
