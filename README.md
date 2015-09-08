@@ -4,7 +4,14 @@
 ## Prerequisites
  - [nodejs](https://nodejs.org/)
  - [nativescript](https://www.nativescript.org/)
- - [grunt](http://gruntjs.com/getting-started)
+ - [grunt](http://gruntjs.com/getting-started)  
+```
+npm install -g grunt-cli
+```
+ - [tsd](https://github.com/DefinitelyTyped/tsd)  
+```
+npm install -g tsd
+```
 
 ## Build
 To install dev dependencies:

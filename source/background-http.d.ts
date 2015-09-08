@@ -123,10 +123,5 @@ declare module "background-http" {
          * You can as well store serialized JSON object.
          */
         description: string;
-
-        /**
-         * Gets the session this task is scheduled in. (read-only)
-         */
-        session: Session;
     }
 }

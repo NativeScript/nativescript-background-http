@@ -7,7 +7,8 @@ module.exports = function(grunt) {
       dist: ["dist"]
     },
     exec: {
-      tsc_package: 'node_modules/typescript/bin/tsc -p ./source/',
+      tsc_source: 'node_modules/typescript/bin/tsc -p ./source/',
+      tsc_example: 'node_modules/typescript/bin/tsc -p ./examples/SimpleBackgroundHttp/',
       npm_pack: {
         cmd: 'npm pack ./package',
         cwd: 'dist/'
@@ -27,12 +28,16 @@ module.exports = function(grunt) {
       run_android_emulator: {
         cmd: 'tns run android --emulator',
         cwd: 'examples/SimpleBackgroundHttp'
+      },
+      tsd_link: {
+        cmd: 'tsd link',
+        cwd: 'examples/SimpleBackgroundHttp'
       }
     },
     copy: {
       package: {
         files: [
-          { expand: true, cwd: 'source', src: ['**/*.js', '**/*.xml', '**/*.jar', 'package.json', 'README.md', 'imagepicker.d.ts'], dest: 'dist/package' }
+          { expand: true, cwd: 'source', src: ['**/*.js', '**/*.xml', '**/*.jar', './*.d.ts', 'package.json', 'README.md', 'imagepicker.d.ts'], dest: 'dist/package' }
         ]
       }
     },
@@ -112,12 +117,14 @@ module.exports = function(grunt) {
   // Default task(s).
   grunt.registerTask('default', [
     'clean:dist',
-    'exec:tsc_package',
+    'exec:tsc_source',
     'mkdir:dist',
     'copy:package',
     'exec:npm_pack',
     'exec:tns_install',
-    'exec:tns_plugin_install'
+    'exec:tns_plugin_install',
+    'exec:tsd_link',
+    'exec:tsc_example'
   ]);
 
   grunt.registerTask('ios', [

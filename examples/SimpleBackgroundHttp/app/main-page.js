@@ -1,90 +1,66 @@
+var background_http = require("background-http");
 var fs = require("file-system");
 var platform = require("platform");
-var bgHttp = require("background-http");
 var ObservableArray = require("data/observable-array").ObservableArray;
-
-var session = bgHttp.session("image-upload");
-
+var session = background_http.session("image-upload");
 var context = {
-	tasks: new ObservableArray(),
-	events: new ObservableArray()
-}
-
+    tasks: new ObservableArray(),
+    events: new ObservableArray()
+};
 var file;
 var url;
-
-if (platform.device.os == platform.platformNames.ios) {  
-	// TODO: These differences should be part of the library instead of exposed outside:
-	file = NSURL.fileURLWithPath(__dirname + "/bigpic.jpg").toString();
-	// TODO: This works for emulator. Real device will need other address.
-	url = "http://localhost:8083";
-} else {
-	file = __dirname + "/bigpic.jpg";
-	// TODO: This works for emulator. Real device will need other address.
-	url = "http://10.0.2.2:8083";
+if (platform.device.os == platform.platformNames.ios) {
+    file = NSURL.fileURLWithPath(__dirname + "/bigpic.jpg").toString();
+    url = "http://localhost:8083";
 }
-
+else {
+    file = __dirname + "/bigpic.jpg";
+    url = "http://10.0.2.2:8083";
+}
 function pageLoaded(args) {
     var page = args.object;
     page.bindingContext = context;
 }
 exports.pageLoaded = pageLoaded;
-
 function upload(args) {
-	start_upload(false);
+    start_upload(false);
 }
 exports.upload = upload;
-
 function upload_error(args) {
-	start_upload(true);
+    start_upload(true);
 }
 exports.upload_error = upload_error;
-
 var counter = 0;
-
 function start_upload(should_fail) {
-	console.log("Upload!");
-	
-	console.log("Upload file: " + file);
-	var name = "bigpic.jpg";
-	var description = name + " " + ++counter;
-
-	var request = {
-		url: url,
-		method: "POST",
-		headers: {
-			"Content-Type": "application/octet-stream",
-			"File-Name": name
-		},
-		description: description
-	};
-
-	if (should_fail) {
-		request.headers["Should-Fail"] = true;
-	}
-
-	var task = session.uploadFile(file, request);
-
-	function onEvent(e) {
-		context.events.push({
-			eventTitle: e.eventName + " " + e.object.description,
-			eventData: JSON.stringify({
-				error: e.error ? e.error.toString() : e.error,
-				currentBytes: e.currentBytes,
-				totalBytes: e.totalBytes
-			})
-		});
-	}
-
-	task.on("progress", onEvent);
-	task.on("error", onEvent);
-	task.on("complete", onEvent);
-
-	context.tasks.push(task);
+    console.log("Upload!");
+    console.log("Upload file: " + file);
+    var name = "bigpic.jpg";
+    var description = name + " " + ++counter;
+    var request = {
+        url: url,
+        method: "POST",
+        headers: {
+            "Content-Type": "application/octet-stream",
+            "File-Name": name
+        },
+        description: description
+    };
+    if (should_fail) {
+        request.headers["Should-Fail"] = true;
+    }
+    var task = session.uploadFile(file, request);
+    function onEvent(e) {
+        context.events.push({
+            eventTitle: e.eventName + " " + e.object.description,
+            eventData: JSON.stringify({
+                error: e.error ? e.error.toString() : e.error,
+                currentBytes: e.currentBytes,
+                totalBytes: e.totalBytes
+            })
+        });
+    }
+    task.on("progress", onEvent);
+    task.on("error", onEvent);
+    task.on("complete", onEvent);
+    context.tasks.push(task);
 }
-
-
-
-
-
-
