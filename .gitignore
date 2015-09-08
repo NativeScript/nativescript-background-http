@@ -4,6 +4,9 @@ dist
 # Dev dependencies
 node_modules
 
+# API reference
+api-ref
+
 # Source, written in TypeScript so JavaScript is not necessary
 /source/**/*.js
 

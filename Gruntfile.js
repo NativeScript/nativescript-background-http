@@ -32,6 +32,26 @@ module.exports = function(grunt) {
       tsd_link: {
         cmd: 'tsd link',
         cwd: 'examples/SimpleBackgroundHttp'
+      },
+    },
+    typedoc: {
+      source: {
+        options: {
+          // 'flag:undefined' will set flags without options.
+          module: 'commonjs',
+          target: 'es5',
+          out: 'api-ref/',
+          json: './api-ref/doc.json',
+          name: 'Background HTTP for NativeScript',
+          includeDeclarations: undefined, 
+          hideGenerator: undefined,
+          excludeExternals: undefined,
+          externalPattern: '**/d.ts/**',
+          mode: 'file',
+          readme: 'source/README.md'
+          // verbose: undefined
+        },
+        src: ['source/background-http.d.ts', 'source/d.ts/data/observable/observable.d.ts']
       }
     },
     copy: {
@@ -54,6 +74,7 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-copy');
   grunt.loadNpmTasks('grunt-contrib-clean');
   grunt.loadNpmTasks('grunt-mkdir');
+  grunt.loadNpmTasks('grunt-typedoc');
 
   grunt.registerTask('http-dev', 'Host handle uploads.', function() {
 
@@ -119,6 +140,7 @@ module.exports = function(grunt) {
     'clean:dist',
     'exec:tsc_source',
     'mkdir:dist',
+    'typedoc:source',
     'copy:package',
     'exec:npm_pack',
     'exec:tns_install',
