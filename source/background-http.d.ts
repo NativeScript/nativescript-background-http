@@ -4,6 +4,7 @@ declare module "background-http" {
 
     /**
      * Get or create a background download/upload session by id.
+     * @param id The session id.
      */
     export function session(id: string): Session;
 
@@ -67,22 +68,22 @@ declare module "background-http" {
 
         /**
          * Subscribe for error notifications.
-         * @param The name of the event - "error"
-         * @param A handler that will receive the error details
+         * @param event The name of the event - "error"
+         * @param handler A handler that will receive the error details
          */
         on(event: "error", handler: (e: ErrorEventData) => void): void;
 
         /**
          * Subscribe for the transfer progress.
-         * @event The name of the event - "progress"
-         * @handler A handler that will receive a progress event with the current and expected total bytes 
+         * @param event The name of the event - "progress"
+         * @param handler A handler that will receive a progress event with the current and expected total bytes 
          */
         on(event: "progress", handler: (e: ProgressEventData) => void): void;
 
         /**
          * Subscribe for successful completion of the task
-         * @event The name of the event - "complete"
-         * @handler A function that will be called with general event data upon successful completion
+         * @param event The name of the event - "complete"
+         * @param handler A function that will be called with general event data upon successful completion
          */
         on(event: "complete", handler: (e: observable.EventData) => void): void;
     }
@@ -93,6 +94,8 @@ declare module "background-http" {
     export interface Session {
         /**
          * Initiate a new background file upload task.
+         * @param fileUri A file path to upload.
+         * @param request Options for the upload, sets uri, headers, task description etc.
          */
         uploadFile(fileUri: string, request: Request): Task;
     }
@@ -119,8 +122,8 @@ declare module "background-http" {
 
         /**
          * Use this to help you identify the task.
-         * Sets the HttpTask's description property.
-         * You can as well store serialized JSON object.
+         * Sets the task's description property.
+         * You can store serialized JSON object.
          */
         description: string;
     }

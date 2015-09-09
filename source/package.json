@@ -7,7 +7,7 @@
 	"name": "background-http",
 	"version": "0.0.1",
 	"nativescript": {
-		"ios": "1.0.0",
+		"ios": "1.2.0",
 		"android": "1.2.0"
 	},
 	"main": "background-http.js",
@@ -15,5 +15,8 @@
 		"definitions": [
 			"background-http.d.ts"
 		]
-	}
+	},
+	"homepage": "http://nativescript.github.io/nativescript-background-http/",
+	"url": "https://github.com/NativeScript/nativescript-background-http/issues",
+	"license": "Apache-2.0"
 }
