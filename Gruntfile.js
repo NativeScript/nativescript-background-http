@@ -4,7 +4,9 @@ module.exports = function(grunt) {
   grunt.initConfig({
     pkg: grunt.file.readJSON('package.json'),
     clean: {
-      dist: ["dist"]
+      dist: ["dist"],
+      "api-ref": ["dist/api-ref"],
+      "github.io": ["github.io/**.*", "!github.io/.git", "!github.io/.gitignore"]
     },
     exec: {
       tsc_source: 'node_modules/typescript/bin/tsc -p ./source/',
@@ -35,20 +37,21 @@ module.exports = function(grunt) {
       },
     },
     typedoc: {
-      source: {
+      "api-ref": {
         options: {
           // 'flag:undefined' will set flags without options.
           module: 'commonjs',
           target: 'es5',
-          out: 'api-ref/',
-          json: './api-ref/doc.json',
+          out: './dist/api-ref/',
+          json: './dist/doc.json',
           name: 'Background HTTP for NativeScript',
           includeDeclarations: undefined, 
           hideGenerator: undefined,
           excludeExternals: undefined,
           externalPattern: '**/d.ts/**',
           mode: 'file',
-          readme: 'source/README.md'
+          readme: 'source/README.md',
+          entryPoint: '"background-http"'
           // verbose: undefined
         },
         src: ['source/background-http.d.ts', 'source/d.ts/data/observable/observable.d.ts']
@@ -59,6 +62,11 @@ module.exports = function(grunt) {
         files: [
           { expand: true, cwd: 'source', src: ['**/*.js', '**/*.xml', '**/*.jar', './*.d.ts', 'package.json', 'README.md', 'imagepicker.d.ts'], dest: 'dist/package' }
         ]
+      },
+      "github.io": {
+      	files: [
+		  { expand: true, cwd: 'dist/api-ref', src: ['**/*'], dest: 'github.io' }
+      	]
       }
     },
     mkdir: {
@@ -140,7 +148,6 @@ module.exports = function(grunt) {
     'clean:dist',
     'exec:tsc_source',
     'mkdir:dist',
-    'typedoc:source',
     'copy:package',
     'exec:npm_pack',
     'exec:tns_install',
@@ -157,6 +164,13 @@ module.exports = function(grunt) {
   grunt.registerTask('android', [
     'default',
     'exec:run_android_emulator'
-  ])
+  ]);
+
+  grunt.registerTask('github.io', [
+  	'clean:api-ref',
+  	'clean:github.io',
+  	'typedoc:api-ref',
+  	'copy:github.io'
+  ]);
 };
 
