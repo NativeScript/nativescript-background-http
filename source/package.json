@@ -4,7 +4,7 @@
 	  "url": "https://github.com/NativeScript/nativescript-background-http"
 	},
 	"name": "nativescript-background-http",
-	"version": "0.0.1",
+	"version": "0.0.2",
 	"nativescript": {
 		"ios": "1.2.0",
 		"android": "1.2.0"
@@ -17,5 +17,12 @@
 	},
 	"homepage": "http://nativescript.github.io/nativescript-background-http/",
 	"url": "https://github.com/NativeScript/nativescript-background-http/issues",
-	"license": "Apache-2.0"
+	"license": "Apache-2.0",
+	"keywords": [
+		"background",
+		"http",
+		"upload",
+		"download",
+		"NativeScript"
+	]
 }

@@ -1,8 +1,4 @@
-A cross platform plugin for [the NativeScript framework](http://www.nativescript.org).
-
-Supports background upload for
- - iOS
- - Android
+A cross platform plugin for [the NativeScript framework](http://www.nativescript.org), that provides background upload for iOS and Android.
 
 ### Source
  - [GitHub](http://github.com/NativeScript/nativescript-background-http)
@@ -14,7 +10,7 @@ Supports background upload for
 
 ### How-To Background Upload
 
-``` JavaScript
+```js
 var bghttp = require("nativescript-background-http");
 
 var session = bghttp.session("image-upload");
@@ -47,7 +43,7 @@ Task implementations are Observable and fire property change events for
  - status
 
 So you can bind to task properties in the UI markup:
-``` XML
+```xml
 <ListView items="{{ tasks }}">
 	<ListView.itemTemplate>
 		<StackLayout>
