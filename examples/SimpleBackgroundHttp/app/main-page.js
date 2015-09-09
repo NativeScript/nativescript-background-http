@@ -1,8 +1,8 @@
-var background_http = require("background-http");
+var bghttp = require("nativescript-background-http");
 var fs = require("file-system");
 var platform = require("platform");
 var ObservableArray = require("data/observable-array").ObservableArray;
-var session = background_http.session("image-upload");
+var session = bghttp.session("image-upload");
 var context = {
     tasks: new ObservableArray(),
     events: new ObservableArray()

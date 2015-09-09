@@ -9,6 +9,7 @@
     }
   },
   "dependencies": {
-    "background-http": "file:../../dist/package"
+    "background-http": "file:../../dist/package",
+    "nativescript-background-http": "file:../../dist/package"
   }
 }

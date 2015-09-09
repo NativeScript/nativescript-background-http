@@ -15,9 +15,9 @@ Supports background upload for
 ### How-To Background Upload
 
 ``` JavaScript
-var background_http = require("background-http");
+var bghttp = require("nativescript-background-http");
 
-var session = background_http.session("image-upload");
+var session = bghttp.session("image-upload");
 
 var request = {
     url: "http://myserver.com",

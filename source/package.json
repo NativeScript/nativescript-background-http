@@ -1,10 +1,9 @@
 {
-	"description": "A plugin for the NativeScript framework implementing background upload and download",
 	"repository": {
 	  "type": "git",
 	  "url": "https://github.com/NativeScript/nativescript-background-http"
 	},
-	"name": "background-http",
+	"name": "nativescript-background-http",
 	"version": "0.0.1",
 	"nativescript": {
 		"ios": "1.2.0",

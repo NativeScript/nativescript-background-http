@@ -1,4 +1,4 @@
-declare module "background-http" {
+declare module "nativescript-background-http" {
 
     import observable = require("data/observable");
 

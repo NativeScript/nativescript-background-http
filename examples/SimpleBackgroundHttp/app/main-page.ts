@@ -1,10 +1,10 @@
-import background_http = require("background-http");
+import bghttp = require("nativescript-background-http");
 
 var fs = require("file-system");
 var platform = require("platform");
 var ObservableArray = require("data/observable-array").ObservableArray;
 
-var session = background_http.session("image-upload");
+var session = bghttp.session("image-upload");
 // TODO: Implement retrieval of existing tasks in the session.
 
 var context = {

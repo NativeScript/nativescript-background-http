@@ -6,7 +6,7 @@ module.exports = function(grunt) {
     clean: {
       dist: ["dist"],
       "api-ref": ["dist/api-ref"],
-      "github.io": ["github.io/**.*", "!github.io/.git", "!github.io/.gitignore", "!github.io/.nojekyll"]
+      "github.io": ["github.io/**/*.*", "!github.io/.git", "!github.io/.gitignore", "!github.io/.nojekyll"]
     },
     exec: {
       tsc_source: 'node_modules/typescript/bin/tsc -p ./source/',
@@ -51,7 +51,7 @@ module.exports = function(grunt) {
           externalPattern: '**/d.ts/**',
           mode: 'file',
           readme: 'source/README.md',
-          entryPoint: '"background-http"'
+          entryPoint: '"nativescript-background-http"'
           // verbose: undefined
         },
         src: ['source/background-http.d.ts', 'source/d.ts/data/observable/observable.d.ts']
