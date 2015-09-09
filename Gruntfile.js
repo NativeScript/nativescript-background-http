@@ -6,7 +6,7 @@ module.exports = function(grunt) {
     clean: {
       dist: ["dist"],
       "api-ref": ["dist/api-ref"],
-      "github.io": ["github.io/**.*", "!github.io/.git", "!github.io/.gitignore"]
+      "github.io": ["github.io/**.*", "!github.io/.git", "!github.io/.gitignore", "!github.io/.nojekyll"]
     },
     exec: {
       tsc_source: 'node_modules/typescript/bin/tsc -p ./source/',
@@ -65,7 +65,7 @@ module.exports = function(grunt) {
       },
       "github.io": {
       	files: [
-		  { expand: true, cwd: 'dist/api-ref', src: ['**/*'], dest: 'github.io' }
+		      { expand: true, cwd: 'dist/api-ref', src: ['**/*'], dest: 'github.io' }
       	]
       }
     },
