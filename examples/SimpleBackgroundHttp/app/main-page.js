@@ -59,7 +59,6 @@ function start_upload(should_fail) {
             })
         });
     }
-    task.on("progress", onEvent);
     task.on("error", onEvent);
     task.on("complete", onEvent);
     context.tasks.push(task);

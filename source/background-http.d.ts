@@ -63,6 +63,7 @@ declare module "nativescript-background-http" {
          * Subscribe for a general event.
          * @param event The name of the event to subscribe for.
          * @param The handler called when the event occure.
+         * @event
          */
         on(event: string, handler: (e: observable.EventData) => void): void;
 
@@ -70,6 +71,7 @@ declare module "nativescript-background-http" {
          * Subscribe for error notifications.
          * @param event
          * @param handler A handler that will receive the error details
+         * @event
          */
         on(event: "error", handler: (e: ErrorEventData) => void): void;
 
@@ -77,6 +79,7 @@ declare module "nativescript-background-http" {
          * Subscribe for progress notifications.
          * @param event
          * @param handler A handler that will receive a progress event with the current and expected total bytes 
+         * @event
          */
         on(event: "progress", handler: (e: ProgressEventData) => void): void;
 
@@ -84,6 +87,7 @@ declare module "nativescript-background-http" {
          * Subscribe for the success notification.
          * @param event
          * @param handler A function that will be called with general event data upon successful completion
+         * @event
          */
         on(event: "complete", handler: (e: observable.EventData) => void): void;
     }

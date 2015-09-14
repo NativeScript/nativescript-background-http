@@ -12,6 +12,10 @@ npm install -g grunt-cli
 ```
 npm install -g tsd
 ```
+ - [appium](http://appium.io/getting-started.html)
+```
+npm install -g appium
+```
 
 ## Build
 To install dev dependencies:

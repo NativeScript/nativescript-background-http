@@ -31,7 +31,7 @@ task.on("progress", logEvent);
 task.on("error", logEvent);
 task.on("complete", logEvent);
 
-function onEvent(e) {
+function logEvent(e) {
 	console.log(e.eventName);
 }
 ```

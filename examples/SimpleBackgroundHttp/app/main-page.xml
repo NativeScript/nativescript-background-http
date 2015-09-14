@@ -3,9 +3,9 @@
     <ListView colSpan="2" items="{{ tasks }}">
 		<ListView.itemTemplate>
 			<StackLayout>
+                <Label text="{{ description }}" />
+                <Progress value="{{ upload }}" maxValue="{{ totalUpload }}" />
 				<Label text="{{ upload, 'Uploading: ' + upload + ' / ' + totalUpload }}" />
-				<Progress value="{{ upload }}" maxValue="{{ totalUpload }}" />
-				<Label text="{{ description, 'description: ' + description }}" />
 				<Label text="{{ status, 'status: ' + status }}" />
 			</StackLayout>
 		</ListView.itemTemplate>

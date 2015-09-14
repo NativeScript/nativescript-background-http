@@ -75,6 +75,23 @@ module.exports = function(grunt) {
           create: ["dist/package"]
         }
       }
+    },
+    mochaAppium: {
+      options: {
+        reporter: 'spec',
+        timeout: 30e3,
+        usePromises: true,
+        appiumPath: 'appium'
+      },
+      'iPhone-6 Sim': {
+        src: ['tests/automation/*.js'],
+        options: {
+          platformName: 'iOS',
+          version: '8.3',
+          deviceName: 'iPhone 6 - 8.3',
+          app: __dirname + '/examples/SimpleBackgroundHttp/platforms/ios/build/emulator/SimpleBackgroundHttp.app'
+        }
+      }
     }
   });
 
@@ -83,66 +100,14 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-clean');
   grunt.loadNpmTasks('grunt-mkdir');
   grunt.loadNpmTasks('grunt-typedoc');
+  grunt.loadNpmTasks('grunt-mocha-appium');
 
   grunt.registerTask('http-dev', 'Host handle uploads.', function() {
-
+    var serv = require('./examples/www/server');
     var done = this.async();
-
-    var http = require("http");
-    var fs = require("fs");
-
-    var server = http.createServer(function(request, response) {
-      var Throttle = require("stream-throttle").Throttle;
-
-      var fileName = request.headers["file-name"];
-      console.log(request.method + "Request! Content-Length: " + request.headers["content-length"] + ", file-name: " + fileName);
-      console.dir(request.headers);
-
-      var out = "tests/www/uploads/upload-" + new Date().getTime() + "-" + fileName;
-      console.log("Output in: " + out);
-
-      var total = request.headers["content-length"];
-      var current = 0;
-
-      var shouldFail = request.headers["should-fail"];
-
-      request.pipe(new Throttle({ rate: 1024 * 512 })).pipe(fs.createWriteStream(out, { flags: 'w', encoding: null, fd: null, mode: 0666 }));
-
-      request.on('data', function(chunk) {
-        current += chunk.length;
-        
-        if (shouldFail && (current / total > 0.25)) {
-          console.log("Error ");
-          var body = "Denied!";
-          response.writeHead(408, "Die!", { "Content-Type": "text/plain", "Content-Length": body.length, "Connection": "close" });
-          response.write(body);
-          response.end();
-          console.log("Terminated with error: [" + out + "]: " + current + " / " + total + "  " + Math.floor(100 * current / total) + "%");
-        } else {
-          console.log("Data [" + out + "]: " + current + " / " + total + "  " + Math.floor(100 * current / total) + "%");
-        }
-      });
-
-      request.on('end', function () {
-        setTimeout(function() {
-          console.log("Done (" + out + ")");
-          var body = "Upload complete!";
-          response.writeHead(200, "Done!", { "Content-Type": "text/plain", "Content-Length": body.length });
-          response.write(body);
-          response.end();
-        }, 10000);
-      });
-
-      request.on('error', function(e) {
-        console.log('error!');
-        console.log(e);
-      });
-    });
-
-    server.listen(8083);
-    console.log("Server is listening");
+    var server = serv.start(8083, console);
   });
-
+  
   // Default task(s).
   grunt.registerTask('default', [
     'clean:dist',

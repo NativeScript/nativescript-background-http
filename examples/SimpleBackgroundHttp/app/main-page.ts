@@ -78,7 +78,7 @@ function start_upload(should_fail) {
 		});
 	}
 
-	task.on("progress", onEvent);
+	// TODO: Log up 2-3 progress events per task or the UI is poluted: task.on("progress", onEvent);
 	task.on("error", onEvent);
 	task.on("complete", onEvent);
 
