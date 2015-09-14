@@ -4,7 +4,6 @@ var fs = require("fs");
 function start(port, logger) {
   var outDir = __dirname + "/uploads/";
   var server = http.createServer(function(request, response) {
-    console.log("WTF?");
     try {
       var Throttle = require("stream-throttle").Throttle;
 
@@ -31,18 +30,18 @@ function start(port, logger) {
         
         if (shouldFail && (current / total > 0.25)) {
           if (logger) {
-            console.log("Error ");
+            logger.log("Error ");
           }
           var body = "Denied!";
           response.writeHead(408, "Die!", { "Content-Type": "text/plain", "Content-Length": body.length, "Connection": "close" });
           response.write(body);
           response.end();
           if (logger) {
-            console.log("Terminated with error: [" + out + "]: " + current + " / " + total + "  " + Math.floor(100 * current / total) + "%");
+            logger.log("Terminated with error: [" + out + "]: " + current + " / " + total + "  " + Math.floor(100 * current / total) + "%");
           }
         } else {
           if (logger) {
-            console.log("Data [" + out + "]: " + current + " / " + total + "  " + Math.floor(100 * current / total) + "%");
+            logger.log("Data [" + out + "]: " + current + " / " + total + "  " + Math.floor(100 * current / total) + "%");
           }
         }
       });
@@ -50,7 +49,7 @@ function start(port, logger) {
       request.on('end', function () {
         setTimeout(function() {
           if (logger) {
-            console.log("Done (" + out + ")");
+            logger.log("Done (" + out + ")");
           }
           var body = "Upload complete!";
           response.writeHead(200, "Done!", { "Content-Type": "text/plain", "Content-Length": body.length });
@@ -61,8 +60,8 @@ function start(port, logger) {
 
       if (logger) {
         request.on('error', function(e) {
-          console.log('error!');
-          console.log(e);
+          logger.log('error!');
+          logger.log(e);
         });
       }
     } catch(e) {

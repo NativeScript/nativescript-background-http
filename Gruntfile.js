@@ -27,6 +27,10 @@ module.exports = function(grunt) {
         cmd: 'tns run ios --emulator --device iPhone-6',
         cwd: 'examples/SimpleBackgroundHttp'
       },
+      build_ios_emulator: {
+        cmd: 'tns build ios --emulator',
+        cwd: 'examples/SimpleBackgroundHttp'
+      },
       run_android_emulator: {
         cmd: 'tns run android --emulator',
         cwd: 'examples/SimpleBackgroundHttp'
@@ -137,5 +141,11 @@ module.exports = function(grunt) {
   	'typedoc:api-ref',
   	'copy:github.io'
   ]);
+
+  grunt.registerTask('tests', [
+    'default',
+    'exec:build_ios_emulator',
+    'mochaAppium:iPhone-6 Sim'
+  ])
 };
 

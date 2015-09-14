@@ -37,6 +37,13 @@ Or
 grunt android
 ```
 
+## To Run the Tests
+The following command will build the plugin from source, add it to and build the example app and start the automation tests:
+```
+grunt tests
+```
+The tests use appium to interact with the app, and may start the upload server located in [www](./examples/www/server.js).
+
 ## iOS
 The iOS API is implemented in JavaScript.
 

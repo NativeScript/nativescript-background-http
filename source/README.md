@@ -55,3 +55,16 @@ So you can bind to task properties in the UI markup:
 	</ListView.itemTemplate>
 </ListView>
 ```
+
+### Node.js Server
+A simple server written in nodejs should look like that:
+```
+var http = require("http");
+var fs = require("fs");
+
+var server = http.createServer(function(request, response) {
+    request.pipe(fs.createWriteStream(out, { flags: 'w', encoding: null, fd: null, mode: 0666 }));
+}
+server.listen(8083);
+```
+[You can check the example server in the source](https://github.com/NativeScript/nativescript-background-http/blob/master/examples/www/server.js).
