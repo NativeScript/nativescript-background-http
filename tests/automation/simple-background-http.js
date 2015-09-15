@@ -12,9 +12,9 @@ describe("tasks", function() {
 	afterEach(function(done) {
 		www_instance.close();
 		done();
-	})
+	});
 
-	it("report notifications", function() {
+	it("reports notifications", function() {
 		var tree = this.browser;
 		return tree
 			// TODO: Provide the random open port to the app.
@@ -28,7 +28,6 @@ describe("tasks", function() {
 				var progress = tree.elementByXPath("//UIATableCell[@name='bigpic.jpg 1']/UIAProgressIndicator") // TODO: Assert 0 ~ 33%, 33% ~ 66$, 66% ~99%...
 					.then(function() { return tree.waitForElementByXPath("//UIATableCell[@name='bigpic.jpg 1']/UIAProgressIndicator[@value='100%']", undefined, 10000, 100); });
 					// TODO: Assert the "www_instance" uploaded the file.
-
 
 				return Promise.all([status, progress]);
 			});

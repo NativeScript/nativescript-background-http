@@ -83,7 +83,7 @@ module.exports = function(grunt) {
     mochaAppium: {
       options: {
         reporter: 'spec',
-        timeout: 30e3,
+        timeout: 360e3,
         usePromises: true,
         appiumPath: 'appium'
       },
@@ -94,6 +94,15 @@ module.exports = function(grunt) {
           version: '8.3',
           deviceName: 'iPhone 6 - 8.3',
           app: __dirname + '/examples/SimpleBackgroundHttp/platforms/ios/build/emulator/SimpleBackgroundHttp.app'
+        }
+      },
+      'Android Sim': {
+        src: ['tests/automation/*.js'],
+        options: {
+          platformName: 'Android',
+          version: '19',
+          deviceName: 'Nexus7Sim',
+          app: __dirname + '/examples/SimpleBackgroundHttp/platforms/android/build/outputs/apk/SimpleBackgroundHttp-debug.apk'
         }
       }
     }
