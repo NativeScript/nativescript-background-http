@@ -11,6 +11,10 @@ module.exports = function(grunt) {
     exec: {
       tsc_source: 'node_modules/typescript/bin/tsc -p ./source/',
       tsc_example: 'node_modules/typescript/bin/tsc -p ./examples/SimpleBackgroundHttp/',
+      gradle_android_upload_service: {
+        cmd: 'gradle build',
+        cwd: 'deps/android-upload-service'
+      },
       npm_pack: {
         cmd: 'npm pack ./package',
         cwd: 'dist/'
@@ -62,10 +66,14 @@ module.exports = function(grunt) {
       }
     },
     copy: {
-      package: {
+      plugin: {
         files: [
           { expand: true, cwd: 'source', src: ['**/*.js', '**/*.xml', '**/*.jar', './*.d.ts', 'package.json', 'README.md', 'imagepicker.d.ts'], dest: 'dist/package' }
         ]
+      },
+      android_upload_service: {
+        src: 'deps/android-upload-service/build/outputs/aar/android-upload-service-debug.aar',
+        dest: 'dist/package/platforms/android/libs/android-upload-service.aar'
       },
       "github.io": {
       	files: [
@@ -124,16 +132,18 @@ module.exports = function(grunt) {
   // Default task(s).
   grunt.registerTask('default', [
     'clean:dist',
+    'exec:gradle_android_upload_service',
     'exec:tsc_source',
     'mkdir:dist',
-    'copy:package',
+    'copy:android_upload_service',
+    'copy:plugin',
     'exec:npm_pack',
     'exec:tns_install',
     'exec:tns_plugin_install',
     'exec:tsd_link',
     'exec:tsc_example'
   ]);
-
+  
   grunt.registerTask('ios', [
     'default',
     'exec:run_ios_emulator'
