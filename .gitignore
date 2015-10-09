@@ -13,3 +13,5 @@ api-ref
 # Example platforms
 /examples/SimpleBackgroundHttp/platforms/
 /examples/SimpleBackgroundHttp/lib/
+
+.DS_Store
