@@ -54,7 +54,7 @@ module.exports = function(grunt) {
           json: './dist/doc.json',
           name: 'Background HTTP for NativeScript',
           includeDeclarations: undefined, 
-          // hideGenerator: undefined, // NOTE: Show http://typedoc.io/ some respect!
+          hideGenerator: undefined,
           excludeExternals: undefined,
           externalPattern: '**/d.ts/**',
           mode: 'file',
@@ -62,7 +62,7 @@ module.exports = function(grunt) {
           entryPoint: '"nativescript-background-http"'
           // verbose: undefined
         },
-        src: ['source/index.d.ts', 'source/d.ts/data/observable/observable.d.ts']
+        src: ['source/background-http.d.ts', 'source/d.ts/data/observable/observable.d.ts']
       }
     },
     copy: {
