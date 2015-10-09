@@ -4,15 +4,15 @@
 	  "url": "https://github.com/NativeScript/nativescript-background-http"
 	},
 	"name": "nativescript-background-http",
-	"version": "0.0.2",
+	"version": "0.0.3",
 	"nativescript": {
-		"ios": "1.2.0",
-		"android": "1.2.0"
+		"ios": "1.3.0",
+		"android": "1.3.0"
 	},
 	"main": "background-http.js",
 	"typescript": {
 		"definitions": [
-			"background-http.d.ts"
+			"index.d.ts"
 		]
 	},
 	"homepage": "http://nativescript.github.io/nativescript-background-http/",
