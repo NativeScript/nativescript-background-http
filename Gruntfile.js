@@ -2,6 +2,13 @@ module.exports = function(grunt) {
 
   // Project configuration.
   grunt.initConfig({
+    options: {
+      ios: {
+        version: grunt.option('os-version') || '8.3',
+        device: grunt.option('device') || 'iPhone 6'
+      },
+      tns: grunt.option('tns') || 'tns'
+    },
     pkg: grunt.file.readJSON('package.json'),
     clean: {
       dist: ["dist"],
@@ -20,23 +27,23 @@ module.exports = function(grunt) {
         cwd: 'dist/'
       },
       tns_install: {
-        cmd: 'tns install',
+        cmd: '<%= options.tns %> install',
         cwd: 'examples/SimpleBackgroundHttp'
       },
       tns_plugin_install: {
-        cmd: 'tns plugin add ../../dist/package',
+        cmd: '<%= options.tns %> plugin add ../../dist/package',
         cwd: 'examples/SimpleBackgroundHttp'
       },
       run_ios_emulator: {
-        cmd: 'tns run ios --emulator --device iPhone-6',
+        cmd: '<%= options.tns %> run ios --emulator --device iPhone-6',
         cwd: 'examples/SimpleBackgroundHttp'
       },
       build_ios_emulator: {
-        cmd: 'tns build ios --emulator',
+        cmd: '<%= options.tns %> build ios --emulator',
         cwd: 'examples/SimpleBackgroundHttp'
       },
       run_android_emulator: {
-        cmd: 'tns run android --emulator',
+        cmd: '<%= options.tns %> run android --emulator',
         cwd: 'examples/SimpleBackgroundHttp'
       },
       tsd_link: {
@@ -67,7 +74,7 @@ module.exports = function(grunt) {
     copy: {
       plugin: {
         files: [
-          { expand: true, cwd: 'source', src: ['**/*.js', '**/*.xml', '**/*.jar', './*.d.ts', 'package.json', 'README.md', 'imagepicker.d.ts'], dest: 'dist/package' }
+          { expand: true, cwd: 'source', src: ['**/*.js', '**/*.xml', '**/*.jar', '**/*.plist', './*.d.ts', 'package.json', 'README.md', 'imagepicker.d.ts'], dest: 'dist/package' }
         ]
       },
       android_upload_service: {
@@ -94,21 +101,21 @@ module.exports = function(grunt) {
         usePromises: true,
         appiumPath: 'appium'
       },
-      'iPhone-6 Sim': {
+      'iOS': {
         src: ['tests/automation/*.js'],
         options: {
           platformName: 'iOS',
-          version: '8.3',
-          deviceName: 'iPhone 6 - 8.3',
+          version: '<%= options.ios.version %>',
+          deviceName: '<%= options.ios.device %>',
           app: __dirname + '/examples/SimpleBackgroundHttp/platforms/ios/build/emulator/SimpleBackgroundHttp.app'
         }
       },
-      'Android Sim': {
+      'Android': {
         src: ['tests/automation/*.js'],
         options: {
           platformName: 'Android',
-          version: '19',
-          deviceName: 'Nexus7Sim',
+          version: '<%= options.android.version %>',
+          deviceName: '<%= options.android.device %> - <%= options.android.version %>',
           app: __dirname + '/examples/SimpleBackgroundHttp/platforms/android/build/outputs/apk/SimpleBackgroundHttp-debug.apk'
         }
       }
@@ -163,7 +170,7 @@ module.exports = function(grunt) {
   grunt.registerTask('tests', [
     'default',
     'exec:build_ios_emulator',
-    'mochaAppium:iPhone-6 Sim'
+    'mochaAppium:iOS'
   ])
 };
 
