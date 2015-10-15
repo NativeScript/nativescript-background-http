@@ -2,6 +2,12 @@
 [How to use the plugin, see: source/README.md](source/)
 
 ## Prerequisites
+
+Get submodules
+```
+git submodule update --init
+```
+
  - [nodejs](https://nodejs.org/)
  - [nativescript](https://www.nativescript.org/)
  - [grunt](http://gruntjs.com/getting-started)  
