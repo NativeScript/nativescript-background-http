@@ -8,6 +8,7 @@
     "grunt-mocha-appium": "^0.4.0",
     "grunt-typedoc": "^0.2.2",
     "stream-throttle": "^0.1.3",
+    "tsd": "^0.6.5",
     "typedoc": "^0.3.10",
     "typescript": "^1.5.3"
   }

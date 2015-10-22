@@ -1,14 +1,39 @@
-module.exports = function(grunt) {
+var fs = require("fs");
+var path = require("path");
 
-  // Project configuration.
-  grunt.initConfig({
-    options: {
+module.exports = function (grunt) {
+
+  function cmd(cmd, moduleName, cmdPath) {
+    if (grunt.option(cmd)) {
+      return grunt.option(cmd);
+    }
+
+    // NOTE: This may need to do a node-like search for node_modules, e. g. search up recursively
+    var nodeModulesPath = path.resolve("node_modules", moduleName, cmdPath);
+    if (fs.existsSync(nodeModulesPath)) {
+      return "node " + nodeModulesPath;
+    }
+    
+    return cmd;
+  }
+  
+  var options = {
       ios: {
         version: grunt.option('os-version') || '8.3',
         device: grunt.option('device') || 'iPhone 6'
       },
-      tns: grunt.option('tns') || 'tns'
-    },
+      tns: cmd("tns", "nativescript", "bin/nativescript.js"),
+      tsd: cmd("tsd", "tsd", "build/cli.js"),
+      tsc: cmd("tsc", "typescript", "lib/tsc.js")
+    };
+  
+  if (grunt.option("verbose")) {
+    console.dir(options);
+  }
+  
+  // Project configuration.
+  grunt.initConfig({
+    options: options,
     pkg: grunt.file.readJSON('package.json'),
     clean: {
       dist: ["dist"],
@@ -16,8 +41,8 @@ module.exports = function(grunt) {
       "github.io": ["github.io/**/*.*", "!github.io/.git", "!github.io/.gitignore", "!github.io/.nojekyll"]
     },
     exec: {
-      tsc_source: 'node_modules/typescript/bin/tsc -p ./source/',
-      tsc_example: 'node_modules/typescript/bin/tsc -p ./examples/SimpleBackgroundHttp/',
+      tsc_source: '<%= options.tsc %> -p ./source/',
+      tsc_example: '<%= options.tsc %> -p ./examples/SimpleBackgroundHttp/',
       gradle_android_upload_service: {
         cmd: 'gradle build',
         cwd: 'deps/android-upload-service'
@@ -47,7 +72,7 @@ module.exports = function(grunt) {
         cwd: 'examples/SimpleBackgroundHttp'
       },
       tsd_link: {
-        cmd: 'tsd link',
+        cmd: '<%= options.tsd %> link',
         cwd: 'examples/SimpleBackgroundHttp'
       },
     },
@@ -82,9 +107,9 @@ module.exports = function(grunt) {
         dest: 'dist/package/platforms/android/libs/android-upload-service.aar'
       },
       "github.io": {
-      	files: [
-		      { expand: true, cwd: 'dist/api-ref', src: ['**/*'], dest: 'github.io' }
-      	]
+        files: [
+          { expand: true, cwd: 'dist/api-ref', src: ['**/*'], dest: 'github.io' }
+        ]
       }
     },
     mkdir: {
@@ -107,7 +132,7 @@ module.exports = function(grunt) {
           platformName: 'iOS',
           version: '<%= options.ios.version %>',
           deviceName: '<%= options.ios.device %>',
-          app: __dirname + '/examples/SimpleBackgroundHttp/platforms/ios/build/emulator/SimpleBackgroundHttp.app'
+          app: path.resolve('examples/SimpleBackgroundHttp/platforms/ios/build/emulator/SimpleBackgroundHttp.app')
         }
       },
       'Android': {
@@ -116,7 +141,7 @@ module.exports = function(grunt) {
           platformName: 'Android',
           version: '<%= options.android.version %>',
           deviceName: '<%= options.android.device %> - <%= options.android.version %>',
-          app: __dirname + '/examples/SimpleBackgroundHttp/platforms/android/build/outputs/apk/SimpleBackgroundHttp-debug.apk'
+          app: path.resolve('examples/SimpleBackgroundHttp/platforms/android/build/outputs/apk/SimpleBackgroundHttp-debug.apk')
         }
       }
     }
@@ -129,7 +154,7 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-typedoc');
   grunt.loadNpmTasks('grunt-mocha-appium');
 
-  grunt.registerTask('http-dev', 'Host handle uploads.', function() {
+  grunt.registerTask('http-dev', 'Host handle uploads.', function () {
     var serv = require('./examples/www/server');
     var done = this.async();
     var server = serv.start(8083, console);
@@ -149,7 +174,7 @@ module.exports = function(grunt) {
     'exec:tsd_link',
     'exec:tsc_example'
   ]);
-  
+
   grunt.registerTask('ios', [
     'default',
     'exec:run_ios_emulator'
@@ -161,10 +186,10 @@ module.exports = function(grunt) {
   ]);
 
   grunt.registerTask('github.io', [
-  	'clean:api-ref',
-  	'clean:github.io',
-  	'typedoc:api-ref',
-  	'copy:github.io'
+    'clean:api-ref',
+    'clean:github.io',
+    'typedoc:api-ref',
+    'copy:github.io'
   ]);
 
   grunt.registerTask('tests', [
