@@ -1,5 +1,5 @@
-import data_observable = require("data/observable");
-import Observable = data_observable.Observable;
+import { Observable } from "data/observable"
+import * as common from "nativescript-background-http"
 
 var runloop = CFRunLoopGetCurrent();
 var defaultRunLoopMode = NSString.stringWithString(kCFRunLoopCommonModes);
@@ -8,115 +8,122 @@ function invokeOnMainRunLoop(func) {
     CFRunLoopWakeUp(runloop);
 }
 
-var SessionDelegate = NSObject.extend({
+class BackgroundUploadDelegate extends NSObject implements NSURLSessionDelegate, NSURLSessionTaskDelegate, NSURLSessionDataDelegate, NSURLSessionDownloadDelegate {
+	
+	static ObjCProtocols = [NSURLSessionDelegate, NSURLSessionTaskDelegate, NSURLSessionDataDelegate, NSURLSessionDownloadDelegate];
+	
+	init(): BackgroundUploadDelegate {
+		return <BackgroundUploadDelegate>super.init();
+	}
+	
 	// NSURLSessionDelegate
-	URLSessionDidBecomeInvalidWithError: function(session, error) {
+	URLSessionDidBecomeInvalidWithError(session, error) {
 		//console.log("URLSessionDidBecomeInvalidWithError:");
 		//console.log(" - session: " + session);
 		//console.log(" - error:   " + error);
-	},
-	URLSessionDidReceiveChallengeCompletionHandler: function(session, challenge, comlpetionHandler) {
+	}
+	
+	URLSessionDidReceiveChallengeCompletionHandler(session, challenge, comlpetionHandler) {
 		//console.log("URLSessionDidFinishEventsForBackgroundURLSession: " + session + " " + challenge);
 		var disposition = null;
 		var credential = null;
 		comlpetionHandler(disposition, credential);
-	},
-	URLSessionDidFinishEventsForBackgroundURLSession: function(session) {
+	}
+	
+	URLSessionDidFinishEventsForBackgroundURLSession(session) {
 		//console.log("URLSessionDidFinishEventsForBackgroundURLSession: " + session);
-	},
-
+	}
+	
 	// NSURLSessionTaskDelegate
-	URLSessionTaskDidCompleteWithError: function(session, nsTask, error) {
-		var jsTask = getTask(session, nsTask);
+	URLSessionTaskDidCompleteWithError(session, nsTask, error) {
+		var task = Task.getTask(session, nsTask);
 		if (error) {
-			jsTask.set("status", "error");
-			jsTask.notify({ eventName: "error", object: jsTask, error: error });
-		} else {
-			jsTask.set("upload", nsTask.countOfBytesSent);
-			jsTask.set("totalUpload", nsTask.countOfBytesExpectedToSend);
-
-			jsTask.set("status", "complete");
-			jsTask.notify({ eventName: "progress", object: jsTask, currentBytes: nsTask.countOfBytesSent, totalBytes: nsTask.countOfBytesExpectedToSend });
-			jsTask.notify({ eventName: "complete", object: jsTask });
-			
+			task.notifyPropertyChange("status", task.status);
+			task.notify({ eventName: "error", object: task, error: error });
+		} else {	
+			task.notifyPropertyChange("upload", task.upload);
+			task.notifyPropertyChange("totalUpload", task.totalUpload);
+			task.notify({ eventName: "progress", object: task, currentBytes: nsTask.countOfBytesSent, totalBytes: nsTask.countOfBytesExpectedToSend });
+			task.notify({ eventName: "complete", object: task });
 		}
-	},
-	URLSessionTaskDidReceiveChallengeCompletionHandler: function(session, task, challenge, completionHandler) {
+	}
+	
+	URLSessionTaskDidReceiveChallengeCompletionHandler(session, task, challenge, completionHandler) {
 		//console.log("URLSessionTaskDidReceiveChallengeCompletionHandler: " + session + " " + task + " " + challenge);
 		var disposition = null;
 		var credential = null;
 		completionHandler(disposition, credential);
-	},
-	URLSessionTaskDidSendBodyDataTotalBytesSentTotalBytesExpectedToSend: function(session, task, data, sent, expectedTotal) {
+	}
+	
+	URLSessionTaskDidSendBodyDataTotalBytesSentTotalBytesExpectedToSend(nsSession: NSURLSession, nsTask: NSURLSessionTask, data, sent: number, expectedTotal: number) {
 		invokeOnMainRunLoop(function() {
-			var jsTask = getTask(session, task);
-			jsTask.set("totalUpload", expectedTotal);
-			jsTask.set("upload", sent);
-			jsTask.set("status", "uploading");
-            jsTask.notify({ eventName: "progress", object: jsTask, currentBytes: sent, totalBytes: expectedTotal });
+			var task = Task.getTask(nsSession, nsTask);
+			task.notifyPropertyChange("upload", task.upload);
+			task.notifyPropertyChange("totalUpload", task.totalUpload);
+            task.notify({ eventName: "progress", object: task, currentBytes: sent, totalBytes: expectedTotal });
 		});
-		//console.log("Sending: " + sent + " / " + expectedTotal);
-	},
-	URLSessionTaskNeedNewBodyStream: function(session, task, need) {
+	}
+	
+	URLSessionTaskNeedNewBodyStream(session, task, need) {
 		//console.log("URLSessionTaskNeedNewBodyStream");
-	},
-	URLSessionTaskWillPerformHTTPRedirectionNewRequestCompletionHandler: function(session, task, redirect, request, completionHandler) {
+	}
+	
+	URLSessionTaskWillPerformHTTPRedirectionNewRequestCompletionHandler(session, task, redirect, request, completionHandler) {
 		//console.log("URLSessionTaskWillPerformHTTPRedirectionNewRequestCompletionHandler");
 		completionHandler(request);
-	},
+	}
 
 	// NSURLSessionDataDelegate
-	URLSessionDataTaskDidReceiveResponseCompletionHandler: function(session, dataTask, response, completionHandler) {
+	URLSessionDataTaskDidReceiveResponseCompletionHandler(session, dataTask, response, completionHandler) {
 		//console.log("URLSessionDataTaskDidReceiveResponseCompletionHandler");
 		var disposition = null;
 		completionHandler(disposition);
-	},
-	URLSessionDataTaskDidBecomeDownloadTask: function(session, dataTask, downloadTask) {
+	}
+	
+	URLSessionDataTaskDidBecomeDownloadTask(session, dataTask, downloadTask) {
 		//console.log("URLSessionDataTaskDidBecomeDownloadTask");
-	},
-	URLSessionDataTaskDidReceiveData: function(session, dataTask, data) {
+	}
+	
+	URLSessionDataTaskDidReceiveData(session, dataTask, data) {
 		//console.log("URLSessionDataTaskDidReceiveData");
 		// we have a response in the data...
-	},
-	URLSessionDataTaskWillCacheResponseCompletionHandler: function() {
+	}
+	
+	URLSessionDataTaskWillCacheResponseCompletionHandler() {
 		//console.log("URLSessionDataTaskWillCacheResponseCompletionHandler");
-	},
+	}
 
 	// NSURLSessionDownloadDelegate
-	URLSessionDownloadTaskDidResumeAtOffsetExpectedTotalBytes: function(session, task, offset, expects) {
+	URLSessionDownloadTaskDidResumeAtOffsetExpectedTotalBytes(session, task, offset, expects) {
 		//console.log("URLSessionDownloadTaskDidResumeAtOffsetExpectedTotalBytes");
-	},
-	URLSessionDownloadTaskDidWriteDataTotalBytesWrittenTotalBytesExpectedToWrite: function(session, task, data, written, expected) {
+	}
+	
+	URLSessionDownloadTaskDidWriteDataTotalBytesWrittenTotalBytesExpectedToWrite(session, task, data, written, expected) {
 		//console.log("URLSessionDownloadTaskDidWriteDataTotalBytesWrittenTotalBytesExpectedToWrite");
-	},
-	URLSessionDownloadTaskDidFinishDownloadingToURL: function(session, task, url) {
+	}
+	
+	URLSessionDownloadTaskDidFinishDownloadingToURL(session, task, url) {
 		//console.log("URLSessionDownloadTaskDidFinishDownloadingToURL");
 	}
-}, {
-	name: "BackgroundUploadDelegate",
-	protocols: [
-		NSURLSessionDelegate,
-		NSURLSessionTaskDelegate,
-		NSURLSessionDataDelegate,
-		NSURLSessionDownloadDelegate
-	]
-});
+}
 
-// TODO: Create a mechanism to clean sessions from the cache that have all their tasks completed, canceled or errored out.
-var sessions = {};
-function session(id): Observable {
-
-	var jsSession = sessions[id];
-	if (jsSession) {
-		return jsSession;
+class Session implements common.Session {
+	// TODO: Create a mechanism to clean sessions from the cache that have all their tasks completed, canceled or errored out.
+	private static _sessions: { [id: string]: Session } = {};
+	
+	private _session: NSURLSession;
+	
+	constructor(id: string) {
+		var delegate = BackgroundUploadDelegate.alloc().init();
+		var configuration = NSURLSessionConfiguration.backgroundSessionConfigurationWithIdentifier(id);
+		this._session = NSURLSession.sessionWithConfigurationDelegateDelegateQueue(configuration, delegate, null);
 	}
-
-	var delegate = SessionDelegate.alloc().init();
-	var configuration = NSURLSessionConfiguration.backgroundSessionConfigurationWithIdentifier(id);
-	var session = NSURLSession.sessionWithConfigurationDelegateDelegateQueue(configuration, delegate, null);
-
-	function uploadFile(fileUri, options) {
-
+	
+	get ios(): any {
+		return this._session;
+	}
+	
+	public uploadFile(file: string, options: common.Request) {
 		var url = NSURL.URLWithString(options.url);
 		var request = NSMutableURLRequest.requestWithURL(url);
 
@@ -134,57 +141,80 @@ function session(id): Observable {
 			request.HTTPMethod = options.method;
 		}
 
-		var file = NSURL.URLWithString(fileUri);
-		var newTask = session.uploadTaskWithRequestFromFile(request, file);
+		var fileURL = /^file:\/\//.test(file) ? NSURL.URLWithString(file) : NSURL.fileURLWithPath(file);
+		
+		var newTask = this._session.uploadTaskWithRequestFromFile(request, fileURL);
 		newTask.taskDescription = options.description;
 		newTask.resume();
 
-		return getTask(session, newTask);
+		return Task.getTask(this._session, newTask);
 	}
-
-	jsSession = new Observable();
-	jsSession.set("ios", session);
-	jsSession.set("uploadFile", uploadFile);
-	sessions[id] = jsSession;
-
-	return jsSession;
+	
+	static getSession(id: string): common.Session {
+		var jsSession = Session._sessions[id];
+		if (jsSession) {
+			return jsSession;
+		}
+		jsSession = new Session(id);
+		Session._sessions[id] = jsSession;
+		return jsSession;
+	}
 }
-exports.session = session;
 
-var tasks = new WeakMap();
-function getTask(nsSession, nsTask): Observable {
-	var jsTask = <Observable>tasks.get(nsTask);
-	if (jsTask) {
-		return jsTask;
+class Task extends Observable implements common.Task {
+	private static _tasks = new WeakMap<NSURLSessionTask, Task>();
+	
+	private _task: NSURLSessionTask;
+	private _session: NSURLSession;
+	
+	constructor(nsSession: NSURLSession, nsTask: NSURLSessionTask) {
+		super();
+		this._task = nsTask;
+		this._session = nsSession;
 	}
-
-	jsTask = new Observable();
-
-	jsTask.set("ios", nsTask);
-	jsTask.set("session", nsSession);
-	jsTask.set("description", nsTask.taskDescription);
-
-	jsTask.set("upload", nsTask.countOfBytesSent);
-	jsTask.set("totalUpload", nsTask.countOfBytesExpectedToSend);
-
-	if (nsTask.error) {
-		// TODO: Consider adding error property on the task.
-		jsTask.set("status", "error");
-	} else {
-		if (nsTask.state == NSURLSessionTaskState.NSURLSessionTaskStateRunning) {
-			jsTask.set("status", "uploading");
-		} else if (nsTask.state == NSURLSessionTaskState.NSURLSessionTaskStateCompleted) {
-			jsTask.set("status", "complete");
-		} else if (nsTask.state == NSURLSessionTaskState.NSURLSessionTaskStateCanceling) {
-			jsTask.set("status", "error");
-		} else if (nsTask.state == NSURLSessionTaskState.NSURLSessionTaskStateSuspended) {
-			jsTask.set("status", "pending");
+	
+	get ios(): any {
+		return this._task;
+	}
+	
+	get description(): string {
+		return this._task.taskDescription;
+	}
+	
+	get upload(): number {
+		return this._task.countOfBytesSent;
+	}
+	
+	get totalUpload(): number {
+		return this._task.countOfBytesExpectedToSend;
+	}
+	
+	get status(): string {
+		if (this._task.error) {
+			return "error";
+		}
+		switch(this._task.state) {
+			case NSURLSessionTaskState.NSURLSessionTaskStateRunning: return "uploading";
+			case NSURLSessionTaskState.NSURLSessionTaskStateCompleted: return "complete";
+			case NSURLSessionTaskState.NSURLSessionTaskStateCanceling: return "error"; 
+			case NSURLSessionTaskState.NSURLSessionTaskStateSuspended: return "pending";
 		}
 	}
+	
+	public static getTask(nsSession: NSURLSession, nsTask: NSURLSessionTask): Task {
+		var task = Task._tasks.get(nsTask);
+		if (task) {
+			return task;
+		}
+		
+		task = new Task(nsSession, nsTask);
+		Task._tasks.set(nsTask, task);
 
-	// Put in the cache
-	tasks.set(nsTask, jsTask);
+		return task;
+	}
+}
 
-	return jsTask;
+export function session(id: string): common.Session {
+	return Session.getSession(id);
 }
 

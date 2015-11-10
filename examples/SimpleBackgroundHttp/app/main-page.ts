@@ -12,17 +12,14 @@ var context = {
 	events: new ObservableArray()
 }
 
-var file;
+var file = __dirname + "/bigpic.jpg";
 var url;
 
-if (platform.device.os == platform.platformNames.ios) {  
-	// TODO: These differences should be part of the library instead of exposed outside:
-	file = NSURL.fileURLWithPath(__dirname + "/bigpic.jpg").toString();
-	// TODO: This works for emulator. Real device will need other address.
+if (platform.device.os == platform.platformNames.ios) {
+	// NOTE: This works for emulator. Real device will need other address.
 	url = "http://localhost:8083";
 } else {
-	file = __dirname + "/bigpic.jpg";
-	// TODO: This works for emulator. Real device will need other address.
+	// NOTE: This works for emulator. Real device will need other address.
 	url = "http://10.0.2.2:8083";
 }
 

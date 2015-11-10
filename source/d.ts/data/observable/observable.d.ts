@@ -62,6 +62,8 @@ declare module "data/observable" {
          */
         on(event: "propertyChange", callback: (data: EventData) => void, thisArg?: any);
 
+        notifyPropertyChange(name: string, newValue: any);
+        
         /**
          * Shortcut alias to the removeEventListener method.
          */
