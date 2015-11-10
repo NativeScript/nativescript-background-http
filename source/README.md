@@ -1,4 +1,9 @@
+### About
 A cross platform plugin for [the NativeScript framework](http://www.nativescript.org), that provides background upload for iOS and Android.
+
+[There is a stock NativeScript `http` module that can handle GET/POST requests that work with strings and JSONs](http://docs.nativescript.org/ApiReference/http/HOW-TO). It however comes short in features when it comes to really large files.
+
+The plugin uses [NSURLSession with background session configuration for iOS](https://developer.apple.com/library/ios/documentation/Foundation/Reference/NSURLSessionConfiguration_class/index.html#//apple_ref/occ/clm/NSURLSessionConfiguration/backgroundSessionConfigurationWithIdentifier:); and for android - the [alexbbb/android-upload-service](https://github.com/alexbbb/android-upload-service) that implements an IntentService.
 
 ### Source
  - [GitHub](http://github.com/NativeScript/nativescript-background-http)
@@ -7,6 +12,11 @@ A cross platform plugin for [the NativeScript framework](http://www.nativescript
 
 ### License
 [Apache-2.0](https://github.com/NativeScript/nativescript-background-http/blob/master/LICENSE)
+
+### Install
+```
+tns plugin add nativescript-background-http
+```
 
 ### How-To Background Upload
 
@@ -63,7 +73,7 @@ var http = require("http");
 var fs = require("fs");
 
 var server = http.createServer(function(request, response) {
-    request.pipe(fs.createWriteStream(out, { flags: 'w', encoding: null, fd: null, mode: 0666 }));
+    request.pipe(fs.createWriteStream("out_file.bin", { flags: 'w', encoding: null, fd: null, mode: 0666 }));
 }
 server.listen(8083);
 ```
