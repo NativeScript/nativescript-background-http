@@ -7,14 +7,12 @@ var context = {
     tasks: new ObservableArray(),
     events: new ObservableArray()
 };
-var file;
+var file = __dirname + "/bigpic.jpg";
 var url;
 if (platform.device.os == platform.platformNames.ios) {
-    file = NSURL.fileURLWithPath(__dirname + "/bigpic.jpg").toString();
     url = "http://localhost:8083";
 }
 else {
-    file = __dirname + "/bigpic.jpg";
     url = "http://10.0.2.2:8083";
 }
 function pageLoaded(args) {

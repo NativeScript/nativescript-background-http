@@ -36,6 +36,7 @@ function start(port, logger) {
           response.writeHead(408, "Die!", { "Content-Type": "text/plain", "Content-Length": body.length, "Connection": "close" });
           response.write(body);
           response.end();
+          shouldFail = false;
           if (logger) {
             logger.log("Terminated with error: [" + out + "]: " + current + " / " + total + "  " + Math.floor(100 * current / total) + "%");
           }
