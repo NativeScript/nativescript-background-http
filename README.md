@@ -1,4 +1,4 @@
-# Background Download / Upload plugin for the NativeScript framework
+# Background Upload plugin for the NativeScript framework
 [**How to use the plugin, see: source/README.md**](source/)
 
 ## Prerequisites
