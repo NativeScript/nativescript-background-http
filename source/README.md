@@ -1,4 +1,4 @@
-### About
+## About
 A cross platform plugin for [the NativeScript framework](http://www.nativescript.org), that provides background upload for iOS and Android.
 
 [There is a stock NativeScript `http` module that can handle GET/POST requests that work with strings and JSONs](http://docs.nativescript.org/ApiReference/http/HOW-TO). It however comes short in features when it comes to really large files.
@@ -13,10 +13,28 @@ The plugin uses [NSURLSession with background session configuration for iOS](htt
 ### License
 [Apache-2.0](https://github.com/NativeScript/nativescript-background-http/blob/master/LICENSE)
 
+## Installation
+
 ### Install
 ```
 tns plugin add nativescript-background-http
 ```
+
+### Install plugin using AppBuilder CLI
+```
+appbuilder plugin add nativescript-background-http
+```
+
+### Install plugin using AppBuilder IDE
+In the Project Navigator, right click your project and choose Manage Packages.
+Choose the Plugins Marketplace tab.
+Search or browse for a plugin and click Install.
+
+
+## Usage
+
+For sample application with single and multiple image selection ready for Android and IOS
+[follow this link](https://github.com/NativeScript/sample-ImageUpload)
 
 ### How-To Background Upload
 
