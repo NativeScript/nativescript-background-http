@@ -141,7 +141,7 @@ class Session implements common.Session {
 			request.HTTPMethod = options.method;
 		}
 
-		var fileURL = /^file:\/\//.test(file) ? NSURL.URLWithString(file) : NSURL.fileURLWithPath(file);
+		var fileURL = NSURL.fileURLWithPath(file);
 		
 		var newTask = this._session.uploadTaskWithRequestFromFile(request, fileURL);
 		newTask.taskDescription = options.description;
