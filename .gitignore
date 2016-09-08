@@ -8,7 +8,7 @@ node_modules
 api-ref
 
 # Source, written in TypeScript so JavaScript is not necessary
-/source/**/*.js
+/nativescript-background-http/**/*.js
 
 # Example platforms
 /examples/SimpleBackgroundHttp/platforms/

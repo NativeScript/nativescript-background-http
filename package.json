@@ -11,5 +11,8 @@
     "tsd": "^0.6.5",
     "typedoc": "^0.3.10",
     "typescript": "^1.5.3"
+  },
+  "scripts": {
+    "link": "cd nativescript-background-http && npm link && cd .. && cd examples/SimpleBackgroundHttp && npm link nativescript-background-http && cd ../.."
   }
 }
