@@ -7,6 +7,10 @@
 		"preserveConstEnums": true,
 		"sourceMap": false,
 		"declaration": false,
-		"noLib": false
-	}
+		"experimentalDecorators": true
+	},
+	"exclude": [
+		"node_modules",
+		"package"
+	]
 }

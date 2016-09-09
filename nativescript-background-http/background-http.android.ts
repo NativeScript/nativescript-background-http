@@ -2,29 +2,49 @@ import application = require("application");
 import frame = require("ui/frame");
 import data_observable = require("data/observable");
 
-var servicePackage = (<any>com).alexbbb.uploadservice;
+var servicePackage = (<any>net).gotev.uploadservice;
 
-var ProgressReceiver = servicePackage.AbstractUploadServiceReceiver.extend({
-    onProgress: function(uploadId, currentBytes, totalBytes) {
-        if (arguments.length === 3) {
-            var task = Task.fromId(uploadId);
-            task.setTotalUpload(totalBytes);
-            task.setUpload(currentBytes);
-            task.setStatus("uploading");
-            task.notify({ eventName: "progress", object: task, currentBytes: currentBytes, totalBytes: totalBytes });
-        }
+interface UploadInfo {
+    getUploadId(): string;
+    getTotalBytes(): number;
+    getUploadedBytes(): number;
+}
+interface ServerResponse {
+    
+}
+
+var ProgressReceiver = servicePackage.UploadServiceBroadcastReceiver.extend({
+    onProgress(uploadInfo: UploadInfo) {
+        console.log("onProgress");
+        var uploadId = uploadInfo.getUploadId();
+        var task = Task.fromId(uploadId);
+        var totalBytes = uploadInfo.getTotalBytes();
+        var currentBytes = uploadInfo.getUploadedBytes();
+        task.setTotalUpload(totalBytes);
+        task.setUpload(currentBytes);
+        task.setStatus("uploading");
+        task.notify({ eventName: "progress", object: task, currentBytes: currentBytes, totalBytes: totalBytes });
     },
 
-    onError: function(uploadId, error) {
+    onCancelled(uploadInfo: UploadInfo) {
+        console.log("onCancelled");
+        this.onError(uploadInfo, new Error("Cancelled"));
+    },
+
+    onError(uploadInfo: UploadInfo, error) {
+        console.log("onError");
+        var uploadId = uploadInfo.getUploadId();
         var task = Task.fromId(uploadId);
         task.setStatus("error");
         task.notify({ eventName: "error", object: task, error: error });
     },
 
-    onCompleted: function(uploadId, responseCode, responseMessage) {
+    onCompleted(uploadInfo: UploadInfo, servicerResponse: ServerResponse) {
+        console.log("onCompleted");
+        var uploadId = uploadInfo.getUploadId();
         var task = Task.fromId(uploadId);
 
-        var totalUpload = task.totalUpload;
+        var totalUpload = uploadInfo.getTotalBytes();
         if (!totalUpload || !isFinite(totalUpload) || totalUpload <= 0) {
             totalUpload = 1;
         }
@@ -41,7 +61,6 @@ var receiver;
 export function session(id: string) {
 
     if (!receiver) {
-        // TODO: While there are interested parties:
         var context = application.android.context;
         receiver = new ProgressReceiver();
         receiver.register(context);
@@ -96,6 +115,8 @@ class Task extends ObservableBase {
         var request = new servicePackage.BinaryUploadRequest(context, task._id, options.url);
 
         request.setFileToUpload(file);
+
+        request.setNotificationConfig(new servicePackage.UploadNotificationConfig());
 
         var headers = options.headers;
         if (headers) {

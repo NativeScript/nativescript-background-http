@@ -1,5 +1,5 @@
 import { Observable } from "data/observable"
-import * as common from "nativescript-background-http"
+import * as common from "./index"
 
 var runloop = CFRunLoopGetCurrent();
 var defaultRunLoopMode = NSString.stringWithString(kCFRunLoopCommonModes);

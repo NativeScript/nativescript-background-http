@@ -15,3 +15,5 @@ api-ref
 /examples/SimpleBackgroundHttp/lib/
 
 .DS_Store
+
+npm-debug.log
