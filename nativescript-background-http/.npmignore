@@ -3,3 +3,4 @@
 !index.d.ts
 tsconfig.json
 *.tgz
+/package
