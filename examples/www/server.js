@@ -86,3 +86,8 @@ function start(port, logger) {
   }
 }
 exports.start = start;
+
+if (process.argv.length === 3) {
+  var port = parseInt(process.argv[2]);
+  start(port, console);
+}

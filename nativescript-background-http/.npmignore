@@ -1,0 +1,6 @@
+/node_modules
+*.ts
+!index.d.ts
+tsconfig.json
+*.tgz
+/package
