@@ -26,7 +26,8 @@
     "tns-core-modules": "*"
   },
   "devDependencies": {
-    "typescript": "^1.8.10"
+    "tns-platform-declarations": "*",
+    "typescript": "^2.0.3"
   },
   "scripts": {
     "tsc": "tsc",

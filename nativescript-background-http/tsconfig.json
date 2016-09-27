@@ -7,7 +7,10 @@
 		"preserveConstEnums": true,
 		"sourceMap": false,
 		"declaration": false,
-		"experimentalDecorators": true
+		"experimentalDecorators": true,
+		"lib": [
+			"es2016"
+		]
 	},
 	"exclude": [
 		"node_modules",

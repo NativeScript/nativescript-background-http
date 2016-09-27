@@ -1,21 +1,10 @@
 import { Observable } from "data/observable"
 import * as common from "./index"
 
-var runloop = CFRunLoopGetCurrent();
-var defaultRunLoopMode = NSString.stringWithString(kCFRunLoopCommonModes);
-function invokeOnMainRunLoop(func) {
-    CFRunLoopPerformBlock(runloop, defaultRunLoopMode, func);
-    CFRunLoopWakeUp(runloop);
-}
-
 class BackgroundUploadDelegate extends NSObject implements NSURLSessionDelegate, NSURLSessionTaskDelegate, NSURLSessionDataDelegate, NSURLSessionDownloadDelegate {
 	
 	static ObjCProtocols = [NSURLSessionDelegate, NSURLSessionTaskDelegate, NSURLSessionDataDelegate, NSURLSessionDownloadDelegate];
-	
-	init(): BackgroundUploadDelegate {
-		return <BackgroundUploadDelegate>super.init();
-	}
-	
+
 	// NSURLSessionDelegate
 	URLSessionDidBecomeInvalidWithError(session, error) {
 		//console.log("URLSessionDidBecomeInvalidWithError:");
@@ -56,12 +45,10 @@ class BackgroundUploadDelegate extends NSObject implements NSURLSessionDelegate,
 	}
 	
 	URLSessionTaskDidSendBodyDataTotalBytesSentTotalBytesExpectedToSend(nsSession: NSURLSession, nsTask: NSURLSessionTask, data, sent: number, expectedTotal: number) {
-		invokeOnMainRunLoop(function() {
-			var task = Task.getTask(nsSession, nsTask);
-			task.notifyPropertyChange("upload", task.upload);
-			task.notifyPropertyChange("totalUpload", task.totalUpload);
-            task.notify({ eventName: "progress", object: task, currentBytes: sent, totalBytes: expectedTotal });
-		});
+		var task = Task.getTask(nsSession, nsTask);
+		task.notifyPropertyChange("upload", task.upload);
+		task.notifyPropertyChange("totalUpload", task.totalUpload);
+		task.notify({ eventName: "progress", object: task, currentBytes: sent, totalBytes: expectedTotal });
 	}
 	
 	URLSessionTaskNeedNewBodyStream(session, task, need) {
@@ -194,10 +181,10 @@ class Task extends Observable implements common.Task {
 			return "error";
 		}
 		switch(this._task.state) {
-			case NSURLSessionTaskState.NSURLSessionTaskStateRunning: return "uploading";
-			case NSURLSessionTaskState.NSURLSessionTaskStateCompleted: return "complete";
-			case NSURLSessionTaskState.NSURLSessionTaskStateCanceling: return "error"; 
-			case NSURLSessionTaskState.NSURLSessionTaskStateSuspended: return "pending";
+			case NSURLSessionTaskState.Running: return "uploading";
+			case NSURLSessionTaskState.Completed: return "complete";
+			case NSURLSessionTaskState.Canceling: return "error"; 
+			case NSURLSessionTaskState.Suspended: return "pending";
 		}
 	}
 	

@@ -2,6 +2,8 @@ import application = require("application");
 import frame = require("ui/frame");
 import data_observable = require("data/observable");
 
+declare var net;
+
 var servicePackage = (<any>net).gotev.uploadservice;
 
 interface UploadInfo {
