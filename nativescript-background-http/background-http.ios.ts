@@ -135,10 +135,7 @@ class Session implements common.Session {
 		}
 
 		var fileURL: NSURL;
-		if (file instanceof NSURL) {
-			// iOS NSURL was provided for file
-			fileURL = file;
-		} else if (file.substr(0, 7) === "file://") {
+		if (file.substr(0, 7) === "file://") {
 			// File URI in string format
 			fileURL = NSURL.URLWithString(file);
 		} else if (file.charAt(0) === "/") {
