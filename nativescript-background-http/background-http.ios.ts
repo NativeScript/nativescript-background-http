@@ -46,7 +46,9 @@ class BackgroundUploadDelegate extends NSObject implements NSURLSessionDelegate,
 	
 	URLSessionTaskDidSendBodyDataTotalBytesSentTotalBytesExpectedToSend(nsSession: NSURLSession, nsTask: NSURLSessionTask, data, sent: number, expectedTotal: number) {
 		var task = Task.getTask(nsSession, nsTask);
+		console.log("notifyPropertyChange: upload");
 		task.notifyPropertyChange("upload", task.upload);
+		console.log("notifyPropertyChange: totalUpload");
 		task.notifyPropertyChange("totalUpload", task.totalUpload);
 		task.notify({ eventName: "progress", object: task, currentBytes: sent, totalBytes: expectedTotal });
 	}
@@ -111,6 +113,10 @@ class Session implements common.Session {
 	}
 	
 	public uploadFile(file: string, options: common.Request) {
+		if (!file) {
+			throw new Error("File must be provided.");
+		}
+
 		var url = NSURL.URLWithString(options.url);
 		var request = NSMutableURLRequest.requestWithURL(url);
 
@@ -118,9 +124,9 @@ class Session implements common.Session {
 		if (headers) {
 			for (var header in headers) {
 				var value = headers[header];
-                if (value !== null && value !== void 0) {
-                    request.setValueForHTTPHeaderField(value.toString(), header);
-                }
+				if (value !== null && value !== void 0) {
+					request.setValueForHTTPHeaderField(value.toString(), header);
+				}
 			}
 		}
 
@@ -128,7 +134,17 @@ class Session implements common.Session {
 			request.HTTPMethod = options.method;
 		}
 
-		var fileURL = NSURL.fileURLWithPath(file);
+		var fileURL: NSURL;
+		if (file instanceof NSURL) {
+			// iOS NSURL was provided for file
+			fileURL = file;
+		} else if (file.substr(0, 7) === "file://") {
+			// File URI in string format
+			fileURL = NSURL.URLWithString(file);
+		} else if (file.charAt(0) === "/") {
+			// Absolute path with leading slash
+			fileURL = NSURL.fileURLWithPath(file);
+		}
 		
 		var newTask = this._session.uploadTaskWithRequestFromFile(request, fileURL);
 		newTask.taskDescription = options.description;
@@ -169,6 +185,7 @@ class Task extends Observable implements common.Task {
 	}
 	
 	get upload(): number {
+		console.log("get upload(): " + this._task.countOfBytesSent);
 		return this._task.countOfBytesSent;
 	}
 	
