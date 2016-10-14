@@ -1,6 +1,23 @@
 import { Observable } from "data/observable"
 import * as common from "./index"
 
+//Generate a UID
+var GUID = function () {
+        var S4 = function () {
+            return Math.floor(
+                Math.random() * 0x10000
+            ).toString(16);
+        };
+
+        return (
+            S4() + S4() + "-" +
+            S4() + "-" +
+            S4() + "-" +
+            S4() + "-" +
+            S4() + S4() + S4()
+        );
+    }
+
 class BackgroundUploadDelegate extends NSObject implements NSURLSessionDelegate, NSURLSessionTaskDelegate, NSURLSessionDataDelegate, NSURLSessionDownloadDelegate {
 	
 	static ObjCProtocols = [NSURLSessionDelegate, NSURLSessionTaskDelegate, NSURLSessionDataDelegate, NSURLSessionDownloadDelegate];
@@ -9,7 +26,7 @@ class BackgroundUploadDelegate extends NSObject implements NSURLSessionDelegate,
 	URLSessionDidBecomeInvalidWithError(session, error) {
 		//console.log("URLSessionDidBecomeInvalidWithError:");
 		//console.log(" - session: " + session);
-		//console.log(" - error:   " + error);
+		//console.log(" - error:   " + error);		
 	}
 	
 	URLSessionDidReceiveChallengeCompletionHandler(session, challenge, comlpetionHandler) {
@@ -34,6 +51,7 @@ class BackgroundUploadDelegate extends NSObject implements NSURLSessionDelegate,
 			task.notifyPropertyChange("totalUpload", task.totalUpload);
 			task.notify({ eventName: "progress", object: task, currentBytes: nsTask.countOfBytesSent, totalBytes: nsTask.countOfBytesExpectedToSend });
 			task.notify({ eventName: "complete", object: task });
+			delete Task._tasks[nsTask.uid]; 
 		}
 	}
 	
@@ -76,6 +94,10 @@ class BackgroundUploadDelegate extends NSObject implements NSURLSessionDelegate,
 	URLSessionDataTaskDidReceiveData(session, dataTask, data) {
 		//console.log("URLSessionDataTaskDidReceiveData");
 		// we have a response in the data...
+	    let jsTask = Task.getTask(session, dataTask);
+        let jsonString = new NSString({ data: data, encoding: NSUTF8StringEncoding });
+        let json = JSON.parse(jsonString.toString());
+        jsTask.notify({ eventName: "responded", object: jsTask, data:json });
 	}
 	
 	URLSessionDataTaskWillCacheResponseCompletionHandler() {
@@ -162,7 +184,7 @@ class Session implements common.Session {
 }
 
 class Task extends Observable implements common.Task {
-	private static _tasks = new WeakMap<NSURLSessionTask, Task>();
+	private static _tasks = {};
 	
 	private _task: NSURLSessionTask;
 	private _session: NSURLSession;
@@ -202,16 +224,17 @@ class Task extends Observable implements common.Task {
 		}
 	}
 	
-	public static getTask(nsSession: NSURLSession, nsTask: NSURLSessionTask): Task {
-		var task = Task._tasks.get(nsTask);
-		if (task) {
-			return task;
-		}
-		
-		task = new Task(nsSession, nsTask);
-		Task._tasks.set(nsTask, task);
+	public static getTask(nsSession: NSURLSession, nsTask: NSURLSessionTask): Task {		
+		if (!nsTask.uid)
+            	nsTask.uid = GUID();
 
-		return task;
+        var task = Task._tasks[nsTask.uid];
+        if (task) {
+            return task;
+        }
+        task = new Task(nsSession, nsTask);        
+        Task._tasks[nsTask.uid] = task;
+        return task;
 	}
 }
 
