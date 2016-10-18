@@ -46,9 +46,9 @@ class BackgroundUploadDelegate extends NSObject implements NSURLSessionDelegate,
 	
 	URLSessionTaskDidSendBodyDataTotalBytesSentTotalBytesExpectedToSend(nsSession: NSURLSession, nsTask: NSURLSessionTask, data, sent: number, expectedTotal: number) {
 		var task = Task.getTask(nsSession, nsTask);
-		console.log("notifyPropertyChange: upload");
+		//console.log("notifyPropertyChange: upload");
 		task.notifyPropertyChange("upload", task.upload);
-		console.log("notifyPropertyChange: totalUpload");
+		//console.log("notifyPropertyChange: totalUpload");
 		task.notifyPropertyChange("totalUpload", task.totalUpload);
 		task.notify({ eventName: "progress", object: task, currentBytes: sent, totalBytes: expectedTotal });
 	}
@@ -182,7 +182,7 @@ class Task extends Observable implements common.Task {
 	}
 	
 	get upload(): number {
-		console.log("get upload(): " + this._task.countOfBytesSent);
+		//console.log("get upload(): " + this._task.countOfBytesSent);
 		return this._task.countOfBytesSent;
 	}
 	

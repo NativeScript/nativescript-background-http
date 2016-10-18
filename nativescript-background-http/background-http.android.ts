@@ -17,7 +17,7 @@ interface ServerResponse {
 
 var ProgressReceiver = servicePackage.UploadServiceBroadcastReceiver.extend({
     onProgress(uploadInfo: UploadInfo) {
-        console.log("onProgress");
+        //console.log("onProgress");
         var uploadId = uploadInfo.getUploadId();
         var task = Task.fromId(uploadId);
         var totalBytes = uploadInfo.getTotalBytes();
@@ -29,12 +29,12 @@ var ProgressReceiver = servicePackage.UploadServiceBroadcastReceiver.extend({
     },
 
     onCancelled(uploadInfo: UploadInfo) {
-        console.log("onCancelled");
+        //console.log("onCancelled");
         this.onError(uploadInfo, new Error("Cancelled"));
     },
 
     onError(uploadInfo: UploadInfo, error) {
-        console.log("onError");
+        //console.log("onError");
         var uploadId = uploadInfo.getUploadId();
         var task = Task.fromId(uploadId);
         task.setStatus("error");
@@ -42,7 +42,7 @@ var ProgressReceiver = servicePackage.UploadServiceBroadcastReceiver.extend({
     },
 
     onCompleted(uploadInfo: UploadInfo, servicerResponse: ServerResponse) {
-        console.log("onCompleted");
+        //console.log("onCompleted");
         var uploadId = uploadInfo.getUploadId();
         var task = Task.fromId(uploadId);
 
