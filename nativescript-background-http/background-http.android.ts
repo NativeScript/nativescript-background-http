@@ -1,6 +1,7 @@
 import application = require("application");
 import frame = require("ui/frame");
 import data_observable = require("data/observable");
+import utils = require("utils/utils");
 
 declare var net;
 
@@ -63,7 +64,7 @@ var receiver;
 export function session(id: string) {
 
     if (!receiver) {
-        var context = application.android.context;
+        var context = utils.ad.getApplicationContext();
         receiver = new ProgressReceiver();
         receiver.register(context);
     }
