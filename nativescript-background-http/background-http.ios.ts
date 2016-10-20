@@ -1,23 +1,6 @@
 import { Observable } from "data/observable"
 import * as common from "./index"
 
-//Generate a UID
-var GUID = function () {
-        var S4 = function () {
-            return Math.floor(
-                Math.random() * 0x10000
-            ).toString(16);
-        };
-
-        return (
-            S4() + S4() + "-" +
-            S4() + "-" +
-            S4() + "-" +
-            S4() + "-" +
-            S4() + S4() + S4()
-        );
-    }
-
 class BackgroundUploadDelegate extends NSObject implements NSURLSessionDelegate, NSURLSessionTaskDelegate, NSURLSessionDataDelegate, NSURLSessionDownloadDelegate {
 	
 	static ObjCProtocols = [NSURLSessionDelegate, NSURLSessionTaskDelegate, NSURLSessionDataDelegate, NSURLSessionDownloadDelegate];
@@ -51,7 +34,7 @@ class BackgroundUploadDelegate extends NSObject implements NSURLSessionDelegate,
 			task.notifyPropertyChange("totalUpload", task.totalUpload);
 			task.notify({ eventName: "progress", object: task, currentBytes: nsTask.countOfBytesSent, totalBytes: nsTask.countOfBytesExpectedToSend });
 			task.notify({ eventName: "complete", object: task });
-			delete Task._tasks[nsTask.uid]; 
+			Task._tasks.delete(nsTask);
 		}
 	}
 	
@@ -184,7 +167,7 @@ class Session implements common.Session {
 }
 
 class Task extends Observable implements common.Task {
-	private static _tasks = {};
+	private static _tasks = new Map<NSURLSessionTask, Task>();
 	
 	private _task: NSURLSessionTask;
 	private _session: NSURLSession;
@@ -203,8 +186,7 @@ class Task extends Observable implements common.Task {
 		return this._task.taskDescription;
 	}
 	
-	get upload(): number {
-		console.log("get upload(): " + this._task.countOfBytesSent);
+	get upload(): number {		
 		return this._task.countOfBytesSent;
 	}
 	
@@ -224,21 +206,18 @@ class Task extends Observable implements common.Task {
 		}
 	}
 	
-	public static getTask(nsSession: NSURLSession, nsTask: NSURLSessionTask): Task {		
-		if (!nsTask.uid)
-            	nsTask.uid = GUID();
+	public static getTask(nsSession: NSURLSession, nsTask: NSURLSessionTask): Task {
+		var task = Task._tasks.get(nsTask);
+		if (task) {
+			return task;
+		}
+		
+		task = new Task(nsSession, nsTask);
+		Task._tasks.set(nsTask, task);
 
-        var task = Task._tasks[nsTask.uid];
-        if (task) {
-            return task;
-        }
-        task = new Task(nsSession, nsTask);        
-        Task._tasks[nsTask.uid] = task;
-        return task;
+		return task;
 	}
 }
-
 export function session(id: string): common.Session {
 	return Session.getSession(id);
 }
-
