@@ -7,8 +7,8 @@
   "version": "2.3.0",
   "nativescript": {
     "platforms": {
-      "ios": "2.2.0",
-      "android": "2.2.0"
+      "ios": "2.3.0",
+      "android": "2.3.0"
     }
   },
   "main": "background-http.js",
@@ -23,10 +23,10 @@
     "NativeScript"
   ],
   "dependencies": {
-    "tns-core-modules": "*"
+    "tns-core-modules": "next"
   },
   "devDependencies": {
-    "tns-platform-declarations": "*",
+    "tns-platform-declarations": "next",
     "typescript": "^2.0.3"
   },
   "scripts": {

@@ -167,7 +167,7 @@ class Session implements common.Session {
 }
 
 class Task extends Observable implements common.Task {
-	private static _tasks = new Map<NSURLSessionTask, Task>();
+	public static _tasks = new Map<NSURLSessionTask, Task>();
 	
 	private _task: NSURLSessionTask;
 	private _session: NSURLSession;
@@ -186,7 +186,7 @@ class Task extends Observable implements common.Task {
 		return this._task.taskDescription;
 	}
 	
-	get upload(): number {		
+	get upload(): number {
 		return this._task.countOfBytesSent;
 	}
 	
