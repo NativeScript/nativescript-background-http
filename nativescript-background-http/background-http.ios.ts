@@ -9,7 +9,7 @@ class BackgroundUploadDelegate extends NSObject implements NSURLSessionDelegate,
 	URLSessionDidBecomeInvalidWithError(session, error) {
 		//console.log("URLSessionDidBecomeInvalidWithError:");
 		//console.log(" - session: " + session);
-		//console.log(" - error:   " + error);
+		//console.log(" - error:   " + error);		
 	}
 	
 	URLSessionDidReceiveChallengeCompletionHandler(session, challenge, comlpetionHandler) {
@@ -34,6 +34,7 @@ class BackgroundUploadDelegate extends NSObject implements NSURLSessionDelegate,
 			task.notifyPropertyChange("totalUpload", task.totalUpload);
 			task.notify({ eventName: "progress", object: task, currentBytes: nsTask.countOfBytesSent, totalBytes: nsTask.countOfBytesExpectedToSend });
 			task.notify({ eventName: "complete", object: task });
+			Task._tasks.delete(nsTask);
 		}
 	}
 	
@@ -76,6 +77,10 @@ class BackgroundUploadDelegate extends NSObject implements NSURLSessionDelegate,
 	URLSessionDataTaskDidReceiveData(session, dataTask, data) {
 		//console.log("URLSessionDataTaskDidReceiveData");
 		// we have a response in the data...
+	    let jsTask = Task.getTask(session, dataTask);
+        let jsonString = new NSString({ data: data, encoding: NSUTF8StringEncoding });
+        let json = JSON.parse(jsonString.toString());
+        jsTask.notify({ eventName: "responded", object: jsTask, data:json });
 	}
 	
 	URLSessionDataTaskWillCacheResponseCompletionHandler() {
@@ -162,7 +167,7 @@ class Session implements common.Session {
 }
 
 class Task extends Observable implements common.Task {
-	private static _tasks = new WeakMap<NSURLSessionTask, Task>();
+	private static _tasks = new Map<NSURLSessionTask, Task>();
 	
 	private _task: NSURLSessionTask;
 	private _session: NSURLSession;
@@ -181,8 +186,7 @@ class Task extends Observable implements common.Task {
 		return this._task.taskDescription;
 	}
 	
-	get upload(): number {
-		//console.log("get upload(): " + this._task.countOfBytesSent);
+	get upload(): number {		
 		return this._task.countOfBytesSent;
 	}
 	
@@ -214,8 +218,6 @@ class Task extends Observable implements common.Task {
 		return task;
 	}
 }
-
 export function session(id: string): common.Session {
 	return Session.getSession(id);
 }
-
