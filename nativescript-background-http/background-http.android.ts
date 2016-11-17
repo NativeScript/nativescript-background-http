@@ -5,8 +5,6 @@ import utils = require("utils/utils");
 
 declare var net;
 
-var servicePackage = (<any>net).gotev.uploadservice;
-
 interface UploadInfo {
     getUploadId(): string;
     getTotalBytes(): number;
@@ -16,7 +14,7 @@ interface ServerResponse {
     getBodyAsString(): string;
 }
 
-var ProgressReceiver = servicePackage.UploadServiceBroadcastReceiver.extend({
+var ProgressReceiver = (<any>net).gotev.uploadservice.UploadServiceBroadcastReceiver.extend({
     onProgress(uploadInfo: UploadInfo) {
         //console.log("onProgress");
         var uploadId = uploadInfo.getUploadId();
@@ -117,11 +115,11 @@ class Task extends ObservableBase {
 
         var context = application.android.context;
 
-        var request = new servicePackage.BinaryUploadRequest(context, task._id, options.url);
+        var request = new (<any>net).gotev.uploadservice.BinaryUploadRequest(context, task._id, options.url);
 
         request.setFileToUpload(file);
 
-        request.setNotificationConfig(new servicePackage.UploadNotificationConfig());
+        request.setNotificationConfig(new (<any>net).gotev.uploadservice.UploadNotificationConfig());
 
         var headers = options.headers;
         if (headers) {

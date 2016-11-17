@@ -1,6 +1,8 @@
 import { Observable } from "data/observable"
 import * as common from "./index"
 
+var main_queue = dispatch_get_current_queue();
+
 class BackgroundUploadDelegate extends NSObject implements NSURLSessionDelegate, NSURLSessionTaskDelegate, NSURLSessionDataDelegate, NSURLSessionDownloadDelegate {
 
 	static ObjCProtocols = [NSURLSessionDelegate, NSURLSessionTaskDelegate, NSURLSessionDataDelegate, NSURLSessionDownloadDelegate];
@@ -25,17 +27,19 @@ class BackgroundUploadDelegate extends NSObject implements NSURLSessionDelegate,
 
 	// NSURLSessionTaskDelegate
 	URLSessionTaskDidCompleteWithError(session, nsTask, error) {
-		var task = Task.getTask(session, nsTask);
-		if (error) {
-			task.notifyPropertyChange("status", task.status);
-			task.notify({ eventName: "error", object: task, error: error });
-		} else {
-			task.notifyPropertyChange("upload", task.upload);
-			task.notifyPropertyChange("totalUpload", task.totalUpload);
-			task.notify({ eventName: "progress", object: task, currentBytes: nsTask.countOfBytesSent, totalBytes: nsTask.countOfBytesExpectedToSend });
-			task.notify({ eventName: "complete", object: task });
-			Task._tasks.delete(nsTask);
-		}
+		dispatch_async(main_queue, () => {
+			var task = Task.getTask(session, nsTask);
+			if (error) {
+				task.notifyPropertyChange("status", task.status);
+				task.notify({ eventName: "error", object: task, error: error });
+			} else {
+				task.notifyPropertyChange("upload", task.upload);
+				task.notifyPropertyChange("totalUpload", task.totalUpload);
+				task.notify({ eventName: "progress", object: task, currentBytes: nsTask.countOfBytesSent, totalBytes: nsTask.countOfBytesExpectedToSend });
+				task.notify({ eventName: "complete", object: task });
+				Task._tasks.delete(nsTask);
+			}
+		});
 	}
 
 	URLSessionTaskDidReceiveChallengeCompletionHandler(session, task, challenge, completionHandler) {
@@ -46,12 +50,14 @@ class BackgroundUploadDelegate extends NSObject implements NSURLSessionDelegate,
 	}
 
 	URLSessionTaskDidSendBodyDataTotalBytesSentTotalBytesExpectedToSend(nsSession: NSURLSession, nsTask: NSURLSessionTask, data, sent: number, expectedTotal: number) {
-		var task = Task.getTask(nsSession, nsTask);
-		//console.log("notifyPropertyChange: upload");
-		task.notifyPropertyChange("upload", task.upload);
-		//console.log("notifyPropertyChange: totalUpload");
-		task.notifyPropertyChange("totalUpload", task.totalUpload);
-		task.notify({ eventName: "progress", object: task, currentBytes: sent, totalBytes: expectedTotal });
+		dispatch_async(main_queue, () => {
+			var task = Task.getTask(nsSession, nsTask);
+			//console.log("notifyPropertyChange: upload");
+			task.notifyPropertyChange("upload", task.upload);
+			//console.log("notifyPropertyChange: totalUpload");
+			task.notifyPropertyChange("totalUpload", task.totalUpload);
+			task.notify({ eventName: "progress", object: task, currentBytes: sent, totalBytes: expectedTotal });
+		});
 	}
 
 	URLSessionTaskNeedNewBodyStream(session, task, need) {
@@ -75,12 +81,14 @@ class BackgroundUploadDelegate extends NSObject implements NSURLSessionDelegate,
 	}
 
 	URLSessionDataTaskDidReceiveData(session, dataTask, data) {
-		//console.log("URLSessionDataTaskDidReceiveData");
-		// we have a response in the data...
-	    let jsTask = Task.getTask(session, dataTask);
-        let jsonString = NSString.alloc().initWithDataEncoding(data, NSUTF8StringEncoding);
+		dispatch_async(main_queue, () => {
+			//console.log("URLSessionDataTaskDidReceiveData");
+			// we have a response in the data...
+			let jsTask = Task.getTask(session, dataTask);
+			let jsonString = NSString.alloc().initWithDataEncoding(data, NSUTF8StringEncoding);
 
-        jsTask.notify({ eventName: "responded", object: jsTask, data: jsonString.toString() });
+			jsTask.notify({ eventName: "responded", object: jsTask, data: jsonString.toString() });
+		});
 	}
 
 	URLSessionDataTaskWillCacheResponseCompletionHandler() {
