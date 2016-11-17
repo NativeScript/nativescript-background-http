@@ -54,9 +54,11 @@ var ProgressReceiver = servicePackage.UploadServiceBroadcastReceiver.extend({
         task.setUpload(totalUpload);
         task.setTotalUpload(totalUpload);
         task.setStatus("complete");
+
         task.notify({ eventName: "progress", object: task, currentBytes: totalUpload, totalBytes: totalUpload });
+        task.notify({ eventName: "responded", object: task, data: serverResponse.getBodyAsString() });
         task.notify({ eventName: "complete", object: task, response: serverResponse });
-    }
+   }
 });
 
 var receiver;
@@ -81,7 +83,7 @@ class ObservableBase extends data_observable.Observable {
 
 class Session {
     private _id: string;
-    
+
     constructor(id: string) {
         this._id = id;
     }
@@ -138,7 +140,7 @@ class Task extends ObservableBase {
         task.setUpload(0);
         task.setTotalUpload(1);
         task.setStatus("pending");
-        
+
         request.startUpload();
 
         Task.cache[task._id] = task;
