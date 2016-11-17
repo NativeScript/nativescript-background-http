@@ -32,6 +32,16 @@ export interface ProgressEventData extends observable.EventData {
 }
 
 /**
+ * Provides the server responce.
+ */
+export interface ResultEventData extends observable.EventData {
+    /**
+     * The string responce of the server.
+     */
+    data: string;
+}
+
+/**
  * Encapsulates some information for background http transfers.
  */
 export interface Task {
@@ -80,6 +90,14 @@ export interface Task {
      * @event
      */
     on(event: "progress", handler: (e: ProgressEventData) => void): void;
+
+    /**
+     * Upon successful upload provides the server responce.
+     * @param event
+     * @param handler A handler that will receive the responce event. 
+     * @event
+     */
+    on(event: "responded", handler: (e: ResultEventData) => void): void;
 
     /**
      * Subscribe for the success notification.
