@@ -13,7 +13,7 @@ interface UploadInfo {
     getUploadedBytes(): number;
 }
 interface ServerResponse {
-    
+    getBodyAsString(): string;
 }
 
 var ProgressReceiver = servicePackage.UploadServiceBroadcastReceiver.extend({
@@ -42,7 +42,7 @@ var ProgressReceiver = servicePackage.UploadServiceBroadcastReceiver.extend({
         task.notify({ eventName: "error", object: task, error: error });
     },
 
-    onCompleted(uploadInfo: UploadInfo, servicerResponse: ServerResponse) {
+    onCompleted(uploadInfo: UploadInfo, serverResponse: ServerResponse) {
         //console.log("onCompleted");
         var uploadId = uploadInfo.getUploadId();
         var task = Task.fromId(uploadId);
@@ -55,7 +55,7 @@ var ProgressReceiver = servicePackage.UploadServiceBroadcastReceiver.extend({
         task.setTotalUpload(totalUpload);
         task.setStatus("complete");
         task.notify({ eventName: "progress", object: task, currentBytes: totalUpload, totalBytes: totalUpload });
-        task.notify({ eventName: "complete", object: task });
+        task.notify({ eventName: "complete", object: task, response: serverResponse });
     }
 });
 
