@@ -23,7 +23,7 @@
     "NativeScript"
   ],
   "dependencies": {
-    "tns-core-modules": "next"
+    "tns-core-modules": "^2.4.0"
   },
   "devDependencies": {
     "tns-platform-declarations": "next",
