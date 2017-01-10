@@ -1,5 +1,7 @@
 import { Observable } from "data/observable"
 import * as common from "./index"
+import * as fileSystemModule from "file-system";
+import * as utils from "utils/utils";
 
 var main_queue = dispatch_get_current_queue();
 
@@ -29,6 +31,10 @@ class BackgroundUploadDelegate extends NSObject implements NSURLSessionDelegate,
 	URLSessionTaskDidCompleteWithError(session, nsTask, error) {
 		dispatch_async(main_queue, () => {
 			var task = Task.getTask(session, nsTask);
+			if (task._fileToCleanup) {
+				let fileManager = utils.ios.getter(NSFileManager, NSFileManager.defaultManager);
+				fileManager.removeItemAtPathError(task._fileToCleanup,null);
+			}
 			if (error) {
 				task.notifyPropertyChange("status", task.status);
 				task.notify({ eventName: "error", object: task, error: error });
@@ -163,6 +169,36 @@ class Session implements common.Session {
 		return Task.getTask(this._session, newTask);
 	}
 
+	public multipartUpload(params: Array<any>, options: common.Request): Task {
+		let MPF = new MultiMultiPartForm();
+		for (let i=0;i<params.length;i++) {
+			let curParam = params[i];
+			if (typeof curParam.name === 'undefined') {
+				throw new Error("You must have a `name` value");
+			}
+
+			if (curParam.filename) {
+				let destFileName = curParam.destFilename || curParam.filename.substring(curParam.filename.lastIndexOf('/')+1, curParam.filename.length);
+				MPF.appendParam(curParam.name, null, curParam.filename, curParam.mimeType, destFileName);
+			} else {
+				MPF.appendParam(curParam.name, curParam.value);
+			}
+		}
+		let header = MPF.getHeader();
+		let uploadFile = MPF.generateFile();
+
+		if (!options.headers) {
+			options.headers = {};
+		}
+		options.headers['Content-Type'] = header['Content-Type'];
+
+		let task = this.uploadFile(uploadFile, options);
+
+		// Tag the file to be deleted and cleanup after upload
+		task._fileToCleanup = uploadFile;
+		return task;
+	}
+
 	static getSession(id: string): common.Session {
 		var jsSession = Session._sessions[id];
 		if (jsSession) {
@@ -177,6 +213,7 @@ class Session implements common.Session {
 class Task extends Observable implements common.Task {
 	public static _tasks = new Map<NSURLSessionTask, Task>();
 
+	public _fileToCleanup: string;
 	private _task: NSURLSessionTask;
 	private _session: NSURLSession;
 
@@ -228,4 +265,94 @@ class Task extends Observable implements common.Task {
 }
 export function session(id: string): common.Session {
 	return Session.getSession(id);
+}
+
+
+
+class MultiMultiPartForm {
+	private boundary: string;
+	private header: any;
+	private fileCount: number;
+	private fields: Array<any>;
+
+	constructor() {
+		this.clear();
+	}
+
+	public clear(): void {
+		this.boundary = "--------------formboundary" + Math.floor(Math.random() * 100000000000);
+		this.header = {"Content-Type": 'multipart/form-data; boundary=' + this.boundary};
+		this.fileCount = 0;
+		this.fields = [];
+	}
+
+	public appendParam(name: string, value: string, filename?: string, mimeType?: string, destFileName?: string): void {
+		// If all we are doing is passing a field, we just add it to the fields list
+		if (filename == null) {
+			this.fields.push({name: name, value: value});
+			return;
+		}
+		// Load file
+		mimeType = mimeType || "application/data";
+
+		if (filename.startsWith("~/")) {
+			filename = filename.replace("~/", fileSystemModule.knownFolders.currentApp().path + "/");
+		}
+
+		const finalName = destFileName || filename.substr(filename.lastIndexOf('/') + 1, filename.length);
+		this.fields.push({name: name, filename: filename, destFilename: finalName, mimeType: mimeType});
+	};
+
+	public generateFile(): string {
+		const CRLF = "\r\n";
+
+		let fileName = fileSystemModule.knownFolders.documents().path+"/temp-MPF-"+Math.floor(Math.random() * 100000000000)+".tmp";
+
+		let combinedData = NSMutableData.alloc().init();
+
+		let results = '', tempString, newData;
+		for (let i = 0; i < this.fields.length; i++) {
+			results += "--" + this.boundary + CRLF;
+			results += 'Content-Disposition: form-data; name="' + this.fields[i].name + '"';
+			if (!this.fields[i].filename) {
+				results += CRLF + CRLF + this.fields[i].value + CRLF;
+			} else {
+				results += '; filename="' + this.fields[i].filename + '"';
+				if (this.fields[i].mimeType) {
+					results += CRLF + "Content-Type: " + this.fields[i].mimeType;
+				}
+				results += CRLF + CRLF;
+			}
+
+			tempString = NSString.stringWithString(results);
+			results = "";
+			newData = tempString.dataUsingEncoding(NSUTF8StringEncoding);
+			combinedData.appendData(newData);
+
+
+			if (this.fields[i].filename) {
+				let fileData = NSData.alloc().initWithContentsOfFile(this.fields[i].filename);
+				combinedData.appendData(fileData);
+				results = CRLF;
+			}
+
+		}
+		// Add final part of it...
+		results += CRLF + "--" + this.boundary + "--" + CRLF;
+		tempString = NSString.stringWithString(results);
+		newData = tempString.dataUsingEncoding(NSUTF8StringEncoding);
+		combinedData.appendData(newData);
+
+
+		let fileManager = utils.ios.getter(NSFileManager, NSFileManager.defaultManager);
+		fileManager.createFileAtPathContentsAttributes(fileName, combinedData, null);
+
+		return fileName;
+	};
+
+	public getHeader(): string {
+		return this.header;
+	};
+
+
 }
