@@ -4,11 +4,11 @@
     "url": "https://github.com/NativeScript/nativescript-background-http"
   },
   "name": "nativescript-background-http",
-  "version": "2.4.2",
+  "version": "2.5.0",
   "nativescript": {
     "platforms": {
-      "ios": "2.4.0",
-      "android": "2.4.1"
+      "ios": "2.5.0",
+      "android": "2.5.0"
     }
   },
   "main": "background-http",
@@ -23,10 +23,10 @@
     "NativeScript"
   ],
   "dependencies": {
-    "tns-core-modules": "^2.4.3"
+    "tns-core-modules": "^2.5.0"
   },
   "devDependencies": {
-    "tns-platform-declarations": "^2.4.3",
+    "tns-platform-declarations": "^2.5.0",
     "typescript": "^2.0.3"
   },
   "scripts": {
