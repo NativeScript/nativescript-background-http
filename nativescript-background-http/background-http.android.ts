@@ -1,9 +1,13 @@
+
 import application = require("application");
 import frame = require("ui/frame");
 import data_observable = require("data/observable");
 import utils = require("utils/utils");
+import * as fileSystemModule from "file-system";
+import * as common from "./index";
 
-declare var net;
+
+declare var net: any;
 
 interface UploadInfo {
     getUploadId(): string;
@@ -86,8 +90,12 @@ class Session {
         this._id = id;
     }
 
-    public uploadFile(file: string, options: any): Task {
+    public uploadFile(file: string, options: common.Request): Task {
         return Task.create(this, file, options);
+    }
+
+    public multipartUpload(params: Array<any>, options: common.Request): Task {
+        return Task.createMultiPart(this, params, options);
     }
 
     get id(): string {
@@ -108,7 +116,7 @@ class Task extends ObservableBase {
     private _status: string;
     private _description: string;
 
-    static create(session: Session, file: string, options: any): Task {
+    static create(session: Session, file: string, options: common.Request): Task {
         var task = new Task();
         task._session = session;
         task._id = session.id + "{" + ++Task.taskCount + "}";
@@ -118,6 +126,62 @@ class Task extends ObservableBase {
         var request = new (<any>net).gotev.uploadservice.BinaryUploadRequest(context, task._id, options.url);
 
         request.setFileToUpload(file);
+
+        request.setNotificationConfig(new (<any>net).gotev.uploadservice.UploadNotificationConfig());
+
+        var headers = options.headers;
+        if (headers) {
+            for (var header in headers) {
+                var value = headers[header];
+                if (value !== null && value !== void 0) {
+                    request.addHeader(header, value.toString());
+                }
+            }
+        }
+
+        task.setDescription(options.description);
+
+        request.setMethod(options.method ? options.method : "GET");
+
+        task.setUpload(0);
+        task.setTotalUpload(1);
+        task.setStatus("pending");
+
+        request.startUpload();
+
+        Task.cache[task._id] = task;
+
+        return task;
+    }
+
+    static createMultiPart(session: Session, params: Array<any>, options: common.Request): Task {
+        var task = new Task();
+        task._session = session;
+        task._id = session.id + "{" + (++Task.taskCount) + "}";
+
+        var context = application.android.context;
+
+        var request = new net.gotev.uploadservice.MultipartUploadRequest(context, task._id, options.url);
+
+        for (var i=0;i<params.length;i++) {
+            var curParam = params[i];
+            if (typeof curParam.name === 'undefined') {
+                throw new Error("You must have a `name` value");
+            }
+
+            if (curParam.filename) {
+                var fileName = curParam.filename;
+                if (fileName.startsWith("~/")) {
+                    fileName = fileName.replace("~/", fileSystemModule.knownFolders.currentApp().path + "/");
+                }
+                var destFileName = curParam.destFilename || fileName.substring(fileName.lastIndexOf('/')+1, fileName.length);
+
+                request.addFileToUpload(fileName, curParam.name, destFileName, curParam.mimeType);
+            } else {
+                request.addParameter(params[i].name, params[i].value);
+
+            }
+        }
 
         request.setNotificationConfig(new (<any>net).gotev.uploadservice.UploadNotificationConfig());
 

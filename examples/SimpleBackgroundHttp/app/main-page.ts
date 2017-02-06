@@ -30,18 +30,24 @@ function pageLoaded(args) {
 exports.pageLoaded = pageLoaded;
 
 function upload(args) {
-	start_upload(false);
+	start_upload(false, false);
 }
 exports.upload = upload;
 
 function upload_error(args) {
-	start_upload(true);
+	start_upload(true, false);
 }
 exports.upload_error = upload_error;
 
+function upload_multi(args) {
+	start_upload(false, true);
+}
+exports.upload_multi = upload_multi;
+
+
 var counter = 0;
 
-function start_upload(should_fail) {
+function start_upload(should_fail, isMulti) {
 	console.log("Upload!");
 	
 	console.log("Upload file: " + file);
@@ -62,7 +68,13 @@ function start_upload(should_fail) {
 		request.headers["Should-Fail"] = true;
 	}
 
-	var task = session.uploadFile(file, request);
+	var task;
+	if (isMulti) {
+		var params = [{name: "test", value: "value"}, {name:"fileToUpload", filename: file, mimeType: 'image/jpeg'}];
+		task = session.multipartUpload(params, request);
+	} else {
+        task = session.uploadFile(file, request);
+    }
 
 	function onEvent(e) {
 		context.events.push({

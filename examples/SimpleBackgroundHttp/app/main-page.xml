@@ -1,6 +1,6 @@
 <Page xmlns="http://www.nativescript.org/tns.xsd" loaded="pageLoaded">
-  <GridLayout rows="3*, 2*, auto" columns="*, *">
-    <ListView colSpan="2" items="{{ tasks }}">
+  <GridLayout rows="3*, 2*, auto" columns="*, *, *">
+    <ListView colSpan="3" items="{{ tasks }}">
 		<ListView.itemTemplate>
 			<StackLayout>
                 <Label text="{{ description }}" />
@@ -10,7 +10,7 @@
 			</StackLayout>
 		</ListView.itemTemplate>
     </ListView>
-    <ListView row="1" colSpan="2" items="{{ events }}">
+    <ListView row="1" colSpan="3" items="{{ events }}">
     	<ListView.itemTemplate>
     		<StackLayout>
     			<Label text="{{ eventTitle }} " />
@@ -20,5 +20,6 @@
     </ListView>
     <Button row="2" margin="2" text="Upload!" tap="upload" />
     <Button row="2" col="1" margin="2" text="Erro-Up!" tap="upload_error" />
+	<Button row="2" col="2" margin="2" text="MultiPart-Up!" tap="upload_multi" />
   </GridLayout>
 </Page>
