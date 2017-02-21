@@ -1,0 +1,9 @@
+<StackLayout> 
+        <GridLayout rows="auto auto auto auto" columns="100 *">
+            <Image marginLeft="2" marginRight="2" height="100" row="0" col="0" [src]="imageSrc"></Image>
+            <Progress marginLeft="2" marginRight="2" marginTop="30" class="progress" row="0" col="1" id="prgressid" class="progress"></Progress>
+            <Button row="1" col="0" colSpan="2" text="ImageUplaod" (tap)="imageUplaod()" class="btn btn-active btn-primary"></Button>
+            <Progress marginLeft="2" marginRight="2" class="progress" row="2" col="0" colSpan="2" id="prgressmultiid" class="progress"></Progress>
+            <Button row="3" col="0" colSpan="2"  text="MultiUpload" (tap)="multiUpload()" class="btn btn-active btn-primary"></Button>
+        </GridLayout>
+</StackLayout>
