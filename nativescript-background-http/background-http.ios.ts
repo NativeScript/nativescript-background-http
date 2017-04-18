@@ -33,7 +33,7 @@ class BackgroundUploadDelegate extends NSObject implements NSURLSessionDelegate,
 			var task = Task.getTask(session, nsTask);
 			if (task._fileToCleanup) {
 				let fileManager = utils.ios.getter(NSFileManager, NSFileManager.defaultManager);
-				fileManager.removeItemAtPathError(task._fileToCleanup,null);
+				fileManager.removeItemAtPathError(task._fileToCleanup);
 			}
 			if (error) {
 				task.notifyPropertyChange("status", task.status);
