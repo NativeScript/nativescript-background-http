@@ -1,21 +1,19 @@
-import bghttp = require("nativescript-background-http");
-
-var fs = require("file-system");
-var platform = require("platform");
-var ObservableArray = require("data/observable-array").ObservableArray;
+import * as bghttp from "nativescript-background-http";
+import { isIOS } from "platform";
+import { ObservableArray } from "data/observable-array";
 
 var session = bghttp.session("image-upload");
 // TODO: Implement retrieval of existing tasks in the session.
 
 var context = {
-	tasks: new ObservableArray(),
+	tasks: new ObservableArray<bghttp.Task>(),
 	events: new ObservableArray()
 }
 
 var file = __dirname + "/bigpic.jpg";
 var url;
 
-if (platform.device.os == platform.platformNames.ios) {
+if (isIOS) {
 	// NOTE: This works for emulator. Real device will need other address.
 	url = "http://localhost:8083";
 } else {
@@ -44,13 +42,12 @@ function upload_multi(args) {
 }
 exports.upload_multi = upload_multi;
 
-
 var counter = 0;
 
 function start_upload(should_fail, isMulti) {
 	console.log("Upload!");
-
 	console.log("Upload file: " + file);
+
 	var name = "bigpic.jpg";
 	var description = name + " " + ++counter;
 
@@ -68,11 +65,12 @@ function start_upload(should_fail, isMulti) {
 		request.headers["Should-Fail"] = true;
 	}
 
-	var task;
+	let task: bghttp.Task;
 	if (isMulti) {
 		var params = [
 			{ name: "test", value: "value" },
-			{ name: "fileToUpload", filename: file, mimeType: 'image/jpeg' }];
+			{ name: "fileToUpload", filename: file, mimeType: 'image/jpeg' }
+		];
 		task = session.multipartUpload(params, request);
 	} else {
 		task = session.uploadFile(file, request);
@@ -95,9 +93,3 @@ function start_upload(should_fail, isMulti) {
 
 	context.tasks.push(task);
 }
-
-
-
-
-
-
