@@ -9,6 +9,7 @@ api-ref
 
 # Source, written in TypeScript so JavaScript is not necessary
 /nativescript-background-http/**/*.js
+/examples/SimpleBackgroundHttp/**/*.js
 
 # Example platforms
 /examples/SimpleBackgroundHttp/platforms/
