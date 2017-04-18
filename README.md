@@ -1,5 +1,5 @@
 # Background Upload plugin for the NativeScript framework
-[**How to use the plugin, see: source/README.md**](source/)
+[**How to use the plugin, see: source/README.md**](nativescript-background-http/)
 
 ## iOS
 The iOS API is implemented in JavaScript.
