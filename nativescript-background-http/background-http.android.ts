@@ -16,6 +16,7 @@ interface UploadInfo {
 }
 interface ServerResponse {
     getBodyAsString(): string;
+    getHttpCode(): number;
 }
 
 var ProgressReceiver = (<any>net).gotev.uploadservice.UploadServiceBroadcastReceiver.extend({
@@ -58,7 +59,7 @@ var ProgressReceiver = (<any>net).gotev.uploadservice.UploadServiceBroadcastRece
         task.setStatus("complete");
 
         task.notify({ eventName: "progress", object: task, currentBytes: totalUpload, totalBytes: totalUpload });
-        task.notify({ eventName: "responded", object: task, data: serverResponse.getBodyAsString() });
+        task.notify({ eventName: "responded", object: task, data: {body: serverResponse.getBodyAsString() , statusCode: serverResponse.getBodyAsString()}});
         task.notify({ eventName: "complete", object: task, response: serverResponse });
    }
 });
