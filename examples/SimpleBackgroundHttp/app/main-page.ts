@@ -1,21 +1,19 @@
-import bghttp = require("nativescript-background-http");
-
-var fs = require("file-system");
-var platform = require("platform");
-var ObservableArray = require("data/observable-array").ObservableArray;
+import * as bghttp from "nativescript-background-http";
+import { isIOS } from "platform";
+import { ObservableArray } from "data/observable-array";
 
 var session = bghttp.session("image-upload");
 // TODO: Implement retrieval of existing tasks in the session.
 
 var context = {
-	tasks: new ObservableArray(),
+	tasks: new ObservableArray<bghttp.Task>(),
 	events: new ObservableArray()
 }
 
 var file = __dirname + "/bigpic.jpg";
 var url;
 
-if (platform.device.os == platform.platformNames.ios) {
+if (isIOS) {
 	// NOTE: This works for emulator. Real device will need other address.
 	url = "http://localhost:8083";
 } else {
@@ -24,8 +22,8 @@ if (platform.device.os == platform.platformNames.ios) {
 }
 
 function pageLoaded(args) {
-    var page = args.object;
-    page.bindingContext = context;
+	var page = args.object;
+	page.bindingContext = context;
 }
 exports.pageLoaded = pageLoaded;
 
@@ -44,13 +42,12 @@ function upload_multi(args) {
 }
 exports.upload_multi = upload_multi;
 
-
 var counter = 0;
 
 function start_upload(should_fail, isMulti) {
 	console.log("Upload!");
-	
 	console.log("Upload file: " + file);
+
 	var name = "bigpic.jpg";
 	var description = name + " " + ++counter;
 
@@ -68,13 +65,16 @@ function start_upload(should_fail, isMulti) {
 		request.headers["Should-Fail"] = true;
 	}
 
-	var task;
+	let task: bghttp.Task;
 	if (isMulti) {
-		var params = [{name: "test", value: "value"}, {name:"fileToUpload", filename: file, mimeType: 'image/jpeg'}];
+		var params = [
+			{ name: "test", value: "value" },
+			{ name: "fileToUpload", filename: file, mimeType: 'image/jpeg' }
+		];
 		task = session.multipartUpload(params, request);
 	} else {
-        task = session.uploadFile(file, request);
-    }
+		task = session.uploadFile(file, request);
+	}
 
 	function onEvent(e) {
 		context.events.push({
@@ -87,15 +87,9 @@ function start_upload(should_fail, isMulti) {
 		});
 	}
 
-	// TODO: Log up 2-3 progress events per task or the UI is poluted: task.on("progress", onEvent);
+	// TODO: Log up 2-3 progress events per task or the UI is polluted: task.on("progress", onEvent);
 	task.on("error", onEvent);
 	task.on("complete", onEvent);
 
 	context.tasks.push(task);
 }
-
-
-
-
-
-
