@@ -33,3 +33,67 @@ Then to run the app:
 ```
 tns run android --path examples/SimpleBackgroundHttp
 ```
+
+## Usage
+
+The below attached code snippets demostrate how to use `nativescript-background-http`, while uploading single or multiple files.
+
+For further help review the (SimpleBackgroundHttp)[https://github.com/NativeScript/nativescript-background-http/tree/master/examples] application.
+
+### uploadFile
+
+uploading sigle file to the service
+
+```
+import * as bghttp from "nativescript-background-http";
+var session = bghttp.session("image-upload");
+
+.....
+var request = {
+		url: url,
+		method: "POST",
+		headers: {
+			"Content-Type": "application/octet-stream",
+			"File-Name": name
+		},
+		description: description
+	};
+
+	if (should_fail) {
+		request.headers["Should-Fail"] = true;
+	}
+
+let task: bghttp.Task;
+task = session.uploadFile(file, request);
+```
+
+### multipartUpload
+
+uploading multiple files while using `nativescript-background-http`
+
+```
+import * as bghttp from "nativescript-background-http";
+var session = bghttp.session("image-upload");
+
+.....
+var request = {
+		url: url,
+		method: "POST",
+		headers: {
+			"Content-Type": "application/octet-stream",
+			"File-Name": name
+		},
+		description: description
+	};
+
+	if (should_fail) {
+		request.headers["Should-Fail"] = true;
+	}
+
+let task: bghttp.Task;
+var params = [
+			{ name: "test", value: "value" },
+			{ name: "fileToUpload", filename: file, mimeType: 'image/jpeg' }
+		];
+task = session.multipartUpload(params, request);
+```
