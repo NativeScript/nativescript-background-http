@@ -317,7 +317,13 @@ class MultiMultiPartForm {
 			if (!this.fields[i].filename) {
 				results += CRLF + CRLF + this.fields[i].value + CRLF;
 			} else {
-				results += '; filename="' + this.fields[i].filename + '"';
+				/*
+				 * Here the filename being sent to the multipart request is trimmed to the name only
+				 */
+				var sendFileName = this.fields[i].filename.split("/");
+                sendFileName = sendFileName[sendFileName.length - 1] || '';
+                results += '; filename="' + sendFileName + '"';
+				// results += '; filename="' + this.fields[i].filename + '"';
 				if (this.fields[i].mimeType) {
 					results += CRLF + "Content-Type: " + this.fields[i].mimeType;
 				}
