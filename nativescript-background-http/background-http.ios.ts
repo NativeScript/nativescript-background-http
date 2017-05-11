@@ -317,7 +317,7 @@ class MultiMultiPartForm {
 			if (!this.fields[i].filename) {
 				results += CRLF + CRLF + this.fields[i].value + CRLF;
 			} else {
-				results += '; filename="' + this.fields[i].filename + '"';
+				results += '; filename="' + this.fields[i].destFilename + '"';
 				if (this.fields[i].mimeType) {
 					results += CRLF + "Content-Type: " + this.fields[i].mimeType;
 				}
