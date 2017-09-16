@@ -139,6 +139,12 @@ class Task extends ObservableBase {
             }
         }
 
+        var utf8 = options.utf8;
+
+        if (utf8) {
+            request.setUtf8Charset();
+        }
+
         task.setDescription(options.description);
 
         request.setMethod(options.method ? options.method : "GET");
@@ -181,6 +187,12 @@ class Task extends ObservableBase {
                 request.addParameter(params[i].name, params[i].value);
 
             }
+        }
+
+        var utf8 = options.utf8;
+
+        if (utf8) {
+            request.setUtf8Charset();
         }
 
         request.setNotificationConfig(new (<any>net).gotev.uploadservice.UploadNotificationConfig());

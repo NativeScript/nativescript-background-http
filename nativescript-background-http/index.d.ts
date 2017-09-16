@@ -148,4 +148,9 @@ export interface Request {
      * You can store serialized JSON object.
      */
     description: string;
+
+    /**
+     * Use utf8 encode in requests
+     */
+    utf8?: boolean;
 }
