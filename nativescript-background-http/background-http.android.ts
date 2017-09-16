@@ -139,12 +139,6 @@ class Task extends ObservableBase {
             }
         }
 
-        var utf8 = options.utf8;
-
-        if (utf8) {
-            request.setUtf8Charset();
-        }
-
         task.setDescription(options.description);
 
         request.setMethod(options.method ? options.method : "GET");
