@@ -127,7 +127,10 @@ class Task extends ObservableBase {
 
         request.setFileToUpload(file);
 
-        request.setNotificationConfig(new (<any>net).gotev.uploadservice.UploadNotificationConfig());
+        var displayNotificationProgress = typeof options.displayNotificationProgress === "boolean" ? options.displayNotificationProgress : true;
+        if (displayNotificationProgress) {
+          request.setNotificationConfig(new (<any>net).gotev.uploadservice.UploadNotificationConfig());
+        }
 
         var headers = options.headers;
         if (headers) {
