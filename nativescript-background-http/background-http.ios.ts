@@ -171,14 +171,14 @@ class Session implements common.Session {
 
 	public multipartUpload(params: Array<any>, options: common.Request): Task {
 		let MPF = new MultiMultiPartForm();
-		for (let i=0;i<params.length;i++) {
+		for (let i = 0; i < params.length; i++) {
 			let curParam = params[i];
 			if (typeof curParam.name === 'undefined') {
 				throw new Error("You must have a `name` value");
 			}
 
 			if (curParam.filename) {
-				let destFileName = curParam.destFilename || curParam.filename.substring(curParam.filename.lastIndexOf('/')+1, curParam.filename.length);
+				let destFileName = curParam.destFilename || curParam.filename.substring(curParam.filename.lastIndexOf('/') + 1, curParam.filename.length);
 				MPF.appendParam(curParam.name, null, curParam.filename, curParam.mimeType, destFileName);
 			} else {
 				MPF.appendParam(curParam.name, curParam.value);
@@ -243,7 +243,7 @@ class Task extends Observable implements common.Task {
 		if (this._task.error) {
 			return "error";
 		}
-		switch(this._task.state) {
+		switch (this._task.state) {
 			case NSURLSessionTaskState.Running: return "uploading";
 			case NSURLSessionTaskState.Completed: return "complete";
 			case NSURLSessionTaskState.Canceling: return "error";
@@ -281,7 +281,7 @@ class MultiMultiPartForm {
 
 	public clear(): void {
 		this.boundary = "--------------formboundary" + Math.floor(Math.random() * 100000000000);
-		this.header = {"Content-Type": 'multipart/form-data; boundary=' + this.boundary};
+		this.header = { "Content-Type": 'multipart/form-data; boundary=' + this.boundary };
 		this.fileCount = 0;
 		this.fields = [];
 	}
@@ -289,7 +289,7 @@ class MultiMultiPartForm {
 	public appendParam(name: string, value: string, filename?: string, mimeType?: string, destFileName?: string): void {
 		// If all we are doing is passing a field, we just add it to the fields list
 		if (filename == null) {
-			this.fields.push({name: name, value: value});
+			this.fields.push({ name: name, value: value });
 			return;
 		}
 		// Load file
@@ -300,13 +300,13 @@ class MultiMultiPartForm {
 		}
 
 		const finalName = destFileName || filename.substr(filename.lastIndexOf('/') + 1, filename.length);
-		this.fields.push({name: name, filename: filename, destFilename: finalName, mimeType: mimeType});
+		this.fields.push({ name: name, filename: filename, destFilename: finalName, mimeType: mimeType });
 	};
 
 	public generateFile(): string {
 		const CRLF = "\r\n";
 
-		let fileName = fileSystemModule.knownFolders.documents().path+"/temp-MPF-"+Math.floor(Math.random() * 100000000000)+".tmp";
+		let fileName = fileSystemModule.knownFolders.documents().path + "/temp-MPF-" + Math.floor(Math.random() * 100000000000) + ".tmp";
 
 		let combinedData = NSMutableData.alloc().init();
 
@@ -317,7 +317,9 @@ class MultiMultiPartForm {
 			if (!this.fields[i].filename) {
 				results += CRLF + CRLF + this.fields[i].value + CRLF;
 			} else {
-				results += '; filename="' + this.fields[i].filename + '"';
+				var sendFileName = this.fields[i].filename.split("/");
+				sendFileName = sendFileName[sendFileName.length - 1] || '';
+				results += '; filename="' + sendFileName + '"';
 				if (this.fields[i].mimeType) {
 					results += CRLF + "Content-Type: " + this.fields[i].mimeType;
 				}
