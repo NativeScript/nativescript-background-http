@@ -149,6 +149,10 @@ export interface Request {
      */
     description: string;
 
+    /**
+     * Use utf8 encode in requests
+     */
+    utf8?: boolean;
 
     /*
      * Use this to set if progress notification should be displayed or not

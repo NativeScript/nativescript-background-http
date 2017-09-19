@@ -186,6 +186,12 @@ class Task extends ObservableBase {
             }
         }
 
+        var utf8 = options.utf8;
+
+        if (utf8) {
+            request.setUtf8Charset();
+        }
+
         var displayNotificationProgress = typeof options.androidDisplayNotificationProgress === "boolean" ? options.androidDisplayNotificationProgress : true;
         if (displayNotificationProgress) {
           request.setNotificationConfig(new (<any>net).gotev.uploadservice.UploadNotificationConfig());
