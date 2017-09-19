@@ -58,7 +58,8 @@ function start_upload(should_fail, isMulti) {
 			"Content-Type": "application/octet-stream",
 			"File-Name": name
 		},
-		description: description
+		description: description,
+		androidDisplayNotificationProgress: false
 	};
 
 	if (should_fail) {
