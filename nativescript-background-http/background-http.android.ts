@@ -90,8 +90,8 @@ class Session {
         this._id = id;
     }
 
-    public uploadFile(file: string, options: common.Request): Task {
-        return Task.create(this, file, options);
+    public uploadFile(fileUri: string, options: common.Request): Task {
+        return Task.create(this, fileUri, options);
     }
 
     public multipartUpload(params: Array<any>, options: common.Request): Task {
@@ -127,7 +127,10 @@ class Task extends ObservableBase {
 
         request.setFileToUpload(file);
 
-        request.setNotificationConfig(new (<any>net).gotev.uploadservice.UploadNotificationConfig());
+        var displayNotificationProgress = typeof options.androidDisplayNotificationProgress === "boolean" ? options.androidDisplayNotificationProgress : true;
+        if (displayNotificationProgress) {
+            request.setNotificationConfig(new (<any>net).gotev.uploadservice.UploadNotificationConfig());
+        }
 
         var headers = options.headers;
         if (headers) {
@@ -189,7 +192,10 @@ class Task extends ObservableBase {
             request.setUtf8Charset();
         }
 
-        request.setNotificationConfig(new (<any>net).gotev.uploadservice.UploadNotificationConfig());
+        var displayNotificationProgress = typeof options.androidDisplayNotificationProgress === "boolean" ? options.androidDisplayNotificationProgress : true;
+        if (displayNotificationProgress) {
+          request.setNotificationConfig(new (<any>net).gotev.uploadservice.UploadNotificationConfig());
+        }
 
         var headers = options.headers;
         if (headers) {

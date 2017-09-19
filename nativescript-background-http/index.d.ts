@@ -115,9 +115,9 @@ export interface Session {
     /**
      * Initiate a new background file upload task.
      * @param fileUri A file path to upload.
-     * @param request Options for the upload, sets uri, headers, task description etc.
+     * @param options Options for the upload, sets uri, headers, task description etc.
      */
-    uploadFile(fileUri: string, request: Request): Task;
+    uploadFile(fileUri: string, options: Request): Task;
     multipartUpload(params: Array<any>, options: any): Task;
 
 }
@@ -153,4 +153,9 @@ export interface Request {
      * Use utf8 encode in requests
      */
     utf8?: boolean;
+
+    /*
+     * Use this to set if progress notification should be displayed or not
+     */
+    androidDisplayNotificationProgress?: boolean;
 }

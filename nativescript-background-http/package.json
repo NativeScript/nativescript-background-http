@@ -4,7 +4,7 @@
     "url": "https://github.com/NativeScript/nativescript-background-http"
   },
   "name": "nativescript-background-http",
-  "version": "3.0.0",
+  "version": "3.1.0",
   "nativescript": {
     "platforms": {
       "android": "3.0.0",
@@ -26,12 +26,12 @@
     "NativeScript"
   ],
   "peerDependencies": {
-    "tns-core-modules": "^3.0.0 || ^3.0.0-rc.1"
+    "tns-core-modules": "^3.2.0"
   },
   "devDependencies": {
-    "tns-core-modules": "^3.0.0 || ^3.0.0-rc.1",
-    "tns-platform-declarations": "^3.0.0 || ^3.0.0-rc.1",
-    "typescript": "^2.2.2"
+    "tns-core-modules": "^3.2.0",
+    "tns-platform-declarations": "^3.2.0",
+    "typescript": "~2.3.0"
   },
   "scripts": {
     "tsc": "tsc",
