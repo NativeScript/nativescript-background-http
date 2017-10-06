@@ -69,7 +69,7 @@ task = session.uploadFile(file, request);
 
 ### multipartUpload
 
-uploading multiple files while using `nativescript-background-http`
+uploading multiple files while using `nativescript-background-http`. Make sure all params sent to `multipartUpload` have string values.
 
 ```
 import * as bghttp from "nativescript-background-http";
