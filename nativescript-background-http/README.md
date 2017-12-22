@@ -20,15 +20,8 @@ The plugin uses [NSURLSession with background session configuration for iOS](htt
 tns plugin add nativescript-background-http
 ```
 
-### Install plugin using AppBuilder CLI
-```
-appbuilder plugin add nativescript-background-http
-```
-
-### Install plugin using AppBuilder IDE
-In the Project Navigator, right click your project and choose Manage Packages.
-Choose the Plugins Marketplace tab.
-Search or browse for a plugin and click Install.
+### Install plugin using NativeScript Sidekick
+In the App Settings screen choose Plugins, switch to the Available tab and search for "nativescript-background-http". Click on the Background Http plugin and then click Install.
 
 
 ## Usage
