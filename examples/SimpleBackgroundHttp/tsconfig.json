@@ -2,14 +2,10 @@
     "compilerOptions": {
         "module": "commonjs",
         "target": "es5",
-        "noImplicitAny": false,
-        "removeComments": true,
-        "preserveConstEnums": true,
-        "sourceMap": false,
-        "declaration": false,
-        "noLib": false,
-        "noEmitHelpers": true,
         "experimentalDecorators": true,
+        "emitDecoratorMetadata": true,
+        "noEmitHelpers": true,
+        "noEmitOnError": true,
         "lib": [
             "es6",
             "dom"
@@ -25,10 +21,5 @@
     "exclude": [
         "node_modules",
         "platforms"
-    ],
-	"files": [
-		"typings/tsd.d.ts",
-		"app/main-page.ts",
-		"app/app.ts"
-	]
+    ]
 }

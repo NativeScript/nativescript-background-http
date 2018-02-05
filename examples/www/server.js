@@ -1,8 +1,10 @@
 var http = require("http");
 var fs = require("fs");
+var path = require("path");
 
 function start(port, logger) {
-  var outDir = __dirname + "/uploads/";
+
+  var outDir = path.join(__dirname, "uploads");
   var server = http.createServer(function(request, response) {
     try {
       var Throttle = require("stream-throttle").Throttle;
@@ -13,7 +15,7 @@ function start(port, logger) {
         logger.dir(request.headers);
       }
 
-      var out = outDir + "upload-" + new Date().getTime() + "-" + fileName;
+      var out = path.join(outDir, "upload-" + new Date().getTime() + "-" + fileName);
       if (logger) {
         logger.log("Output in: " + out);
       }
@@ -23,7 +25,8 @@ function start(port, logger) {
 
       var shouldFail = request.headers["should-fail"];
 
-      request.pipe(new Throttle({ rate: 1024 * 2048 })).pipe(fs.createWriteStream(out, { flags: 'w', encoding: null, fd: null, mode: 0666 }));
+      // throttle write speed to 4MB/s
+      request.pipe(new Throttle({ rate: 1024 * 4096 })).pipe(fs.createWriteStream(out, { flags: 'w', encoding: null, fd: null, mode: 0666 }));
 
       request.on('data', function(chunk) {
         current += chunk.length;
@@ -56,7 +59,7 @@ function start(port, logger) {
           response.writeHead(200, "Done!", { "Content-Type": "text/plain", "Content-Length": body.length });
           response.write(body);
           response.end();
-        }, 10000);
+        }, 1000);
       });
 
       if (logger) {
