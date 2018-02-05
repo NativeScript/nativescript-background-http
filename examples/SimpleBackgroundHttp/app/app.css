@@ -1,4 +1,6 @@
-﻿.title {
+﻿@import '~nativescript-theme-core/css/core.light.css';
+
+.title {
     font-size: 30;
     horizontal-align: center;
     margin:20;

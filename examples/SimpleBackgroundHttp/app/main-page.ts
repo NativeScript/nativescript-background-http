@@ -15,10 +15,10 @@ var url;
 
 if (isIOS) {
 	// NOTE: This works for emulator. Real device will need other address.
-	url = "http://localhost:8083";
+	url = "http://localhost:8080";
 } else {
 	// NOTE: This works for emulator. Real device will need other address.
-	url = "http://10.0.2.2:8083";
+	url = "http://10.0.2.2:8080";
 }
 
 function pageLoaded(args) {
@@ -45,8 +45,7 @@ exports.upload_multi = upload_multi;
 var counter = 0;
 
 function start_upload(should_fail, isMulti) {
-	console.log("Upload!");
-	console.log("Upload file: " + file);
+	console.log((should_fail ? "Testing error during upload of " : "Uploading file: ") + file + (isMulti ? " using multipart." : ""));
 
 	var name = "bigpic.jpg";
 	var description = name + " " + ++counter;
@@ -67,6 +66,7 @@ function start_upload(should_fail, isMulti) {
 	}
 
 	let task: bghttp.Task;
+	let lastEvent = "";
 	if (isMulti) {
 		var params = [
 			{ name: "test", value: "value" },
@@ -78,19 +78,28 @@ function start_upload(should_fail, isMulti) {
 	}
 
 	function onEvent(e) {
+		if (lastEvent !== e.eventName) {
+			// suppress all repeating progress events and only show the first one
+			lastEvent = e.eventName;
+		} else {
+			return;
+		}
+
 		context.events.push({
 			eventTitle: e.eventName + " " + e.object.description,
 			eventData: JSON.stringify({
 				error: e.error ? e.error.toString() : e.error,
 				currentBytes: e.currentBytes,
-				totalBytes: e.totalBytes
+				totalBytes: e.totalBytes,
+				body: e.data
 			})
 		});
 	}
 
-	// TODO: Log up 2-3 progress events per task or the UI is polluted: task.on("progress", onEvent);
+	task.on("progress", onEvent);
 	task.on("error", onEvent);
+	task.on("responded", onEvent);
 	task.on("complete", onEvent);
-
+	lastEvent = "";
 	context.tasks.push(task);
 }
