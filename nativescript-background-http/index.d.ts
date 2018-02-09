@@ -68,6 +68,10 @@ export interface Task {
     status: string;
 
     /**
+     * Cancel the Upload Task.
+     */
+    cancel(): void;
+   /**
      * Subscribe for a general event.
      * @param event The name of the event to subscribe for.
      * @param The handler called when the event occure.

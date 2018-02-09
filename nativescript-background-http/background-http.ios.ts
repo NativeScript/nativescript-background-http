@@ -131,8 +131,9 @@ class Session implements common.Session {
 		return this._session;
 	}
 
-	public uploadFile(file: string, options: common.Request) {
-		if (!file) {
+	
+	public uploadFile(fileUri: string, options: common.Request): common.Task {
+		if (!fileUri) {
 			throw new Error("File must be provided.");
 		}
 
@@ -154,31 +155,30 @@ class Session implements common.Session {
 		}
 
 		var fileURL: NSURL;
-		if (file.substr(0, 7) === "file://") {
+		if (fileUri.substr(0, 7) === "file://") {
 			// File URI in string format
-			fileURL = NSURL.URLWithString(file);
-		} else if (file.charAt(0) === "/") {
+			fileURL = NSURL.URLWithString(fileUri);
+		} else if (fileUri.charAt(0) === "/") {
 			// Absolute path with leading slash
-			fileURL = NSURL.fileURLWithPath(file);
+			fileURL = NSURL.fileURLWithPath(fileUri);
 		}
 
 		var newTask = this._session.uploadTaskWithRequestFromFile(request, fileURL);
 		newTask.taskDescription = options.description;
 		newTask.resume();
-
-		return Task.getTask(this._session, newTask);
+		var retTask: common.Task = <any>Task.getTask(this._session, newTask);
+		return retTask;
 	}
-
-	public multipartUpload(params: Array<any>, options: common.Request): Task {
+	public multipartUpload(params: any[], options: any): common.Task {
 		let MPF = new MultiMultiPartForm();
-		for (let i=0;i<params.length;i++) {
+		for (let i = 0; i < params.length; i++) {
 			let curParam = params[i];
 			if (typeof curParam.name === 'undefined') {
 				throw new Error("You must have a `name` value");
 			}
 
 			if (curParam.filename) {
-				let destFileName = curParam.destFilename || curParam.filename.substring(curParam.filename.lastIndexOf('/')+1, curParam.filename.length);
+				let destFileName = curParam.destFilename || curParam.filename.substring(curParam.filename.lastIndexOf('/') + 1, curParam.filename.length);
 				MPF.appendParam(curParam.name, null, curParam.filename, curParam.mimeType, destFileName);
 			} else {
 				MPF.appendParam(curParam.name, curParam.value);
@@ -195,10 +195,9 @@ class Session implements common.Session {
 		let task = this.uploadFile(uploadFile, options);
 
 		// Tag the file to be deleted and cleanup after upload
-		task._fileToCleanup = uploadFile;
+		(<any>task)._fileToCleanup = uploadFile;
 		return task;
 	}
-
 	static getSession(id: string): common.Session {
 		var jsSession = Session._sessions[id];
 		if (jsSession) {
@@ -210,7 +209,7 @@ class Session implements common.Session {
 	}
 }
 
-class Task extends Observable implements common.Task {
+class Task extends Observable {
 	public static _tasks = new Map<NSURLSessionTask, Task>();
 
 	public _fileToCleanup: string;
@@ -243,7 +242,7 @@ class Task extends Observable implements common.Task {
 		if (this._task.error) {
 			return "error";
 		}
-		switch(this._task.state) {
+		switch (this._task.state) {
 			case NSURLSessionTaskState.Running: return "uploading";
 			case NSURLSessionTaskState.Completed: return "complete";
 			case NSURLSessionTaskState.Canceling: return "error";
@@ -261,6 +260,9 @@ class Task extends Observable implements common.Task {
 		Task._tasks.set(nsTask, task);
 
 		return task;
+	}
+	public cancel(): void {
+		this._task.cancel();
 	}
 }
 export function session(id: string): common.Session {
@@ -281,7 +283,7 @@ class MultiMultiPartForm {
 
 	public clear(): void {
 		this.boundary = "--------------formboundary" + Math.floor(Math.random() * 100000000000);
-		this.header = {"Content-Type": 'multipart/form-data; boundary=' + this.boundary};
+		this.header = { "Content-Type": 'multipart/form-data; boundary=' + this.boundary };
 		this.fileCount = 0;
 		this.fields = [];
 	}
@@ -289,7 +291,7 @@ class MultiMultiPartForm {
 	public appendParam(name: string, value: string, filename?: string, mimeType?: string, destFileName?: string): void {
 		// If all we are doing is passing a field, we just add it to the fields list
 		if (filename == null) {
-			this.fields.push({name: name, value: value});
+			this.fields.push({ name: name, value: value });
 			return;
 		}
 		// Load file
@@ -300,13 +302,13 @@ class MultiMultiPartForm {
 		}
 
 		const finalName = destFileName || filename.substr(filename.lastIndexOf('/') + 1, filename.length);
-		this.fields.push({name: name, filename: filename, destFilename: finalName, mimeType: mimeType});
+		this.fields.push({ name: name, filename: filename, destFilename: finalName, mimeType: mimeType });
 	};
 
 	public generateFile(): string {
 		const CRLF = "\r\n";
 
-		let fileName = fileSystemModule.knownFolders.documents().path+"/temp-MPF-"+Math.floor(Math.random() * 100000000000)+".tmp";
+		let fileName = fileSystemModule.knownFolders.documents().path + "/temp-MPF-" + Math.floor(Math.random() * 100000000000) + ".tmp";
 
 		let combinedData = NSMutableData.alloc().init();
 

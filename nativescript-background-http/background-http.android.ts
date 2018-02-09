@@ -33,7 +33,10 @@ var ProgressReceiver = (<any>net).gotev.uploadservice.UploadServiceBroadcastRece
 
     onCancelled(uploadInfo: UploadInfo) {
         //console.log("onCancelled");
-        this.onError(uploadInfo, new Error("Cancelled"));
+        var uploadId = uploadInfo.getUploadId();
+        var task = Task.fromId(uploadId);
+        task.setStatus("cancelled");
+        task.notify({ eventName: "cancelled", object: task });
     },
 
     onError(uploadInfo: UploadInfo, error) {
@@ -60,7 +63,7 @@ var ProgressReceiver = (<any>net).gotev.uploadservice.UploadServiceBroadcastRece
         task.notify({ eventName: "progress", object: task, currentBytes: totalUpload, totalBytes: totalUpload });
         task.notify({ eventName: "responded", object: task, data: serverResponse.getBodyAsString() });
         task.notify({ eventName: "complete", object: task, response: serverResponse });
-   }
+    }
 });
 
 var receiver;
@@ -104,7 +107,6 @@ class Session {
 }
 
 class Task extends ObservableBase {
-
     private static taskCount = 0;
     private static cache = {};
 
@@ -166,7 +168,7 @@ class Task extends ObservableBase {
 
         var request = new net.gotev.uploadservice.MultipartUploadRequest(context, task._id, options.url);
 
-        for (var i=0;i<params.length;i++) {
+        for (var i = 0; i < params.length; i++) {
             var curParam = params[i];
             if (typeof curParam.name === 'undefined') {
                 throw new Error("You must have a `name` value");
@@ -177,7 +179,7 @@ class Task extends ObservableBase {
                 if (fileName.startsWith("~/")) {
                     fileName = fileName.replace("~/", fileSystemModule.knownFolders.currentApp().path + "/");
                 }
-                var destFileName = curParam.destFilename || fileName.substring(fileName.lastIndexOf('/')+1, fileName.length);
+                var destFileName = curParam.destFilename || fileName.substring(fileName.lastIndexOf('/') + 1, fileName.length);
 
                 request.addFileToUpload(fileName, curParam.name, destFileName, curParam.mimeType);
             } else {
@@ -194,7 +196,7 @@ class Task extends ObservableBase {
 
         var displayNotificationProgress = typeof options.androidDisplayNotificationProgress === "boolean" ? options.androidDisplayNotificationProgress : true;
         if (displayNotificationProgress) {
-          request.setNotificationConfig(new (<any>net).gotev.uploadservice.UploadNotificationConfig());
+            request.setNotificationConfig(new (<any>net).gotev.uploadservice.UploadNotificationConfig());
         }
 
         var headers = options.headers;
@@ -264,6 +266,9 @@ class Task extends ObservableBase {
     setDescription(value: string) {
         this._description = value;
         this.notifyPropertyChanged("description", value);
+    }
+    cancel(): void {
+        (<any>net).gotev.uploadservice.UploadService.stopUpload(this._id);
     }
 }
 
