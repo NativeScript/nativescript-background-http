@@ -58,7 +58,8 @@ function start_upload(should_fail, isMulti) {
 			"File-Name": name
 		},
 		description: description,
-		androidDisplayNotificationProgress: false
+		androidDisplayNotificationProgress: false,
+		androidAutoDeleteAfterUpload: false
 	};
 
 	if (should_fail) {

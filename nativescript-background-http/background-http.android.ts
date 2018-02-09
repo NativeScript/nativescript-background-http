@@ -133,6 +133,10 @@ class Task extends ObservableBase {
         if (displayNotificationProgress) {
             request.setNotificationConfig(new (<any>net).gotev.uploadservice.UploadNotificationConfig());
         }
+        var autoDeleteAfterUpload = typeof options.androidAutoDeleteAfterUpload === "boolean" ? options.androidAutoDeleteAfterUpload : false;
+        if(autoDeleteAfterUpload) {
+            request.setAutoDeleteFilesAfterSuccessfulUpload(true);
+        }
 
         var headers = options.headers;
         if (headers) {

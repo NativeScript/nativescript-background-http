@@ -162,4 +162,9 @@ export interface Request {
      * Use this to set if progress notification should be displayed or not
      */
     androidDisplayNotificationProgress?: boolean;
+
+    /*
+     * Use this to set if files should be deleted automatically after upload
+     */
+    androidAutoDeleteAfterUpload?: boolean;
 }
