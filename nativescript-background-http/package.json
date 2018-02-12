@@ -35,6 +35,6 @@
   },
   "scripts": {
     "tsc": "tsc",
-    "prepublish": "tsc"
+    "prepack": "tsc"
   }
 }

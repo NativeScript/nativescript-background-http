@@ -1,11 +1,8 @@
-
 import application = require("application");
-import frame = require("ui/frame");
 import data_observable = require("data/observable");
 import utils = require("utils/utils");
 import * as fileSystemModule from "file-system";
 import * as common from "./index";
-
 
 declare var net: any;
 
@@ -18,18 +15,31 @@ interface ServerResponse {
     getBodyAsString(): string;
 }
 
-var ProgressReceiver = (<any>net).gotev.uploadservice.UploadServiceBroadcastReceiver.extend({
+/* A snapshot-friendly, lazy-loaded class for ProgressReceiver BEGIN */
+interface ProgressReceiver /*extends net.gotev.uploadservice.UploadServiceBroadcastReceiver*/ {
+  new(): typeof ProgressReceiver;
+  register(context: android.content.Context): void;
+}
+
+let ProgressReceiver: ProgressReceiver;
+
+function initializeProgressReceiver() {
+if (ProgressReceiver) {
+    return;
+}
+
+class ProgressReceiverImpl extends net.gotev.uploadservice.UploadServiceBroadcastReceiver {
     onProgress(uploadInfo: UploadInfo) {
         //console.log("onProgress");
-        var uploadId = uploadInfo.getUploadId();
-        var task = Task.fromId(uploadId);
-        var totalBytes = uploadInfo.getTotalBytes();
-        var currentBytes = uploadInfo.getUploadedBytes();
+        const uploadId = uploadInfo.getUploadId();
+        const task = Task.fromId(uploadId);
+        const totalBytes = uploadInfo.getTotalBytes();
+        const currentBytes = uploadInfo.getUploadedBytes();
         task.setTotalUpload(totalBytes);
         task.setUpload(currentBytes);
         task.setStatus("uploading");
         task.notify({ eventName: "progress", object: task, currentBytes: currentBytes, totalBytes: totalBytes });
-    },
+    }
 
     onCancelled(uploadInfo: UploadInfo) {
         //console.log("onCancelled");
@@ -37,22 +47,22 @@ var ProgressReceiver = (<any>net).gotev.uploadservice.UploadServiceBroadcastRece
         var task = Task.fromId(uploadId);
         task.setStatus("cancelled");
         task.notify({ eventName: "cancelled", object: task });
-    },
+    }
 
     onError(uploadInfo: UploadInfo, error) {
         //console.log("onError");
-        var uploadId = uploadInfo.getUploadId();
-        var task = Task.fromId(uploadId);
+        const uploadId = uploadInfo.getUploadId();
+        const task = Task.fromId(uploadId);
         task.setStatus("error");
         task.notify({ eventName: "error", object: task, error: error });
-    },
+    }
 
     onCompleted(uploadInfo: UploadInfo, serverResponse: ServerResponse) {
         //console.log("onCompleted");
-        var uploadId = uploadInfo.getUploadId();
-        var task = Task.fromId(uploadId);
+        const uploadId = uploadInfo.getUploadId();
+        const task = Task.fromId(uploadId);
 
-        var totalUpload = uploadInfo.getTotalBytes();
+        let totalUpload = uploadInfo.getTotalBytes();
         if (!totalUpload || !isFinite(totalUpload) || totalUpload <= 0) {
             totalUpload = 1;
         }
@@ -63,15 +73,21 @@ var ProgressReceiver = (<any>net).gotev.uploadservice.UploadServiceBroadcastRece
         task.notify({ eventName: "progress", object: task, currentBytes: totalUpload, totalBytes: totalUpload });
         task.notify({ eventName: "responded", object: task, data: serverResponse.getBodyAsString() });
         task.notify({ eventName: "complete", object: task, response: serverResponse });
-    }
-});
 
-var receiver;
+   }
+}
+
+ProgressReceiver = ProgressReceiverImpl as any;
+}
+/* ProgressReceiver END */
+
+let receiver: ProgressReceiver;
 
 export function session(id: string) {
 
     if (!receiver) {
-        var context = utils.ad.getApplicationContext();
+        const context = utils.ad.getApplicationContext();
+        initializeProgressReceiver();
         receiver = new ProgressReceiver();
         receiver.register(context);
     }
@@ -119,29 +135,29 @@ class Task extends ObservableBase {
     private _description: string;
 
     static create(session: Session, file: string, options: common.Request): Task {
-        var task = new Task();
+        const task = new Task();
         task._session = session;
         task._id = session.id + "{" + ++Task.taskCount + "}";
 
-        var context = application.android.context;
+        const context = application.android.context;
 
-        var request = new (<any>net).gotev.uploadservice.BinaryUploadRequest(context, task._id, options.url);
+        const request = new net.gotev.uploadservice.BinaryUploadRequest(context, task._id, options.url);
 
         request.setFileToUpload(file);
 
-        var displayNotificationProgress = typeof options.androidDisplayNotificationProgress === "boolean" ? options.androidDisplayNotificationProgress : true;
+        const displayNotificationProgress = typeof options.androidDisplayNotificationProgress === "boolean" ? options.androidDisplayNotificationProgress : true;
         if (displayNotificationProgress) {
-            request.setNotificationConfig(new (<any>net).gotev.uploadservice.UploadNotificationConfig());
+            request.setNotificationConfig(new net.gotev.uploadservice.UploadNotificationConfig());
         }
         var autoDeleteAfterUpload = typeof options.androidAutoDeleteAfterUpload === "boolean" ? options.androidAutoDeleteAfterUpload : false;
         if(autoDeleteAfterUpload) {
             request.setAutoDeleteFilesAfterSuccessfulUpload(true);
         }
 
-        var headers = options.headers;
+        const headers = options.headers;
         if (headers) {
-            for (var header in headers) {
-                var value = headers[header];
+            for (const header in headers) {
+                const value = headers[header];
                 if (value !== null && value !== void 0) {
                     request.addHeader(header, value.toString());
                 }
@@ -164,27 +180,28 @@ class Task extends ObservableBase {
     }
 
     static createMultiPart(session: Session, params: Array<any>, options: common.Request): Task {
-        var task = new Task();
+        const task = new Task();
         task._session = session;
         task._id = session.id + "{" + (++Task.taskCount) + "}";
 
-        var context = application.android.context;
+        const context = application.android.context;
 
-        var request = new net.gotev.uploadservice.MultipartUploadRequest(context, task._id, options.url);
+        const request = new net.gotev.uploadservice.MultipartUploadRequest(context, task._id, options.url);
 
-        for (var i = 0; i < params.length; i++) {
-            var curParam = params[i];
+
+        for (let i = 0; i < params.length; i++) {
+            const curParam = params[i];
             if (typeof curParam.name === 'undefined') {
                 throw new Error("You must have a `name` value");
             }
 
             if (curParam.filename) {
-                var fileName = curParam.filename;
+                let fileName = curParam.filename;
                 if (fileName.startsWith("~/")) {
                     fileName = fileName.replace("~/", fileSystemModule.knownFolders.currentApp().path + "/");
                 }
-                var destFileName = curParam.destFilename || fileName.substring(fileName.lastIndexOf('/') + 1, fileName.length);
 
+                const destFileName = curParam.destFilename || fileName.substring(fileName.lastIndexOf('/')+1, fileName.length);
                 request.addFileToUpload(fileName, curParam.name, destFileName, curParam.mimeType);
             } else {
                 request.addParameter(params[i].name, params[i].value);
@@ -192,21 +209,21 @@ class Task extends ObservableBase {
             }
         }
 
-        var utf8 = options.utf8;
+        const utf8 = options.utf8;
 
         if (utf8) {
             request.setUtf8Charset();
         }
 
-        var displayNotificationProgress = typeof options.androidDisplayNotificationProgress === "boolean" ? options.androidDisplayNotificationProgress : true;
+        const displayNotificationProgress = typeof options.androidDisplayNotificationProgress === "boolean" ? options.androidDisplayNotificationProgress : true;
         if (displayNotificationProgress) {
-            request.setNotificationConfig(new (<any>net).gotev.uploadservice.UploadNotificationConfig());
+          request.setNotificationConfig(new net.gotev.uploadservice.UploadNotificationConfig());
         }
 
-        var headers = options.headers;
+        const headers = options.headers;
         if (headers) {
-            for (var header in headers) {
-                var value = headers[header];
+            for (const header in headers) {
+                const value = headers[header];
                 if (value !== null && value !== void 0) {
                     request.addHeader(header, value.toString());
                 }
