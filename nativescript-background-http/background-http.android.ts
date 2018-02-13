@@ -43,7 +43,10 @@ class ProgressReceiverImpl extends net.gotev.uploadservice.UploadServiceBroadcas
 
     onCancelled(uploadInfo: UploadInfo) {
         //console.log("onCancelled");
-        this.onError(uploadInfo, new Error("Cancelled"));
+        var uploadId = uploadInfo.getUploadId();
+        var task = Task.fromId(uploadId);
+        task.setStatus("cancelled");
+        task.notify({ eventName: "cancelled", object: task });
     }
 
     onError(uploadInfo: UploadInfo, error) {
@@ -70,6 +73,7 @@ class ProgressReceiverImpl extends net.gotev.uploadservice.UploadServiceBroadcas
         task.notify({ eventName: "progress", object: task, currentBytes: totalUpload, totalBytes: totalUpload });
         task.notify({ eventName: "responded", object: task, data: serverResponse.getBodyAsString() });
         task.notify({ eventName: "complete", object: task, response: serverResponse });
+
    }
 }
 
@@ -119,7 +123,6 @@ class Session {
 }
 
 class Task extends ObservableBase {
-
     private static taskCount = 0;
     private static cache = {};
 
@@ -145,6 +148,10 @@ class Task extends ObservableBase {
         const displayNotificationProgress = typeof options.androidDisplayNotificationProgress === "boolean" ? options.androidDisplayNotificationProgress : true;
         if (displayNotificationProgress) {
             request.setNotificationConfig(new net.gotev.uploadservice.UploadNotificationConfig());
+        }
+        var autoDeleteAfterUpload = typeof options.androidAutoDeleteAfterUpload === "boolean" ? options.androidAutoDeleteAfterUpload : false;
+        if(autoDeleteAfterUpload) {
+            request.setAutoDeleteFilesAfterSuccessfulUpload(true);
         }
 
         const headers = options.headers;
@@ -181,6 +188,7 @@ class Task extends ObservableBase {
 
         const request = new net.gotev.uploadservice.MultipartUploadRequest(context, task._id, options.url);
 
+
         for (let i = 0; i < params.length; i++) {
             const curParam = params[i];
             if (typeof curParam.name === 'undefined') {
@@ -192,8 +200,8 @@ class Task extends ObservableBase {
                 if (fileName.startsWith("~/")) {
                     fileName = fileName.replace("~/", fileSystemModule.knownFolders.currentApp().path + "/");
                 }
-                const destFileName = curParam.destFilename || fileName.substring(fileName.lastIndexOf('/')+1, fileName.length);
 
+                const destFileName = curParam.destFilename || fileName.substring(fileName.lastIndexOf('/')+1, fileName.length);
                 request.addFileToUpload(fileName, curParam.name, destFileName, curParam.mimeType);
             } else {
                 request.addParameter(params[i].name, params[i].value);
@@ -279,6 +287,9 @@ class Task extends ObservableBase {
     setDescription(value: string) {
         this._description = value;
         this.notifyPropertyChanged("description", value);
+    }
+    cancel(): void {
+        (<any>net).gotev.uploadservice.UploadService.stopUpload(this._id);
     }
 }
 

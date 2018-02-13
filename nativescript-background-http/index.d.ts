@@ -68,6 +68,10 @@ export interface Task {
     status: string;
 
     /**
+     * Cancel the Upload Task.
+     */
+    cancel(): void;
+   /**
      * Subscribe for a general event.
      * @param event The name of the event to subscribe for.
      * @param The handler called when the event occure.
@@ -158,4 +162,9 @@ export interface Request {
      * Use this to set if progress notification should be displayed or not
      */
     androidDisplayNotificationProgress?: boolean;
+
+    /*
+     * Use this to set if files should be deleted automatically after upload
+     */
+    androidAutoDeleteAfterUpload?: boolean;
 }
