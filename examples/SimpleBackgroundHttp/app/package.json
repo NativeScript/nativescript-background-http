@@ -1,7 +1,0 @@
-{
-	"android": {
-      "v8Flags": "--expose_gc"
-    },
-	"main": "app.js",
-	"version": "3.4.1"
-}

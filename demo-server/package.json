@@ -1,0 +1,7 @@
+{
+  "name": "bghttp-demo-server",
+  "version": "1.0.0",
+  "dependencies": {
+    "stream-throttle": "*"
+  }
+}
