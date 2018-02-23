@@ -1,3 +1,0 @@
-[submodule "deps/android-upload-service"]
-	path = deps/android-upload-service
-	url = git@github.com:NativeScript/android-upload-service.git

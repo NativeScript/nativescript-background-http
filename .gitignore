@@ -1,20 +1,17 @@
-# Output
-dist
-
-# Dev dependencies
+/.project
+.vscode
+.idea
+.DS_Store
+*.js
+*.js.map
+*.log
+!src/scripts/*.js
+!src/hooks/*.js
 node_modules
 
-# API reference
-api-ref
-
-# Source, written in TypeScript so JavaScript is not necessary
-/nativescript-background-http/**/*.js
-/examples/SimpleBackgroundHttp/**/*.js
-
-# Example platforms
-/examples/SimpleBackgroundHttp/platforms/
-/examples/SimpleBackgroundHttp/lib/
-
-.DS_Store
-
-npm-debug.log
+demo/app/*.js
+demo/*.d.ts
+demo/hooks
+demo/platforms
+demo/node_modules
+demo/report
