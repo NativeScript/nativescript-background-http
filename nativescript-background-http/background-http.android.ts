@@ -28,7 +28,8 @@ if (ProgressReceiver) {
     return;
 }
 
-class ProgressReceiverImpl extends net.gotev.uploadservice.UploadServiceBroadcastReceiver {
+/* Registered receivers must be extended via method rather than TS-style*/
+const ProgressReceiverImpl = net.gotev.uploadservice.UploadServiceBroadcastReceiver.extend({
     onProgress(uploadInfo: UploadInfo) {
         //console.log("onProgress");
         const uploadId = uploadInfo.getUploadId();
@@ -39,12 +40,12 @@ class ProgressReceiverImpl extends net.gotev.uploadservice.UploadServiceBroadcas
         task.setUpload(currentBytes);
         task.setStatus("uploading");
         task.notify({ eventName: "progress", object: task, currentBytes: currentBytes, totalBytes: totalBytes });
-    }
+    },
 
     onCancelled(uploadInfo: UploadInfo) {
         //console.log("onCancelled");
         this.onError(uploadInfo, new Error("Cancelled"));
-    }
+    },
 
     onError(uploadInfo: UploadInfo, error) {
         //console.log("onError");
@@ -52,7 +53,7 @@ class ProgressReceiverImpl extends net.gotev.uploadservice.UploadServiceBroadcas
         const task = Task.fromId(uploadId);
         task.setStatus("error");
         task.notify({ eventName: "error", object: task, error: error });
-    }
+    },
 
     onCompleted(uploadInfo: UploadInfo, serverResponse: ServerResponse) {
         //console.log("onCompleted");
@@ -71,7 +72,7 @@ class ProgressReceiverImpl extends net.gotev.uploadservice.UploadServiceBroadcas
         task.notify({ eventName: "responded", object: task, data: serverResponse.getBodyAsString() });
         task.notify({ eventName: "complete", object: task, response: serverResponse });
    }
-}
+});
 
 ProgressReceiver = ProgressReceiverImpl as any;
 }
