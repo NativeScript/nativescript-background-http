@@ -5,12 +5,14 @@ import * as fileSystemModule from "file-system";
 import * as common from "./index";
 
 declare const net: any;
+net.gotev.uploadservice.UploadService.NAMESPACE = application.android.packageName
 
 interface UploadInfo {
     getUploadId(): string;
     getTotalBytes(): number;
     getUploadedBytes(): number;
 }
+
 interface ServerResponse {
     getBodyAsString(): string;
 }
@@ -19,55 +21,55 @@ interface ServerResponse {
 let ProgressReceiver: any;
 
 function initializeProgressReceiver() {
-if (ProgressReceiver) {
-    return;
-}
+    if (ProgressReceiver) {
+        return;
+    }
 
-const ProgressReceiverImpl = net.gotev.uploadservice.UploadServiceBroadcastReceiver.extend({
-    onProgress(uploadInfo: UploadInfo) {
-        const uploadId = uploadInfo.getUploadId();
-        const task = Task.fromId(uploadId);
-        const totalBytes = uploadInfo.getTotalBytes();
-        const currentBytes = uploadInfo.getUploadedBytes();
-        task.setTotalUpload(totalBytes);
-        task.setUpload(currentBytes);
-        task.setStatus("uploading");
-        task.notify({ eventName: "progress", object: task, currentBytes: currentBytes, totalBytes: totalBytes });
-    },
+    const ProgressReceiverImpl = net.gotev.uploadservice.UploadServiceBroadcastReceiver.extend({
+        onProgress(context: any, uploadInfo: UploadInfo) {
+            const uploadId = uploadInfo.getUploadId();
+            const task = Task.fromId(uploadId);
+            const totalBytes = uploadInfo.getTotalBytes();
+            const currentBytes = uploadInfo.getUploadedBytes();
+            task.setTotalUpload(totalBytes);
+            task.setUpload(currentBytes);
+            task.setStatus("uploading");
+            task.notify({ eventName: "progress", object: task, currentBytes: currentBytes, totalBytes: totalBytes });
+        },
 
-    onCancelled(uploadInfo: UploadInfo) {
-        const uploadId = uploadInfo.getUploadId();
-        const task = Task.fromId(uploadId);
-        task.setStatus("cancelled");
-        task.notify({ eventName: "cancelled", object: task });
-    },
+        onCancelled(context: any, uploadInfo: UploadInfo) {
+            const uploadId = uploadInfo.getUploadId();
+            const task = Task.fromId(uploadId);
+            task.setStatus("cancelled");
+            task.notify({ eventName: "cancelled", object: task });
+        },
 
-    onError(uploadInfo: UploadInfo, error) {
-        const uploadId = uploadInfo.getUploadId();
-        const task = Task.fromId(uploadId);
-        task.setStatus("error");
-        task.notify({ eventName: "error", object: task, error: error });
-    },
+        onError(context: any, uploadInfo: UploadInfo, error) {
+            const uploadId = uploadInfo.getUploadId();
+            const task = Task.fromId(uploadId);
+            task.setStatus("error");
+            task.notify({ eventName: "error", object: task, error: error });
+        },
 
-    onCompleted(uploadInfo: UploadInfo, serverResponse: ServerResponse) {
-        const uploadId = uploadInfo.getUploadId();
-        const task = Task.fromId(uploadId);
+        onCompleted(context: any, uploadInfo: UploadInfo, serverResponse: ServerResponse) {
+            const uploadId = uploadInfo.getUploadId();
+            const task = Task.fromId(uploadId);
 
-        let totalUpload = uploadInfo.getTotalBytes();
-        if (!totalUpload || !isFinite(totalUpload) || totalUpload <= 0) {
-            totalUpload = 1;
+            let totalUpload = uploadInfo.getTotalBytes();
+            if (!totalUpload || !isFinite(totalUpload) || totalUpload <= 0) {
+                totalUpload = 1;
+            }
+            task.setUpload(totalUpload);
+            task.setTotalUpload(totalUpload);
+            task.setStatus("complete");
+
+            task.notify({ eventName: "progress", object: task, currentBytes: totalUpload, totalBytes: totalUpload });
+            task.notify({ eventName: "responded", object: task, data: serverResponse.getBodyAsString() });
+            task.notify({ eventName: "complete", object: task, response: serverResponse });
         }
-        task.setUpload(totalUpload);
-        task.setTotalUpload(totalUpload);
-        task.setStatus("complete");
+    });
 
-        task.notify({ eventName: "progress", object: task, currentBytes: totalUpload, totalBytes: totalUpload });
-        task.notify({ eventName: "responded", object: task, data: serverResponse.getBodyAsString() });
-        task.notify({ eventName: "complete", object: task, response: serverResponse });
-   }
-});
-
-ProgressReceiver = ProgressReceiverImpl as any;
+    ProgressReceiver = ProgressReceiverImpl as any;
 }
 /* ProgressReceiver END */
 
@@ -140,7 +142,7 @@ class Task extends ObservableBase {
             request.setNotificationConfig(new net.gotev.uploadservice.UploadNotificationConfig());
         }
         const autoDeleteAfterUpload = typeof options.androidAutoDeleteAfterUpload === "boolean" ? options.androidAutoDeleteAfterUpload : false;
-        if(autoDeleteAfterUpload) {
+        if (autoDeleteAfterUpload) {
             request.setAutoDeleteFilesAfterSuccessfulUpload(true);
         }
 
@@ -191,7 +193,7 @@ class Task extends ObservableBase {
                     fileName = fileName.replace("~/", fileSystemModule.knownFolders.currentApp().path + "/");
                 }
 
-                const destFileName = curParam.destFilename || fileName.substring(fileName.lastIndexOf('/')+1, fileName.length);
+                const destFileName = curParam.destFilename || fileName.substring(fileName.lastIndexOf('/') + 1, fileName.length);
                 request.addFileToUpload(fileName, curParam.name, destFileName, curParam.mimeType);
             } else {
                 request.addParameter(params[i].name, params[i].value);
@@ -207,7 +209,7 @@ class Task extends ObservableBase {
 
         const displayNotificationProgress = typeof options.androidDisplayNotificationProgress === "boolean" ? options.androidDisplayNotificationProgress : true;
         if (displayNotificationProgress) {
-          request.setNotificationConfig(new net.gotev.uploadservice.UploadNotificationConfig());
+            request.setNotificationConfig(new net.gotev.uploadservice.UploadNotificationConfig());
         }
 
         const headers = options.headers;
@@ -282,6 +284,3 @@ class Task extends ObservableBase {
         (<any>net).gotev.uploadservice.UploadService.stopUpload(this._id);
     }
 }
-
-
-
