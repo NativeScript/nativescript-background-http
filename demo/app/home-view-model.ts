@@ -54,7 +54,6 @@ export class HomeViewModel extends Observable {
                 "File-Name": name
             },
             description: description,
-            androidDisplayNotificationProgress: true,
             androidAutoDeleteAfterUpload: false
         };
 
