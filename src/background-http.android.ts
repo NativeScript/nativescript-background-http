@@ -5,7 +5,7 @@ import * as fileSystemModule from "file-system";
 import * as common from "./index";
 
 declare const net: any;
-net.gotev.uploadservice.UploadService.NAMESPACE = application.android.packageName
+net.gotev.uploadservice.UploadService.NAMESPACE = application.android.packageName;
 
 interface UploadInfo {
     getUploadId(): string;
