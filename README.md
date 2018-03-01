@@ -1,6 +1,4 @@
 # Background Upload plugin for the NativeScript framework
-[**How to use the plugin, see: source/README.md**](nativescript-background-http/)
-
 ## iOS
 The iOS API is implemented in JavaScript.
 
@@ -8,30 +6,19 @@ The iOS API is implemented in JavaScript.
 The minimum supported API level is 18 and the background file upload is handled by the [android-upload-service](https://github.com/alexbbb/android-upload-service) Open-Source library.
 
 ## Examples
-To run the example open a terminal and run in the root of the repo:
+
+To run the demo open a terminal at the root of the repo and start the server included in `demo-server` with the command:
 ```
-npm install
+npm run start-server
 ```
 
-This will start the server included in `examples/www`:
+Then, open a second terminal, again at the root of the repo and execute (for Android):
 ```
-npm start
+npm run start-demo-android
 ```
-
-Open a second terminal, again at the root of the repo.
-This will create a link from the nativescript-background-http to the examples/SimpleBackgroundHttp's node_modules so you can build and run the plugin from source:
+OR (for iOS)
 ```
-npm run link
-```
-
-To compile the TypeScript of the plugin:
-```
-npm run tsc
-```
-
-Then to run the app:
-```
-tns run android --path examples/SimpleBackgroundHttp
+npm run start-demo-ios
 ```
 
 ## Usage
