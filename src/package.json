@@ -35,7 +35,7 @@
     "typescript": "~2.7.1"
   },
   "scripts": {
-    "tsc": "tsc",
+    "build": "npm i && tsc",
     "prepack": "tsc"
   }
 }
