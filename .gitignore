@@ -17,3 +17,5 @@ demo/node_modules
 demo/report
 
 !demo-server/*.js
+/src/platforms/android/nativescript_background_http.aar
+/src/*.tgz
