@@ -2,9 +2,11 @@ import application = require("application");
 import { Observable } from "data/observable";
 import { ad } from "utils/utils";
 import * as fileSystemModule from "file-system";
+import { isAndroid, device } from 'platform';
 import * as common from "./index";
 
 declare const net: any;
+declare const android: any;
 net.gotev.uploadservice.UploadService.NAMESPACE = application.android.packageName;
 
 interface UploadInfo {
@@ -138,8 +140,17 @@ class Task extends ObservableBase {
         request.setFileToUpload(file);
 
         const displayNotificationProgress = typeof options.androidDisplayNotificationProgress === "boolean" ? options.androidDisplayNotificationProgress : true;
+
+        if (isAndroid && parseInt(device.sdkVersion) >= 26) {
+            const channel = new android.app.NotificationChannel(application.android.packageName, application.android.packageName, android.app.NotificationManager.IMPORTANCE_LOW);
+            const notificationManager = context.getSystemService(android.content.Context.NOTIFICATION_SERVICE)
+            notificationManager.createNotificationChannel(channel);
+        }
+
         if (displayNotificationProgress) {
-            request.setNotificationConfig(new net.gotev.uploadservice.UploadNotificationConfig());
+            const uploadNotificationConfig = new net.gotev.uploadservice.UploadNotificationConfig();
+            uploadNotificationConfig.setNotificationChannelId(application.android.packageName);
+            request.setNotificationConfig(uploadNotificationConfig);
         }
         const autoDeleteAfterUpload = typeof options.androidAutoDeleteAfterUpload === "boolean" ? options.androidAutoDeleteAfterUpload : false;
         if (autoDeleteAfterUpload) {
