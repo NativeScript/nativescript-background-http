@@ -38,7 +38,7 @@ Following these steps is the best way to get your code included in the project:
 
 1. Fork and clone the nativescript-background-http repo:
 ```bash
-git clone https://github.com/<your-git-username>/nativescript-background-http.git
+git clone https://github.com/NativeScript/nativescript-background-http.git
 # Navigate to the newly cloned directory
 cd nativescript-background-http
 # Add an "upstream" remote pointing to the original repo.
