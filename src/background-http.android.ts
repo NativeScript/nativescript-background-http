@@ -18,52 +18,73 @@ interface ServerResponse {
 /* A snapshot-friendly, lazy-loaded class for ProgressReceiver BEGIN */
 let ProgressReceiver: any;
 
+function onProgressReceiverProgress(context: any, uploadInfo: UploadInfo) {
+    const uploadId = uploadInfo.getUploadId();
+    const task = Task.fromId(uploadId);
+    const totalBytes = uploadInfo.getTotalBytes();
+    const currentBytes = uploadInfo.getUploadedBytes();
+    task.setTotalUpload(totalBytes);
+    task.setUpload(currentBytes);
+    task.setStatus("uploading");
+    task.notify({ eventName: "progress", object: task, currentBytes: currentBytes, totalBytes: totalBytes });
+}
+
+function onProgressReceiverCancelled(context: any, uploadInfo: UploadInfo) {
+    const uploadId = uploadInfo.getUploadId();
+    const task = Task.fromId(uploadId);
+    task.setStatus("cancelled");
+    task.notify({ eventName: "cancelled", object: task });
+}
+
+function onProgressReceiverError(context: any, uploadInfo: UploadInfo, error) {
+    const uploadId = uploadInfo.getUploadId();
+    const task = Task.fromId(uploadId);
+    task.setStatus("error");
+    task.notify({ eventName: "error", object: task, error: error });
+}
+
+function onProgressReceiverCompleted(context: any, uploadInfo: UploadInfo, serverResponse: ServerResponse) {
+    const uploadId = uploadInfo.getUploadId();
+    const task = Task.fromId(uploadId);
+
+    let totalUpload = uploadInfo.getTotalBytes();
+    if (!totalUpload || !isFinite(totalUpload) || totalUpload <= 0) {
+        totalUpload = 1;
+    }
+    task.setUpload(totalUpload);
+    task.setTotalUpload(totalUpload);
+    task.setStatus("complete");
+
+    task.notify({ eventName: "progress", object: task, currentBytes: totalUpload, totalBytes: totalUpload });
+    task.notify({ eventName: "responded", object: task, data: serverResponse.getBodyAsString() });
+    task.notify({ eventName: "complete", object: task, response: serverResponse });
+}
+
 function initializeProgressReceiver() {
     if (ProgressReceiver) {
         return;
     }
 
+    const zonedOnProgress = global.zonedCallback(onProgressReceiverProgress);
+    const zonedOnCancelled = global.zonedCallback(onProgressReceiverCancelled);
+    const zonedOnError = global.zonedCallback(onProgressReceiverError);
+    const zonedOnCompleted = global.zonedCallback(onProgressReceiverCompleted);
+
     const ProgressReceiverImpl = net.gotev.uploadservice.UploadServiceBroadcastReceiver.extend({
         onProgress(context: any, uploadInfo: UploadInfo) {
-            const uploadId = uploadInfo.getUploadId();
-            const task = Task.fromId(uploadId);
-            const totalBytes = uploadInfo.getTotalBytes();
-            const currentBytes = uploadInfo.getUploadedBytes();
-            task.setTotalUpload(totalBytes);
-            task.setUpload(currentBytes);
-            task.setStatus("uploading");
-            task.notify({ eventName: "progress", object: task, currentBytes: currentBytes, totalBytes: totalBytes });
+            zonedOnProgress(context, uploadInfo);
         },
 
         onCancelled(context: any, uploadInfo: UploadInfo) {
-            const uploadId = uploadInfo.getUploadId();
-            const task = Task.fromId(uploadId);
-            task.setStatus("cancelled");
-            task.notify({ eventName: "cancelled", object: task });
+            zonedOnCancelled(context, uploadInfo);
         },
 
         onError(context: any, uploadInfo: UploadInfo, error) {
-            const uploadId = uploadInfo.getUploadId();
-            const task = Task.fromId(uploadId);
-            task.setStatus("error");
-            task.notify({ eventName: "error", object: task, error: error });
+            zonedOnError(context, uploadInfo);
         },
 
         onCompleted(context: any, uploadInfo: UploadInfo, serverResponse: ServerResponse) {
-            const uploadId = uploadInfo.getUploadId();
-            const task = Task.fromId(uploadId);
-
-            let totalUpload = uploadInfo.getTotalBytes();
-            if (!totalUpload || !isFinite(totalUpload) || totalUpload <= 0) {
-                totalUpload = 1;
-            }
-            task.setUpload(totalUpload);
-            task.setTotalUpload(totalUpload);
-            task.setStatus("complete");
-
-            task.notify({ eventName: "progress", object: task, currentBytes: totalUpload, totalBytes: totalUpload });
-            task.notify({ eventName: "responded", object: task, data: serverResponse.getBodyAsString() });
-            task.notify({ eventName: "complete", object: task, response: serverResponse });
+            zonedOnCompleted(context, uploadInfo, serverResponse);
         }
     });
 
