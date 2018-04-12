@@ -5,8 +5,6 @@ import * as fileSystemModule from "file-system";
 import * as common from "./index";
 
 declare const net: any;
-net.gotev.uploadservice.UploadService.NAMESPACE = application.android.packageName;
-
 interface UploadInfo {
     getUploadId(): string;
     getTotalBytes(): number;
@@ -73,10 +71,17 @@ function initializeProgressReceiver() {
 }
 /* ProgressReceiver END */
 
+let hasNamespace = false;
+function ensureUploadServiceNamespace() {
+    if (!hasNamespace) {
+        net.gotev.uploadservice.UploadService.NAMESPACE = application.android.packageName;
+        hasNamespace = true;
+    }
+}
+
 let receiver: any;
-
 export function session(id: string) {
-
+    ensureUploadServiceNamespace();
     if (!receiver) {
         const context = ad.getApplicationContext();
         initializeProgressReceiver();
