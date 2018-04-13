@@ -16,6 +16,10 @@ demo/platforms
 demo/node_modules
 demo/report
 
+demo-angular/app/*.js
+demo-angular/*.d.ts
+demo-angular/platforms/
+
 !demo-server/*.js
 /src/platforms/android/nativescript_background_http.aar
 /src/*.tgz
