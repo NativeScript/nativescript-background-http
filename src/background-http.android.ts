@@ -1,24 +1,18 @@
-import application = require("application");
+import * as application from "application";
 import { Observable } from "data/observable";
 import { ad } from "utils/utils";
 import * as fileSystemModule from "file-system";
 import * as common from "./index";
 
-declare const net: any;
-interface UploadInfo {
-    getUploadId(): string;
-    getTotalBytes(): number;
-    getUploadedBytes(): number;
-}
-
-interface ServerResponse {
-    getBodyAsString(): string;
-}
+type Context = android.content.Context;
+type ServerResponse = net.gotev.uploadservice.ServerResponse;
+type UploadInfo = net.gotev.uploadservice.UploadInfo;
+type UploadServiceBroadcastReceiver = net.gotev.uploadservice.UploadServiceBroadcastReceiver;
 
 /* A snapshot-friendly, lazy-loaded class for ProgressReceiver BEGIN */
 let ProgressReceiver: any;
 
-function onProgressReceiverProgress(context: any, uploadInfo: UploadInfo) {
+function onProgressReceiverProgress(context: Context, uploadInfo: UploadInfo) {
     const uploadId = uploadInfo.getUploadId();
     const task = Task.fromId(uploadId);
     const totalBytes = uploadInfo.getTotalBytes();
@@ -29,21 +23,26 @@ function onProgressReceiverProgress(context: any, uploadInfo: UploadInfo) {
     task.notify({ eventName: "progress", object: task, currentBytes: currentBytes, totalBytes: totalBytes });
 }
 
-function onProgressReceiverCancelled(context: any, uploadInfo: UploadInfo) {
+function onProgressReceiverCancelled(context: Context, uploadInfo: UploadInfo) {
     const uploadId = uploadInfo.getUploadId();
     const task = Task.fromId(uploadId);
     task.setStatus("cancelled");
     task.notify({ eventName: "cancelled", object: task });
 }
 
-function onProgressReceiverError(context: any, uploadInfo: UploadInfo, error) {
+function onProgressReceiverError(context: Context, uploadInfo: UploadInfo, response: ServerResponse, error: java.lang.Exception) {
     const uploadId = uploadInfo.getUploadId();
     const task = Task.fromId(uploadId);
     task.setStatus("error");
-    task.notify({ eventName: "error", object: task, error: error });
+    task.notify({
+      eventName: "error",
+      object: task,
+      error,
+      responseCode: response && typeof response.getHttpCode === 'function' ? response.getHttpCode() : -1
+    });
 }
 
-function onProgressReceiverCompleted(context: any, uploadInfo: UploadInfo, serverResponse: ServerResponse) {
+function onProgressReceiverCompleted(context: Context, uploadInfo: UploadInfo, serverResponse: ServerResponse) {
     const uploadId = uploadInfo.getUploadId();
     const task = Task.fromId(uploadId);
 
@@ -70,23 +69,25 @@ function initializeProgressReceiver() {
     const zonedOnError = global.zonedCallback(onProgressReceiverError);
     const zonedOnCompleted = global.zonedCallback(onProgressReceiverCompleted);
 
-    const ProgressReceiverImpl = net.gotev.uploadservice.UploadServiceBroadcastReceiver.extend({
-        onProgress(context: any, uploadInfo: UploadInfo) {
-            zonedOnProgress(context, uploadInfo);
-        },
+    const temp: Partial<UploadServiceBroadcastReceiver> = {
+      onProgress(context: Context, uploadInfo: UploadInfo) {
+        zonedOnProgress(context, uploadInfo);
+      },
 
-        onCancelled(context: any, uploadInfo: UploadInfo) {
-            zonedOnCancelled(context, uploadInfo);
-        },
+      onCancelled(context: Context, uploadInfo: UploadInfo) {
+        zonedOnCancelled(context, uploadInfo);
+      },
 
-        onError(context: any, uploadInfo: UploadInfo, error) {
-            zonedOnError(context, uploadInfo);
-        },
+      onError(context: Context, uploadInfo: UploadInfo, response: ServerResponse, error: java.lang.Exception) {
+        zonedOnError(context, uploadInfo, response, error);
+      },
 
-        onCompleted(context: any, uploadInfo: UploadInfo, serverResponse: ServerResponse) {
-            zonedOnCompleted(context, uploadInfo, serverResponse);
-        }
-    });
+      onCompleted(context: Context, uploadInfo: UploadInfo, serverResponse: ServerResponse) {
+        zonedOnCompleted(context, uploadInfo, serverResponse);
+      }
+    };
+
+    const ProgressReceiverImpl = (<any>net.gotev.uploadservice.UploadServiceBroadcastReceiver).extend(temp);
 
     ProgressReceiver = ProgressReceiverImpl as any;
 }

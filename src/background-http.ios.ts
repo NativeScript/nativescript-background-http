@@ -28,7 +28,7 @@ class BackgroundUploadDelegate extends NSObject implements NSURLSessionDelegate,
 	}
 
 	// NSURLSessionTaskDelegate
-	URLSessionTaskDidCompleteWithError(session, nsTask, error) {
+	URLSessionTaskDidCompleteWithError(session: NSURLSession, nsTask: NSURLSessionTask, error: NSError) {
 		dispatch_async(main_queue, () => {
 			const task = Task.getTask(session, nsTask);
 			if (task._fileToCleanup) {
@@ -37,7 +37,12 @@ class BackgroundUploadDelegate extends NSObject implements NSURLSessionDelegate,
 			}
 			if (error) {
 				task.notifyPropertyChange("status", task.status);
-				task.notify({ eventName: "error", object: task, error: error });
+				task.notify({
+					eventName: "error",
+					object: task,
+					error,
+					responseCode: nsTask && nsTask.response ? (<NSHTTPURLResponse>nsTask.response).statusCode : -1
+				});
 			} else {
 				task.notifyPropertyChange("upload", task.upload);
 				task.notifyPropertyChange("totalUpload", task.totalUpload);
