@@ -1,5 +1,5 @@
-import { Observable } from "data/observable"
-import * as common from "./index"
+import { Observable } from "data/observable";
+import * as common from "./index";
 import * as fileSystemModule from "file-system";
 import * as utils from "utils/utils";
 
@@ -11,24 +11,24 @@ class BackgroundUploadDelegate extends NSObject implements NSURLSessionDelegate,
 
     // NSURLSessionDelegate
     URLSessionDidBecomeInvalidWithError(session, error) {
-        //console.log("URLSessionDidBecomeInvalidWithError:");
-        //console.log(" - session: " + session);
-        //console.log(" - error:   " + error);
+        // console.log("URLSessionDidBecomeInvalidWithError:");
+        // console.log(" - session: " + session);
+        // console.log(" - error:   " + error);
     }
 
     URLSessionDidReceiveChallengeCompletionHandler(session, challenge, comlpetionHandler) {
-        //console.log("URLSessionDidFinishEventsForBackgroundURLSession: " + session + " " + challenge);
+        // console.log("URLSessionDidFinishEventsForBackgroundURLSession: " + session + " " + challenge);
         const disposition = null;
         const credential = null;
         comlpetionHandler(disposition, credential);
     }
 
     URLSessionDidFinishEventsForBackgroundURLSession(session) {
-        //console.log("URLSessionDidFinishEventsForBackgroundURLSession: " + session);
+        // console.log("URLSessionDidFinishEventsForBackgroundURLSession: " + session);
     }
 
     // NSURLSessionTaskDelegate
-    URLSessionTaskDidCompleteWithError(session: NSURLSession, nsTask: NSURLSessionTask, error: NSError) {
+    URLSessionTaskDidCompleteWithError(session, nsTask, error) {
         dispatch_async(main_queue, () => {
             const task = Task.getTask(session, nsTask);
             if (task._fileToCleanup) {
@@ -63,7 +63,7 @@ class BackgroundUploadDelegate extends NSObject implements NSURLSessionDelegate,
     }
 
     URLSessionTaskDidReceiveChallengeCompletionHandler(session, task, challenge, completionHandler) {
-        //console.log("URLSessionTaskDidReceiveChallengeCompletionHandler: " + session + " " + task + " " + challenge);
+        // console.log("URLSessionTaskDidReceiveChallengeCompletionHandler: " + session + " " + task + " " + challenge);
         const disposition = null;
         const credential = null;
         completionHandler(disposition, credential);
@@ -72,9 +72,9 @@ class BackgroundUploadDelegate extends NSObject implements NSURLSessionDelegate,
     URLSessionTaskDidSendBodyDataTotalBytesSentTotalBytesExpectedToSend(nsSession: NSURLSession, nsTask: NSURLSessionTask, data, sent: number, expectedTotal: number) {
         dispatch_async(main_queue, () => {
             const task = Task.getTask(nsSession, nsTask);
-            //console.log("notifyPropertyChange: upload");
+            // console.log("notifyPropertyChange: upload");
             task.notifyPropertyChange("upload", task.upload);
-            //console.log("notifyPropertyChange: totalUpload");
+            // console.log("notifyPropertyChange: totalUpload");
             task.notifyPropertyChange("totalUpload", task.totalUpload);
             task.notify(<common.ProgressEventData>{
               eventName: "progress",
@@ -86,28 +86,28 @@ class BackgroundUploadDelegate extends NSObject implements NSURLSessionDelegate,
     }
 
     URLSessionTaskNeedNewBodyStream(session, task, need) {
-        //console.log("URLSessionTaskNeedNewBodyStream");
+        // console.log("URLSessionTaskNeedNewBodyStream");
     }
 
     URLSessionTaskWillPerformHTTPRedirectionNewRequestCompletionHandler(session, task, redirect, request, completionHandler) {
-        //console.log("URLSessionTaskWillPerformHTTPRedirectionNewRequestCompletionHandler");
+        // console.log("URLSessionTaskWillPerformHTTPRedirectionNewRequestCompletionHandler");
         completionHandler(request);
     }
 
     // NSURLSessionDataDelegate
     URLSessionDataTaskDidReceiveResponseCompletionHandler(session, dataTask, response, completionHandler) {
-        //console.log("URLSessionDataTaskDidReceiveResponseCompletionHandler");
+        // console.log("URLSessionDataTaskDidReceiveResponseCompletionHandler");
         const disposition = null;
         completionHandler(disposition);
     }
 
     URLSessionDataTaskDidBecomeDownloadTask(session, dataTask, downloadTask) {
-        //console.log("URLSessionDataTaskDidBecomeDownloadTask");
+        // console.log("URLSessionDataTaskDidBecomeDownloadTask");
     }
 
     URLSessionDataTaskDidReceiveData(session: NSURLSession, dataTask: NSURLSessionDataTask, data: NSData) {
         dispatch_async(main_queue, () => {
-            //console.log("URLSessionDataTaskDidReceiveData");
+            // console.log("URLSessionDataTaskDidReceiveData");
             // we have a response in the data...
             const jsTask = Task.getTask(session, dataTask);
             const jsonString = NSString.alloc().initWithDataEncoding(data, NSUTF8StringEncoding);
@@ -122,20 +122,20 @@ class BackgroundUploadDelegate extends NSObject implements NSURLSessionDelegate,
     }
 
     URLSessionDataTaskWillCacheResponseCompletionHandler() {
-        //console.log("URLSessionDataTaskWillCacheResponseCompletionHandler");
+        // console.log("URLSessionDataTaskWillCacheResponseCompletionHandler");
     }
 
     // NSURLSessionDownloadDelegate
     URLSessionDownloadTaskDidResumeAtOffsetExpectedTotalBytes(session, task, offset, expects) {
-        //console.log("URLSessionDownloadTaskDidResumeAtOffsetExpectedTotalBytes");
+        // console.log("URLSessionDownloadTaskDidResumeAtOffsetExpectedTotalBytes");
     }
 
     URLSessionDownloadTaskDidWriteDataTotalBytesWrittenTotalBytesExpectedToWrite(session, task, data, written, expected) {
-        //console.log("URLSessionDownloadTaskDidWriteDataTotalBytesWrittenTotalBytesExpectedToWrite");
+        // console.log("URLSessionDownloadTaskDidWriteDataTotalBytesWrittenTotalBytesExpectedToWrite");
     }
 
     URLSessionDownloadTaskDidFinishDownloadingToURL(session, task, url) {
-        //console.log("URLSessionDownloadTaskDidFinishDownloadingToURL");
+        // console.log("URLSessionDownloadTaskDidFinishDownloadingToURL");
     }
 }
 
@@ -289,11 +289,10 @@ class Task extends Observable {
         this._task.cancel();
     }
 }
+
 export function session(id: string): common.Session {
     return Session.getSession(id);
 }
-
-
 
 class MultiMultiPartForm {
     private boundary: string;
@@ -327,7 +326,7 @@ class MultiMultiPartForm {
 
         const finalName = destFileName || filename.substr(filename.lastIndexOf('/') + 1, filename.length);
         this.fields.push({ name: name, filename: filename, destFilename: finalName, mimeType: mimeType });
-    };
+    }
 
     public generateFile(): string {
         const CRLF = "\r\n";
@@ -376,11 +375,9 @@ class MultiMultiPartForm {
         fileManager.createFileAtPathContentsAttributes(fileName, combinedData, null);
 
         return fileName;
-    };
+    }
 
     public getHeader(): string {
         return this.header;
-    };
-
-
+    }
 }

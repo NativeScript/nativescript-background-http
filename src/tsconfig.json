@@ -1,32 +1,27 @@
 {
     "compilerOptions": {
-        "module": "commonjs",
         "target": "es5",
+        "module": "commonjs",
+        "lib": ["es6", "dom"],
         "noImplicitAny": false,
         "removeComments": true,
         "preserveConstEnums": true,
-        "sourceMap": false,
+        "sourceMap": true,
         "declaration": false,
         "noLib": false,
         "noEmitHelpers": true,
         "experimentalDecorators": true,
-        "lib": [
-            "es6",
-            "dom"
-        ],
+        "emitDecoratorMetadata": true,
         "baseUrl": ".",
         "paths": {
             "*": [
-                "./node_modules/tns-core-modules/*",
-                "./node_modules/*"
+                "node_modules/tns-core-modules/*",
+                "node_modules/*"
             ]
         },
-        "skipLibCheck": true
     },
     "exclude": [
-        "node_modules",
-        "platforms",
-        "package"
+        "node_modules"
     ],
     "compileOnSave": false
 }

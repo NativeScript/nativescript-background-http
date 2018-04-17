@@ -1,9 +1,0 @@
-{
-  "scripts": {
-    "tsc": "cd src && npm i && tsc",
-    "start-server": "cd demo-server && npm i && node server.js 8080",
-    "start-demo": "npm run start-demo-android",
-    "start-demo-android": "npm run tsc && cd demo && npm i && tns run android",
-    "start-demo-ios": "npm run tsc && cd demo && npm i && tns run ios"
-  }
-}
