@@ -18,7 +18,7 @@
             </StackLayout>
         </ng-template>
     </ListView>
-    <Button row="3" margin="2" text="Upload!" (tap)="upload()"></Button>
-    <Button row="3" col="1" margin="2" text="Error-Up!" (tap)="upload_error()"></Button>
-    <Button row="3" col="2" margin="2" text="MultiPart-Up!" (tap)="upload_multi()"></Button>
+    <Button row="3" margin="2" text="Upload!" (tap)="upload($event)"></Button>
+    <Button row="3" col="1" margin="2" text="Error-Up!" (tap)="upload_error($event)"></Button>
+    <Button row="3" col="2" margin="2" text="MultiPart-Up!" (tap)="upload_multi($event)"></Button>
 </GridLayout>

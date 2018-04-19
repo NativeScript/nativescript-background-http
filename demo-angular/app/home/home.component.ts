@@ -2,6 +2,7 @@ import * as bgHttp from "nativescript-background-http";
 import { Component } from "@angular/core";
 import { isIOS } from "platform";
 import { ObservableArray } from "data/observable-array";
+import * as fs from "tns-core-modules/file-system";
 
 @Component({
     selector: "Home",
@@ -9,15 +10,15 @@ import { ObservableArray } from "data/observable-array";
     templateUrl: "./home.component.html"
 })
 export class HomeComponent {
-    private tasks: bgHttp.Task[] = [];
-    private events: { eventTitle: string, eventData: any }[] = [];
+    public tasks: bgHttp.Task[] = [];
+    public events: { eventTitle: string, eventData: any }[] = [];
     private file: string;
     private url: string;
     private counter: number = 0;
     private session: any;
 
     constructor() {
-        this.file = __dirname + "/bigpic.jpg";
+        this.file = fs.path.normalize(fs.knownFolders.currentApp().path + "/home/bigpic.jpg");
         if (isIOS) {
             // NOTE: This works for emulator. Real device will need other address.
             this.url = "http://localhost:8080";

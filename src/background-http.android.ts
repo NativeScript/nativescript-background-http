@@ -1,6 +1,5 @@
 import * as application from "application";
 import { Observable } from "data/observable";
-import { ad } from "utils/utils";
 import * as fileSystemModule from "file-system";
 import * as common from "./index";
 
@@ -122,15 +121,16 @@ function ensureUploadServiceNamespace() {
 }
 
 let receiver: any;
-export function session(id: string) {
-    ensureUploadServiceNamespace();
+function ensureReceiver() {
     if (!receiver) {
-        const context = ad.getApplicationContext();
+        const context = application.android.context;
         initializeProgressReceiver();
         receiver = new ProgressReceiver();
         receiver.register(context);
     }
+}
 
+export function session(id: string) {
     // TODO: Cache.
     return new Session(id);
 }
@@ -174,6 +174,8 @@ class Task extends ObservableBase {
     private _description: string;
 
     static create(session: Session, file: string, options: common.Request): Task {
+        ensureUploadServiceNamespace();
+        ensureReceiver();
         const task = new Task();
         task._session = session;
         task._id = session.id + "{" + ++Task.taskCount + "}";
@@ -219,6 +221,8 @@ class Task extends ObservableBase {
     }
 
     static createMultiPart(session: Session, params: Array<any>, options: common.Request): Task {
+        ensureUploadServiceNamespace();
+        ensureReceiver();
         const task = new Task();
         task._session = session;
         task._id = session.id + "{" + (++Task.taskCount) + "}";

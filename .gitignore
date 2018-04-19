@@ -29,6 +29,8 @@ demo-angular/platforms/
 demo-angular/hooks
 
 !demo-server/*.js
+!demo/webpack.config.js
+!demo-angular/webpack.config.js
 /src/platforms/android/nativescript_background_http.aar
 /src/*.tgz
 /src/package
