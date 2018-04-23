@@ -116,7 +116,7 @@ class BackgroundUploadDelegate extends NSObject implements NSURLSessionDelegate,
               eventName: "responded",
               object: jsTask,
               data: jsonString.toString(),
-              responseCode: nsTask && nsTask.response ? (<NSHTTPURLResponse>nsTask.response).statusCode : -1
+              responseCode: dataTask && dataTask.response ? (<NSHTTPURLResponse>dataTask.response).statusCode : -1
             });
         });
     }
