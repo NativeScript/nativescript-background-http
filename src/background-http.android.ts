@@ -71,7 +71,11 @@ function onProgressReceiverCompleted(context: Context, uploadInfo: UploadInfo, r
       data: response.getBodyAsString(),
       responseCode: response && typeof response.getHttpCode === 'function' ? response.getHttpCode() : -1
     });
-    task.notify({ eventName: "complete", object: task, response });
+    task.notify(<common.CompleteEventData>{
+      eventName: "complete",
+      object: task,
+      responseCode: response && typeof response.getHttpCode === 'function' ? response.getHttpCode() : -1
+    });
 }
 
 function initializeProgressReceiver() {

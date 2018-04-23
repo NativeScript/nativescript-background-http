@@ -45,6 +45,11 @@ export interface ResultEventData extends observable.EventData {
     responseCode: number;
 }
 
+export interface CompleteEventData extends observable.EventData {
+    /** HTTP response code if response object is present, otherwise -1 */
+    responseCode: number;
+}
+
 /**
  * Encapsulates some information for background http transfers.
  */

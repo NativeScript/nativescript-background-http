@@ -52,7 +52,11 @@ class BackgroundUploadDelegate extends NSObject implements NSURLSessionDelegate,
                   currentBytes: nsTask.countOfBytesSent,
                   totalBytes: nsTask.countOfBytesExpectedToSend
                 });
-                task.notify({ eventName: "complete", object: task });
+                task.notify(<common.CompleteEventData>{
+                  eventName: "complete",
+                  object: task,
+                  responseCode: nsTask && nsTask.response ? (<NSHTTPURLResponse>nsTask.response).statusCode : -1
+                });
                 Task._tasks.delete(nsTask);
             }
         });
