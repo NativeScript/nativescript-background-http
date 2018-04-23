@@ -41,6 +41,8 @@ export interface ResultEventData extends observable.EventData {
      * The string response of the server.
      */
     data: string;
+    /** HTTP response code if response object is present, otherwise -1 */
+    responseCode: number;
 }
 
 /**
@@ -76,7 +78,7 @@ export interface Task {
    /**
      * Subscribe for a general event.
      * @param event The name of the event to subscribe for.
-     * @param The handler called when the event occure.
+     * @param handler The handler called when the event occure.
      * @event
      */
     on(event: string, handler: (e: observable.EventData) => void): void;

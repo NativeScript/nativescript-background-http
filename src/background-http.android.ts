@@ -20,7 +20,12 @@ function onProgressReceiverProgress(context: Context, uploadInfo: UploadInfo) {
     task.setTotalUpload(totalBytes);
     task.setUpload(currentBytes);
     task.setStatus("uploading");
-    task.notify({ eventName: "progress", object: task, currentBytes: currentBytes, totalBytes: totalBytes });
+    task.notify(<common.ProgressEventData>{
+      eventName: "progress",
+      object: task,
+      currentBytes: currentBytes,
+      totalBytes: totalBytes
+    });
 }
 
 function onProgressReceiverCancelled(context: Context, uploadInfo: UploadInfo) {
@@ -34,7 +39,7 @@ function onProgressReceiverError(context: Context, uploadInfo: UploadInfo, respo
     const uploadId = uploadInfo.getUploadId();
     const task = Task.fromId(uploadId);
     task.setStatus("error");
-    task.notify({
+    task.notify(<common.ErrorEventData>{
       eventName: "error",
       object: task,
       error,
@@ -42,7 +47,7 @@ function onProgressReceiverError(context: Context, uploadInfo: UploadInfo, respo
     });
 }
 
-function onProgressReceiverCompleted(context: Context, uploadInfo: UploadInfo, serverResponse: ServerResponse) {
+function onProgressReceiverCompleted(context: Context, uploadInfo: UploadInfo, response: ServerResponse) {
     const uploadId = uploadInfo.getUploadId();
     const task = Task.fromId(uploadId);
 
@@ -54,9 +59,19 @@ function onProgressReceiverCompleted(context: Context, uploadInfo: UploadInfo, s
     task.setTotalUpload(totalUpload);
     task.setStatus("complete");
 
-    task.notify({ eventName: "progress", object: task, currentBytes: totalUpload, totalBytes: totalUpload });
-    task.notify({ eventName: "responded", object: task, data: serverResponse.getBodyAsString() });
-    task.notify({ eventName: "complete", object: task, response: serverResponse });
+    task.notify(<common.ProgressEventData>{
+      eventName: "progress",
+      object: task,
+      currentBytes: totalUpload,
+      totalBytes: totalUpload
+    });
+    task.notify(<common.ResultEventData>{
+      eventName: "responded",
+      object: task,
+      data: response.getBodyAsString(),
+      responseCode: response && typeof response.getHttpCode === 'function' ? response.getHttpCode() : -1
+    });
+    task.notify({ eventName: "complete", object: task, response });
 }
 
 function initializeProgressReceiver() {
