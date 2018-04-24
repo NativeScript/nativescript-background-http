@@ -48,6 +48,8 @@ export interface ResultEventData extends observable.EventData {
 export interface CompleteEventData extends observable.EventData {
     /** HTTP response code if response object is present, otherwise -1 */
     responseCode: number;
+    /** Currently available for Android only */
+    response?: any; // net.gotev.uploadservice.ServerResponse
 }
 
 /**

@@ -43,7 +43,8 @@ function onProgressReceiverError(context: Context, uploadInfo: UploadInfo, respo
       eventName: "error",
       object: task,
       error,
-      responseCode: response && typeof response.getHttpCode === 'function' ? response.getHttpCode() : -1
+      responseCode: response && typeof response.getHttpCode === 'function' ? response.getHttpCode() : -1,
+      response
     });
 }
 
