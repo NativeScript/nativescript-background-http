@@ -13,7 +13,9 @@ export interface ErrorEventData extends observable.EventData {
     /**
      * Provides the underlying error. The value is platform specific.
      */
-    error: any;
+    error: any /*NSError | java.lang.Exception*/;
+    /** HTTP response code if response object is present, otherwise -1 */
+    responseCode: number;
 }
 
 /**
@@ -32,13 +34,22 @@ export interface ProgressEventData extends observable.EventData {
 }
 
 /**
- * Provides the server responce.
+ * Provides the server response.
  */
 export interface ResultEventData extends observable.EventData {
     /**
-     * The string responce of the server.
+     * The string response of the server.
      */
     data: string;
+    /** HTTP response code if response object is present, otherwise -1 */
+    responseCode: number;
+}
+
+export interface CompleteEventData extends observable.EventData {
+    /** HTTP response code if response object is present, otherwise -1 */
+    responseCode: number;
+    /** Currently available for Android only */
+    response?: any; // net.gotev.uploadservice.ServerResponse
 }
 
 /**
@@ -74,7 +85,7 @@ export interface Task {
    /**
      * Subscribe for a general event.
      * @param event The name of the event to subscribe for.
-     * @param The handler called when the event occure.
+     * @param handler The handler called when the event occure.
      * @event
      */
     on(event: string, handler: (e: observable.EventData) => void): void;
@@ -90,15 +101,15 @@ export interface Task {
     /**
      * Subscribe for progress notifications.
      * @param event
-     * @param handler A handler that will receive a progress event with the current and expected total bytes 
+     * @param handler A handler that will receive a progress event with the current and expected total bytes
      * @event
      */
     on(event: "progress", handler: (e: ProgressEventData) => void): void;
 
     /**
-     * Upon successful upload provides the server responce.
+     * Upon successful upload provides the server response.
      * @param event
-     * @param handler A handler that will receive the responce event. 
+     * @param handler A handler that will receive the response event.
      * @event
      */
     on(event: "responded", handler: (e: ResultEventData) => void): void;
