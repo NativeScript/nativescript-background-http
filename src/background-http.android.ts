@@ -186,8 +186,21 @@ class Task extends ObservableBase {
 
         const displayNotificationProgress = typeof options.androidDisplayNotificationProgress === "boolean" ? options.androidDisplayNotificationProgress : true;
         if (displayNotificationProgress) {
-            request.setNotificationConfig(new net.gotev.uploadservice.UploadNotificationConfig());
+
+            const uploadNotificationConfig = new net.gotev.uploadservice.UploadNotificationConfig();
+            if(android.os.Build.VERSION.SDK_INT >= 26){
+                const channel = new android.app.NotificationChannel(application.android.packageName, 
+                                application.android.packageName,
+                                android.app.NotificationManager.IMPORTANCE_LOW);
+                                
+                const notificationManager = context.getSystemService(android.content.Context.NOTIFICATION_SERVICE)
+                notificationManager.createNotificationChannel(channel);
+                
+                uploadNotificationConfig.setNotificationChannelId(application.android.packageName)
+            }
+            request.setNotificationConfig(uploadNotificationConfig);
         }
+
         const autoDeleteAfterUpload = typeof options.androidAutoDeleteAfterUpload === "boolean" ? options.androidAutoDeleteAfterUpload : false;
         if (autoDeleteAfterUpload) {
             request.setAutoDeleteFilesAfterSuccessfulUpload(true);
@@ -256,7 +269,19 @@ class Task extends ObservableBase {
 
         const displayNotificationProgress = typeof options.androidDisplayNotificationProgress === "boolean" ? options.androidDisplayNotificationProgress : true;
         if (displayNotificationProgress) {
-            request.setNotificationConfig(new net.gotev.uploadservice.UploadNotificationConfig());
+
+            const uploadNotificationConfig = new net.gotev.uploadservice.UploadNotificationConfig();
+            if(android.os.Build.VERSION.SDK_INT >= 26){
+                const channel = new android.app.NotificationChannel(application.android.packageName, 
+                                application.android.packageName,
+                                android.app.NotificationManager.IMPORTANCE_LOW);
+                                
+                const notificationManager = context.getSystemService(android.content.Context.NOTIFICATION_SERVICE)
+                notificationManager.createNotificationChannel(channel);
+                
+                uploadNotificationConfig.setNotificationChannelId(application.android.packageName)
+            }
+            request.setNotificationConfig(uploadNotificationConfig);
         }
 
         const headers = options.headers;
