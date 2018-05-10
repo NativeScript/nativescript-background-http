@@ -2,7 +2,7 @@ import * as bgHttp from "nativescript-background-http";
 import { Component } from "@angular/core";
 import { isIOS } from "platform";
 import { ObservableArray } from "data/observable-array";
-import * as fs from "tns-core-modules/file-system";
+import * as fs from "file-system";
 
 @Component({
     selector: "Home",
