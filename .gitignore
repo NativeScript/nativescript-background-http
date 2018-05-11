@@ -25,6 +25,7 @@ demo/node_modules
 demo-angular/node_modules
 
 demo-angular/*.d.ts
+!demo-angular/references.d.ts
 demo-angular/platforms/
 demo-angular/hooks
 

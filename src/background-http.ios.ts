@@ -11,7 +11,12 @@ function onProgress(nsSession, nsTask, sent, expectedTotal) {
     const task = Task.getTask(nsSession, nsTask);
     task.notifyPropertyChange("upload", task.upload);
     task.notifyPropertyChange("totalUpload", task.totalUpload);
-    task.notify({ eventName: "progress", object: task, currentBytes: sent, totalBytes: expectedTotal });
+    task.notify(<common.ProgressEventData>{
+        eventName: "progress",
+        object: task,
+        currentBytes: sent,
+        totalBytes: expectedTotal
+    });
 }
 
 function onError(session, nsTask, error) {
@@ -22,12 +27,27 @@ function onError(session, nsTask, error) {
     }
     if (error) {
         task.notifyPropertyChange("status", task.status);
-        task.notify({ eventName: "error", object: task, error: error });
+        task.notify(<common.ErrorEventData>{
+            eventName: "error",
+            object: task,
+            error,
+            responseCode: nsTask && nsTask.response ? (<NSHTTPURLResponse>nsTask.response).statusCode : -1
+        });
     } else {
         task.notifyPropertyChange("upload", task.upload);
         task.notifyPropertyChange("totalUpload", task.totalUpload);
-        task.notify({ eventName: "progress", object: task, currentBytes: nsTask.countOfBytesSent, totalBytes: nsTask.countOfBytesExpectedToSend });
-        task.notify({ eventName: "complete", object: task });
+        task.notify(<common.ProgressEventData>{
+            eventName: "progress",
+            object: task,
+            currentBytes: nsTask.countOfBytesSent,
+            totalBytes: nsTask.countOfBytesExpectedToSend
+        });
+        task.notify(<common.CompleteEventData>{
+            eventName: "complete",
+            object: task,
+            responseCode: nsTask && nsTask.response ? (<NSHTTPURLResponse>nsTask.response).statusCode : -1
+        });
+
         Task._tasks.delete(nsTask);
     }
 }
@@ -55,26 +75,9 @@ class BackgroundUploadDelegate extends NSObject implements NSURLSessionDelegate,
     }
 
     // NSURLSessionTaskDelegate
-    URLSessionTaskDidCompleteWithError(session, nsTask, error) {
+    URLSessionTaskDidCompleteWithError(session: NSURLSession, nsTask: NSURLSessionTask, error: NSError) {
         dispatch_async(main_queue, () => {
             zonedOnError(session, nsTask, error);
-                task.notify(<common.ErrorEventData>{
-                    eventName: "error",
-                    object: task,
-                    error,
-                    responseCode: nsTask && nsTask.response ? (<NSHTTPURLResponse>nsTask.response).statusCode : -1
-                });
-                task.notify(<common.ProgressEventData>{
-                  eventName: "progress",
-                  object: task,
-                  currentBytes: nsTask.countOfBytesSent,
-                  totalBytes: nsTask.countOfBytesExpectedToSend
-                });
-                task.notify(<common.CompleteEventData>{
-                  eventName: "complete",
-                  object: task,
-                  responseCode: nsTask && nsTask.response ? (<NSHTTPURLResponse>nsTask.response).statusCode : -1
-                });
         });
     }
 
@@ -88,12 +91,6 @@ class BackgroundUploadDelegate extends NSObject implements NSURLSessionDelegate,
     URLSessionTaskDidSendBodyDataTotalBytesSentTotalBytesExpectedToSend(nsSession: NSURLSession, nsTask: NSURLSessionTask, data, sent: number, expectedTotal: number) {
         dispatch_async(main_queue, () => {
             zonedOnProgress(nsSession, nsTask, sent, expectedTotal);
-            task.notify(<common.ProgressEventData>{
-              eventName: "progress",
-              object: task,
-              currentBytes: sent,
-              totalBytes: expectedTotal
-            });
         });
     }
 
@@ -125,10 +122,10 @@ class BackgroundUploadDelegate extends NSObject implements NSURLSessionDelegate,
             const jsonString = NSString.alloc().initWithDataEncoding(data, NSUTF8StringEncoding);
 
             jsTask.notify(<common.ResultEventData>{
-              eventName: "responded",
-              object: jsTask,
-              data: jsonString.toString(),
-              responseCode: dataTask && dataTask.response ? (<NSHTTPURLResponse>dataTask.response).statusCode : -1
+                eventName: "responded",
+                object: jsTask,
+                data: jsonString.toString(),
+                responseCode: dataTask && dataTask.response ? (<NSHTTPURLResponse>dataTask.response).statusCode : -1
             });
         });
     }
@@ -253,7 +250,7 @@ class Task extends Observable {
     public _fileToCleanup: string;
     private _task: NSURLSessionTask;
     private _session: NSURLSession;
-    public testProp = 0;
+
     constructor(nsSession: NSURLSession, nsTask: NSURLSessionTask) {
         super();
         this._task = nsTask;

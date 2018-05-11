@@ -12,6 +12,10 @@
       "version": "4.0.1"
     }
   },
+  "scripts": {
+    "build.plugin": "cd ../src && npm run build",
+    "ci.tslint": "npm i && tslint --config '../tslint.json' 'app/**/*.ts' --exclude '**/node_modules/**'"
+  },
   "dependencies": {
     "@angular/animations": "~5.2.0",
     "@angular/common": "~5.2.0",
@@ -28,6 +32,7 @@
     "reflect-metadata": "~0.1.10",
     "rxjs": "~5.5.5",
     "tns-core-modules": "4.0.0",
+    "tns-platform-declarations": "^4.0.0",
     "zone.js": "~0.8.18"
   },
   "devDependencies": {
@@ -50,6 +55,7 @@
     "uglifyjs-webpack-plugin": "~1.1.6",
     "webpack": "~3.10.0",
     "webpack-bundle-analyzer": "^2.9.1",
+    "tslint": "^5.0.0",
     "webpack-sources": "~1.1.0"
   }
 }

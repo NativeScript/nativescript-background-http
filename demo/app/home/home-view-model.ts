@@ -19,7 +19,7 @@ export class HomeViewModel extends Observable {
         this.tasks = new ObservableArray<bghttp.Task>();
         this.events = new ObservableArray();
         this.counter = 0;
-        this.file = fs.path.normalize(fs.knownFolders.currentApp().path + "/home/bigpic.jpg");;
+        this.file = fs.path.normalize(fs.knownFolders.currentApp().path + "/home/bigpic.jpg");
         if (isIOS) {
             // NOTE: This works for emulator. Real device will need other address.
             this.url = "http://localhost:8080";
@@ -65,7 +65,7 @@ export class HomeViewModel extends Observable {
         let task: bghttp.Task;
         let lastEvent = "";
         if (isMulti) {
-            var params = [
+            const params = [
                 { name: "test", value: "value" },
                 { name: "fileToUpload", filename: this.file, mimeType: 'image/jpeg' }
             ];

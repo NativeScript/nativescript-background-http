@@ -65,7 +65,7 @@ export class HomeComponent {
         let task: bgHttp.Task;
         let lastEvent = "";
         if (isMulti) {
-            var params = [
+            const params = [
                 { name: "test", value: "value" },
                 { name: "fileToUpload", filename: this.file, mimeType: 'image/jpeg' }
             ];
