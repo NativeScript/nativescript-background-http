@@ -4,10 +4,13 @@ import { ad } from "utils/utils";
 import * as fileSystemModule from "file-system";
 import * as common from "./index";
 
+declare const android: any;
+
 type Context = android.content.Context;
 type ServerResponse = net.gotev.uploadservice.ServerResponse;
 type UploadInfo = net.gotev.uploadservice.UploadInfo;
 type UploadServiceBroadcastReceiver = net.gotev.uploadservice.UploadServiceBroadcastReceiver;
+type UploadNotificationConfig = net.gotev.uploadservice.UploadNotificationConfig;
 
 /* A snapshot-friendly, lazy-loaded class for ProgressReceiver BEGIN */
 let ProgressReceiver: any;
@@ -186,19 +189,7 @@ class Task extends ObservableBase {
 
         const displayNotificationProgress = typeof options.androidDisplayNotificationProgress === "boolean" ? options.androidDisplayNotificationProgress : true;
         if (displayNotificationProgress) {
-
-            const uploadNotificationConfig = new net.gotev.uploadservice.UploadNotificationConfig();
-            if(android.os.Build.VERSION.SDK_INT >= 26){
-                const channel = new android.app.NotificationChannel(application.android.packageName, 
-                                application.android.packageName,
-                                android.app.NotificationManager.IMPORTANCE_LOW);
-                                
-                const notificationManager = context.getSystemService(android.content.Context.NOTIFICATION_SERVICE)
-                notificationManager.createNotificationChannel(channel);
-                
-                uploadNotificationConfig.setNotificationChannelId(application.android.packageName)
-            }
-            request.setNotificationConfig(uploadNotificationConfig);
+            request.setNotificationConfig(Task.getUploadNotificationConfig(context));
         }
 
         const autoDeleteAfterUpload = typeof options.androidAutoDeleteAfterUpload === "boolean" ? options.androidAutoDeleteAfterUpload : false;
@@ -269,19 +260,7 @@ class Task extends ObservableBase {
 
         const displayNotificationProgress = typeof options.androidDisplayNotificationProgress === "boolean" ? options.androidDisplayNotificationProgress : true;
         if (displayNotificationProgress) {
-
-            const uploadNotificationConfig = new net.gotev.uploadservice.UploadNotificationConfig();
-            if(android.os.Build.VERSION.SDK_INT >= 26){
-                const channel = new android.app.NotificationChannel(application.android.packageName, 
-                                application.android.packageName,
-                                android.app.NotificationManager.IMPORTANCE_LOW);
-                                
-                const notificationManager = context.getSystemService(android.content.Context.NOTIFICATION_SERVICE)
-                notificationManager.createNotificationChannel(channel);
-                
-                uploadNotificationConfig.setNotificationChannelId(application.android.packageName)
-            }
-            request.setNotificationConfig(uploadNotificationConfig);
+            request.setNotificationConfig(Task.getUploadNotificationConfig(context));
         }
 
         const headers = options.headers;
@@ -354,5 +333,21 @@ class Task extends ObservableBase {
     }
     cancel(): void {
         (<any>net).gotev.uploadservice.UploadService.stopUpload(this._id);
+    }
+
+    private static getUploadNotificationConfig(context: Context): UploadNotificationConfig {
+
+        const uploadNotificationConfig = new net.gotev.uploadservice.UploadNotificationConfig();
+        if(android.os.Build.VERSION.SDK_INT >= 26){
+            const channel = new android.app.NotificationChannel(application.android.packageName, 
+                            application.android.packageName,
+                            android.app.NotificationManager.IMPORTANCE_LOW);
+                            
+            const notificationManager = context.getSystemService(android.content.Context.NOTIFICATION_SERVICE)
+            notificationManager.createNotificationChannel(channel);
+            
+            uploadNotificationConfig.setNotificationChannelId(application.android.packageName)
+        }
+        return uploadNotificationConfig;
     }
 }
