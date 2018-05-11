@@ -1,9 +1,9 @@
 import * as bghttp from "nativescript-background-http";
-import { isIOS } from "platform";
-import { Observable } from 'data/observable';
-import { ObservableArray } from "data/observable-array";
-import * as app from "application";
-import * as fs from "file-system";
+import { isIOS } from "tns-core-modules/platform";
+import { Observable } from 'tns-core-modules/data/observable';
+import { ObservableArray } from "tns-core-modules/data/observable-array";
+import * as app from "tns-core-modules/application";
+import * as fs from "tns-core-modules/file-system";
 
 export class HomeViewModel extends Observable {
     tasks: ObservableArray<bghttp.Task>;

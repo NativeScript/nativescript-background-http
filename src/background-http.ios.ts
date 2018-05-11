@@ -1,7 +1,7 @@
-import { Observable } from "data/observable";
+import { Observable } from "tns-core-modules/data/observable";
 import * as common from "./index";
-import * as fileSystemModule from "file-system";
-import * as utils from "utils/utils";
+import * as fileSystemModule from "tns-core-modules/file-system";
+import * as utils from "tns-core-modules/utils/utils";
 
 const main_queue = dispatch_get_current_queue();
 let zonedOnProgress = null;

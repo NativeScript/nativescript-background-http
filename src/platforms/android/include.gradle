@@ -1,12 +1,3 @@
-//default elements
-android {
-  productFlavors {
-    "nativescript-background-http" {
-      dimension "nativescript-background-http"
-    }
-  }
-}
-
 //optional elements
 dependencies {
     compile 'net.gotev:uploadservice:3.4.2'

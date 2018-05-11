@@ -1,6 +1,6 @@
-import * as application from "application";
-import { Observable } from "data/observable";
-import * as fileSystemModule from "file-system";
+import * as application from "tns-core-modules/application";
+import { Observable } from "tns-core-modules/data/observable";
+import * as fileSystemModule from "tns-core-modules/file-system";
 import * as common from "./index";
 
 type Context = android.content.Context;
