@@ -8,7 +8,7 @@
 android {  
   defaultConfig {  
     generatedDensities = []
-    applicationId = "org.nativescript.backgroundhttpdemoangular"  
+    applicationId = "org.nativescript.demoangular"  
   }  
   aaptOptions {  
     additionalParameters "--no-version-vectors"  

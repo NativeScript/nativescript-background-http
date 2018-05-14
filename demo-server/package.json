@@ -1,6 +1,9 @@
 {
   "name": "bghttp-demo-server",
   "version": "1.0.0",
+  "scripts": {
+    "start": "npm i && node server.js 8080"
+  },
   "dependencies": {
     "stream-throttle": "*"
   }

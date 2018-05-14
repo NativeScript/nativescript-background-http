@@ -1,9 +1,56 @@
-import { Observable } from "data/observable"
-import * as common from "./index"
-import * as fileSystemModule from "file-system";
-import * as utils from "utils/utils";
+import { Observable } from "tns-core-modules/data/observable";
+import * as common from "./index";
+import * as fileSystemModule from "tns-core-modules/file-system";
+import * as utils from "tns-core-modules/utils/utils";
 
 const main_queue = dispatch_get_current_queue();
+let zonedOnProgress = null;
+let zonedOnError = null;
+
+function onProgress(nsSession, nsTask, sent, expectedTotal) {
+    const task = Task.getTask(nsSession, nsTask);
+    task.notifyPropertyChange("upload", task.upload);
+    task.notifyPropertyChange("totalUpload", task.totalUpload);
+    task.notify(<common.ProgressEventData>{
+        eventName: "progress",
+        object: task,
+        currentBytes: sent,
+        totalBytes: expectedTotal
+    });
+}
+
+function onError(session, nsTask, error) {
+    const task = Task.getTask(session, nsTask);
+    if (task._fileToCleanup) {
+        const fileManager = utils.ios.getter(NSFileManager, NSFileManager.defaultManager);
+        fileManager.removeItemAtPathError(task._fileToCleanup);
+    }
+    if (error) {
+        task.notifyPropertyChange("status", task.status);
+        task.notify(<common.ErrorEventData>{
+            eventName: "error",
+            object: task,
+            error,
+            responseCode: nsTask && nsTask.response ? (<NSHTTPURLResponse>nsTask.response).statusCode : -1
+        });
+    } else {
+        task.notifyPropertyChange("upload", task.upload);
+        task.notifyPropertyChange("totalUpload", task.totalUpload);
+        task.notify(<common.ProgressEventData>{
+            eventName: "progress",
+            object: task,
+            currentBytes: nsTask.countOfBytesSent,
+            totalBytes: nsTask.countOfBytesExpectedToSend
+        });
+        task.notify(<common.CompleteEventData>{
+            eventName: "complete",
+            object: task,
+            responseCode: nsTask && nsTask.response ? (<NSHTTPURLResponse>nsTask.response).statusCode : -1
+        });
+
+        Task._tasks.delete(nsTask);
+    }
+}
 
 class BackgroundUploadDelegate extends NSObject implements NSURLSessionDelegate, NSURLSessionTaskDelegate, NSURLSessionDataDelegate, NSURLSessionDownloadDelegate {
 
@@ -11,59 +58,31 @@ class BackgroundUploadDelegate extends NSObject implements NSURLSessionDelegate,
 
     // NSURLSessionDelegate
     URLSessionDidBecomeInvalidWithError(session, error) {
-        //console.log("URLSessionDidBecomeInvalidWithError:");
-        //console.log(" - session: " + session);
-        //console.log(" - error:   " + error);
+        // console.log("URLSessionDidBecomeInvalidWithError:");
+        // console.log(" - session: " + session);
+        // console.log(" - error:   " + error);
     }
 
     URLSessionDidReceiveChallengeCompletionHandler(session, challenge, comlpetionHandler) {
-        //console.log("URLSessionDidFinishEventsForBackgroundURLSession: " + session + " " + challenge);
+        // console.log("URLSessionDidFinishEventsForBackgroundURLSession: " + session + " " + challenge);
         const disposition = null;
         const credential = null;
         comlpetionHandler(disposition, credential);
     }
 
     URLSessionDidFinishEventsForBackgroundURLSession(session) {
-        //console.log("URLSessionDidFinishEventsForBackgroundURLSession: " + session);
+        // console.log("URLSessionDidFinishEventsForBackgroundURLSession: " + session);
     }
 
     // NSURLSessionTaskDelegate
     URLSessionTaskDidCompleteWithError(session: NSURLSession, nsTask: NSURLSessionTask, error: NSError) {
         dispatch_async(main_queue, () => {
-            const task = Task.getTask(session, nsTask);
-            if (task._fileToCleanup) {
-                const fileManager = utils.ios.getter(NSFileManager, NSFileManager.defaultManager);
-                fileManager.removeItemAtPathError(task._fileToCleanup);
-            }
-            if (error) {
-                task.notifyPropertyChange("status", task.status);
-                task.notify(<common.ErrorEventData>{
-                    eventName: "error",
-                    object: task,
-                    error,
-                    responseCode: nsTask && nsTask.response ? (<NSHTTPURLResponse>nsTask.response).statusCode : -1
-                });
-            } else {
-                task.notifyPropertyChange("upload", task.upload);
-                task.notifyPropertyChange("totalUpload", task.totalUpload);
-                task.notify(<common.ProgressEventData>{
-                  eventName: "progress",
-                  object: task,
-                  currentBytes: nsTask.countOfBytesSent,
-                  totalBytes: nsTask.countOfBytesExpectedToSend
-                });
-                task.notify(<common.CompleteEventData>{
-                  eventName: "complete",
-                  object: task,
-                  responseCode: nsTask && nsTask.response ? (<NSHTTPURLResponse>nsTask.response).statusCode : -1
-                });
-                Task._tasks.delete(nsTask);
-            }
+            zonedOnError(session, nsTask, error);
         });
     }
 
     URLSessionTaskDidReceiveChallengeCompletionHandler(session, task, challenge, completionHandler) {
-        //console.log("URLSessionTaskDidReceiveChallengeCompletionHandler: " + session + " " + task + " " + challenge);
+        // console.log("URLSessionTaskDidReceiveChallengeCompletionHandler: " + session + " " + task + " " + challenge);
         const disposition = null;
         const credential = null;
         completionHandler(disposition, credential);
@@ -71,71 +90,61 @@ class BackgroundUploadDelegate extends NSObject implements NSURLSessionDelegate,
 
     URLSessionTaskDidSendBodyDataTotalBytesSentTotalBytesExpectedToSend(nsSession: NSURLSession, nsTask: NSURLSessionTask, data, sent: number, expectedTotal: number) {
         dispatch_async(main_queue, () => {
-            const task = Task.getTask(nsSession, nsTask);
-            //console.log("notifyPropertyChange: upload");
-            task.notifyPropertyChange("upload", task.upload);
-            //console.log("notifyPropertyChange: totalUpload");
-            task.notifyPropertyChange("totalUpload", task.totalUpload);
-            task.notify(<common.ProgressEventData>{
-              eventName: "progress",
-              object: task,
-              currentBytes: sent,
-              totalBytes: expectedTotal
-            });
+            zonedOnProgress(nsSession, nsTask, sent, expectedTotal);
         });
     }
 
     URLSessionTaskNeedNewBodyStream(session, task, need) {
-        //console.log("URLSessionTaskNeedNewBodyStream");
+        // console.log("URLSessionTaskNeedNewBodyStream");
     }
 
     URLSessionTaskWillPerformHTTPRedirectionNewRequestCompletionHandler(session, task, redirect, request, completionHandler) {
-        //console.log("URLSessionTaskWillPerformHTTPRedirectionNewRequestCompletionHandler");
+        // console.log("URLSessionTaskWillPerformHTTPRedirectionNewRequestCompletionHandler");
         completionHandler(request);
     }
 
     // NSURLSessionDataDelegate
     URLSessionDataTaskDidReceiveResponseCompletionHandler(session, dataTask, response, completionHandler) {
-        //console.log("URLSessionDataTaskDidReceiveResponseCompletionHandler");
+        // console.log("URLSessionDataTaskDidReceiveResponseCompletionHandler");
         const disposition = null;
         completionHandler(disposition);
     }
 
     URLSessionDataTaskDidBecomeDownloadTask(session, dataTask, downloadTask) {
-        //console.log("URLSessionDataTaskDidBecomeDownloadTask");
+        // console.log("URLSessionDataTaskDidBecomeDownloadTask");
     }
 
     URLSessionDataTaskDidReceiveData(session: NSURLSession, dataTask: NSURLSessionDataTask, data: NSData) {
         dispatch_async(main_queue, () => {
-            //console.log("URLSessionDataTaskDidReceiveData");
+            // console.log("URLSessionDataTaskDidReceiveData");
             // we have a response in the data...
             const jsTask = Task.getTask(session, dataTask);
             const jsonString = NSString.alloc().initWithDataEncoding(data, NSUTF8StringEncoding);
 
             jsTask.notify(<common.ResultEventData>{
-              eventName: "responded",
-              object: jsTask,
-              data: jsonString.toString(),
-              responseCode: dataTask && dataTask.response ? (<NSHTTPURLResponse>dataTask.response).statusCode : -1
+                eventName: "responded",
+                object: jsTask,
+                data: jsonString.toString(),
+                responseCode: dataTask && dataTask.response ? (<NSHTTPURLResponse>dataTask.response).statusCode : -1
             });
         });
     }
 
     URLSessionDataTaskWillCacheResponseCompletionHandler() {
-        //console.log("URLSessionDataTaskWillCacheResponseCompletionHandler");
+        // console.log("URLSessionDataTaskWillCacheResponseCompletionHandler");
     }
 
     // NSURLSessionDownloadDelegate
     URLSessionDownloadTaskDidResumeAtOffsetExpectedTotalBytes(session, task, offset, expects) {
-        //console.log("URLSessionDownloadTaskDidResumeAtOffsetExpectedTotalBytes");
+        // console.log("URLSessionDownloadTaskDidResumeAtOffsetExpectedTotalBytes");
     }
 
     URLSessionDownloadTaskDidWriteDataTotalBytesWrittenTotalBytesExpectedToWrite(session, task, data, written, expected) {
-        //console.log("URLSessionDownloadTaskDidWriteDataTotalBytesWrittenTotalBytesExpectedToWrite");
+        // console.log("URLSessionDownloadTaskDidWriteDataTotalBytesWrittenTotalBytesExpectedToWrite");
     }
 
     URLSessionDownloadTaskDidFinishDownloadingToURL(session, task, url) {
-        //console.log("URLSessionDownloadTaskDidFinishDownloadingToURL");
+        // console.log("URLSessionDownloadTaskDidFinishDownloadingToURL");
     }
 }
 
@@ -149,6 +158,8 @@ class Session implements common.Session {
         const delegate = BackgroundUploadDelegate.alloc().init();
         const configuration = NSURLSessionConfiguration.backgroundSessionConfigurationWithIdentifier(id);
         this._session = NSURLSession.sessionWithConfigurationDelegateDelegateQueue(configuration, delegate, null);
+        zonedOnProgress = global.zonedCallback(onProgress);
+        zonedOnError = global.zonedCallback(onError);
     }
 
     get ios(): any {
@@ -289,11 +300,10 @@ class Task extends Observable {
         this._task.cancel();
     }
 }
+
 export function session(id: string): common.Session {
     return Session.getSession(id);
 }
-
-
 
 class MultiMultiPartForm {
     private boundary: string;
@@ -327,7 +337,7 @@ class MultiMultiPartForm {
 
         const finalName = destFileName || filename.substr(filename.lastIndexOf('/') + 1, filename.length);
         this.fields.push({ name: name, filename: filename, destFilename: finalName, mimeType: mimeType });
-    };
+    }
 
     public generateFile(): string {
         const CRLF = "\r\n";
@@ -376,11 +386,9 @@ class MultiMultiPartForm {
         fileManager.createFileAtPathContentsAttributes(fileName, combinedData, null);
 
         return fileName;
-    };
+    }
 
     public getHeader(): string {
         return this.header;
-    };
-
-
+    }
 }

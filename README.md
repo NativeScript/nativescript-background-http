@@ -1,31 +1,20 @@
-# Background Upload plugin for the NativeScript framework
-## iOS
-The iOS API is implemented in JavaScript.
+# Background Upload NativeScript plugin
 
-## Android
-The minimum supported API level is 18 and the background file upload is handled by the [android-upload-service](https://github.com/alexbbb/android-upload-service) Open-Source library.
+A cross platform plugin for [the NativeScript framework](http://www.nativescript.org), that provides background upload for iOS and Android.
 
-## Examples
+[There is a stock NativeScript `http` module that can handle GET/POST requests that work with strings and JSONs](http://docs.nativescript.org/ApiReference/http/HOW-TO). It however comes short in features when it comes to really large files.
 
-To run the demo open a terminal at the root of the repo and start the server included in `demo-server` with the command:
-```
-npm run start-server
-```
+The plugin uses [NSURLSession with background session configuration for iOS](https://developer.apple.com/library/ios/documentation/Foundation/Reference/NSURLSessionConfiguration_class/index.html#//apple_ref/occ/clm/NSURLSessionConfiguration/backgroundSessionConfigurationWithIdentifier:); and for android - the [alexbbb/android-upload-service](https://github.com/alexbbb/android-upload-service) that implements an IntentService.
 
-Then, open a second terminal, again at the root of the repo and execute (for Android):
-```
-npm run start-demo-android
-```
-OR (for iOS)
-```
-npm run start-demo-ios
+## Installation
+
+```javascript
+tns plugin add nativescript-background-http
 ```
 
 ## Usage
 
-The below attached code snippets demostrate how to use `nativescript-background-http`, while uploading single or multiple files.
-
-For further help review the (SimpleBackgroundHttp)[https://github.com/NativeScript/nativescript-background-http/tree/master/examples] application.
+The below attached code snippets demonstrate how to use `nativescript-background-http`, while uploading single or multiple files.
 
 ### uploadFile
 
@@ -91,5 +80,7 @@ We love PRs! Check out the [contributing guidelines](CONTRIBUTING.md). If you wa
 ## Get Help 
 Please, use [github issues](https://github.com/NativeScript/nativescript-background-http/issues) strictly for [reporting bugs](CONTRIBUTING.md#reporting-bugs) or [requesting features](CONTRIBUTING.md#requesting-new-features). For general questions and support, check out the [NativeScript community forum](https://discourse.nativescript.org/) or ask our experts in [NativeScript community Slack channel](http://developer.telerik.com/wp-login.php?action=slack-invitation).
 
-![](https://ga-beacon.appspot.com/UA-111455-24/nativescript/nativescript-background-http?pixel)
+## License
 
+Apache License Version 2.0, January 2004
+![](https://ga-beacon.appspot.com/UA-111455-24/nativescript/nativescript-background-http?pixel)

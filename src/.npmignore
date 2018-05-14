@@ -1,3 +1,5 @@
+scripts/*
+*.map
 /node_modules
 *.ts
 !index.d.ts
