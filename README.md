@@ -1,4 +1,4 @@
-# Background Upload NativeScript plugin
+# Background Upload NativeScript plugin [![Build Status](https://travis-ci.org/NativeScript/nativescript-background-http.svg?branch=master)](https://travis-ci.org/NativeScript/nativescript-background-http)
 
 A cross platform plugin for [the NativeScript framework](http://www.nativescript.org), that provides background upload for iOS and Android.
 
