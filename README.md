@@ -73,6 +73,7 @@ var params = [
 		];
 task = session.multipartUpload(params, request);
 ```
+> To get advantage of the demo apps and test the functionality, you will have to start the server from `demo-server` folder part of the repository. To do so, execute `cd demo-server && npm run start` command in a terminal.
 
 ## Contribute
 We love PRs! Check out the [contributing guidelines](CONTRIBUTING.md). If you want to contribute, but you are not sure where to start - look for [issues labeled `help wanted`](https://github.com/NativeScript/nativescript-background-http/issues?q=is%3Aopen+is%3Aissue+label%3A%22help+wanted%22).
