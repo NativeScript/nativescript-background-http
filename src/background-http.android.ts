@@ -74,7 +74,8 @@ function onProgressReceiverCompleted(context: Context, uploadInfo: UploadInfo, r
     task.notify(<common.CompleteEventData>{
       eventName: "complete",
       object: task,
-      responseCode: response && typeof response.getHttpCode === 'function' ? response.getHttpCode() : -1
+      responseCode: response && typeof response.getHttpCode === 'function' ? response.getHttpCode() : -1,
+      response
     });
 }
 
