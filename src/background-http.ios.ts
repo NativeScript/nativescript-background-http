@@ -25,13 +25,15 @@ function onError(session, nsTask, error) {
         const fileManager = utils.ios.getter(NSFileManager, NSFileManager.defaultManager);
         fileManager.removeItemAtPathError(task._fileToCleanup);
     }
+    let response = nsTask && nsTask.response ? <NSHTTPURLResponse>nsTask.response : null;
     if (error) {
         task.notifyPropertyChange("status", task.status);
         task.notify(<common.ErrorEventData>{
             eventName: "error",
             object: task,
             error,
-            responseCode: nsTask && nsTask.response ? (<NSHTTPURLResponse>nsTask.response).statusCode : -1
+            responseCode: response ? response.statusCode : -1,
+            response
         });
     } else {
         task.notifyPropertyChange("upload", task.upload);
@@ -45,7 +47,8 @@ function onError(session, nsTask, error) {
         task.notify(<common.CompleteEventData>{
             eventName: "complete",
             object: task,
-            responseCode: nsTask && nsTask.response ? (<NSHTTPURLResponse>nsTask.response).statusCode : -1
+            responseCode: response ? response.statusCode : -1,
+            response
         });
 
         Task._tasks.delete(nsTask);
