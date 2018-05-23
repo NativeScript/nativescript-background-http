@@ -31,7 +31,7 @@
     "nativescript-theme-core": "~1.0.4",
     "reflect-metadata": "~0.1.10",
     "rxjs": "~6.1.0",
-    "tns-core-modules": "4.0.0",
+    "tns-core-modules": "next",
     "tns-platform-declarations": "^4.0.0",
     "zone.js": "~0.8.26"
   },
