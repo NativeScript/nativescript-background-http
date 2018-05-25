@@ -1,7 +1,6 @@
 branches:
   only: 
     - next
-
 matrix:
   include:
     - stage: "WebPack and Build"
