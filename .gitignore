@@ -5,6 +5,7 @@
 *.js
 *.js.map
 *.log
+*.esm.json
 src/*.d.ts
 !src/index.d.ts
 !src/references.d.ts
@@ -23,16 +24,13 @@ demo/report/report.html
 demo/report/stats.json
 demo/node_modules
 demo-angular/node_modules
-
 demo-angular/*.d.ts
 !demo-angular/references.d.ts
 demo-angular/platforms/
 demo-angular/hooks
-
 !demo-server/*.js
-!demo/webpack.config.js
-!demo-angular/webpack.config.js
 /src/platforms/android/nativescript_background_http.aar
 /src/*.tgz
+/publish/package/*.tgz
 /src/package
 /src/package-lock.json
