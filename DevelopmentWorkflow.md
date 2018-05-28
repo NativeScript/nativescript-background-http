@@ -21,13 +21,13 @@ For local development we recommend using the npm commands provided in the root d
 To run and develop using TypeScript demo:
 
 ```bash
-# Build the plugin. This compiles all TypeScript files in the plugin directory, which is referenced in the demo's package.json
-npm run tsc
+# Navigate to the src directory:
+cd src/
 # Run the demo server, which is used to handle uploads from the demo app. Best to run from a separate terminal.
-npm run start-server
+npm run server
 # Run the demo for iOS or Android.
-npm run start-demo-ios
-npm run start-demo-android
+npm run demo.ios
+npm run demo.android
 ```
 
 ## Testing the plugin
