@@ -170,7 +170,9 @@ export interface Request {
     utf8?: boolean;
 
     /*
-     * Use this to set if progress notification should be displayed or not
+     * Use this to set if progress notification should be displayed or not.
+     * Please note that since API26, Android requires developers to use notifications
+     * when running background tasks. https://developer.android.com/about/versions/oreo/background
      */
     androidDisplayNotificationProgress?: boolean;
 
