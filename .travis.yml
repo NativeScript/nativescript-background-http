@@ -1,3 +1,6 @@
+branches:
+  only: 
+    - master
 matrix:
   include:
     - stage: "Lint"
@@ -13,14 +16,14 @@ matrix:
       language: node_js 
       node_js: "6"
       jdk: oraclejdk8
-      script: cd demo && npm run build.plugin && npm i && tns build ios --bundle --env.uglify && cd ../demo-angular && npm i && tns build ios --bundle --env.uglify
+      script: cd demo && npm run build.plugin && npm i && tns build ios --bundle --env.uglify && cd ../demo-angular && npm i && tns build ios --bundle --env.uglify --env.aot
     - language: android
       os: linux
       env:
         - WebPack="Android"
       jdk: oraclejdk8
       before_install: nvm install 6.10.3
-      script: cd demo && npm run build.plugin && npm i && tns build android --bundle --env.uglify --env.snapshot && cd ../demo-angular && tns build android --bundle --env.uglify --env.snapshot
+      script: cd demo && npm run build.plugin && npm i && tns build android --bundle --env.uglify --env.snapshot && cd ../demo-angular && tns build android --bundle --env.uglify --env.snapshot --env.aot
     - language: android
       env: 
         - BuildAndroid="26"
@@ -43,12 +46,12 @@ matrix:
 android:
   components:
     - tools
+    - tools
     - platform-tools
-    - build-tools-26.0.2
+    - build-tools-27.0.3
     - android-26
     - android-23
     - extra-android-m2repository
-    - sys-img-armeabi-v7a-android-21
 
 install:
     - echo no | npm install -g nativescript
