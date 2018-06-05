@@ -6,10 +6,10 @@
   "nativescript": {
     "id": "org.nativescript.demo",
     "tns-android": {
-      "version": "4.0.1"
+      "version": "4.1.1"
     },
     "tns-ios": {
-      "version": "4.0.1"
+      "version": "4.1.0"
     }
   },
   "scripts": {
@@ -19,7 +19,7 @@
   "dependencies": {
     "nativescript-background-http": "../src",
     "nativescript-theme-core": "~1.0.4",
-    "tns-core-modules": "next",
+    "tns-core-modules": "^4.1.0",
     "tns-platform-declarations": "^4.0.0"
   },
   "devDependencies": {
@@ -32,8 +32,8 @@
     "css-loader": "~0.28.7",
     "extract-text-webpack-plugin": "~3.0.2",
     "lazy": "1.0.11",
-    "nativescript-dev-typescript": "next",
-    "nativescript-dev-webpack": "next",
+    "nativescript-dev-typescript": "^0.7.1",
+    "nativescript-dev-webpack": "^0.12.0",
     "nativescript-worker-loader": "~0.8.1",
     "raw-loader": "~0.5.1",
     "resolve-url-loader": "~2.3.0",
