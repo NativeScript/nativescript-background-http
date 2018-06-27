@@ -133,7 +133,7 @@ export interface Session {
      * @param options Options for the upload, sets uri, headers, task description etc.
      */
     uploadFile(fileUri: string, options: Request): Task;
-    multipartUpload(params: Array<any>, options: any): Task;
+    multipartUpload(params: Array<any>, options: Request): Task;
 
 }
 
