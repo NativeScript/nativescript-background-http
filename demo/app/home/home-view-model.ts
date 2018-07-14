@@ -55,7 +55,8 @@ export class HomeViewModel extends Observable {
                 "File-Name": name
             },
             description: description,
-            androidAutoDeleteAfterUpload: false
+            androidAutoDeleteAfterUpload: false,
+            androidNotificationTitle: 'NativeScript HTTP background'
         };
 
         if (should_fail) {
