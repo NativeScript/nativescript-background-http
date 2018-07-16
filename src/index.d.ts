@@ -180,4 +180,10 @@ export interface Request {
      * Use this to set if files should be deleted automatically after upload
      */
     androidAutoDeleteAfterUpload?: boolean;
+
+    /*
+    * Use this to set the maximum retry count. The default retry count is 0
+    * https://github.com/gotev/android-upload-service/wiki/Recipes#backoff
+    */
+    androidMaxRetries?: number;
 }
