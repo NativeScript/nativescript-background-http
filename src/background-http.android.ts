@@ -198,6 +198,10 @@ class Task extends ObservableBase {
         if (autoDeleteAfterUpload) {
             request.setAutoDeleteFilesAfterSuccessfulUpload(true);
         }
+        const maxRetryCount = typeof options.androidMaxRetries === "number" ? options.androidMaxRetries : undefined;
+        if (maxRetryCount) {
+            request.setMaxRetries(maxRetryCount);
+        }
 
         const headers = options.headers;
         if (headers) {
@@ -268,6 +272,14 @@ class Task extends ObservableBase {
             const notificationTitle = typeof options.androidNotificationTitle === "string" ? options.androidNotificationTitle : 'File Upload';
             uploadNotificationConfig.setTitleForAllStatuses(notificationTitle);
             request.setNotificationConfig(uploadNotificationConfig);
+        }
+        const autoDeleteAfterUpload = typeof options.androidAutoDeleteAfterUpload === "boolean" ? options.androidAutoDeleteAfterUpload : false;
+        if (autoDeleteAfterUpload) {
+            request.setAutoDeleteFilesAfterSuccessfulUpload(true);
+        }
+        const maxRetryCount = typeof options.androidMaxRetries === "number" ? options.androidMaxRetries : undefined;
+        if (maxRetryCount) {
+            request.setMaxRetries(maxRetryCount);
         }
 
         const headers = options.headers;
