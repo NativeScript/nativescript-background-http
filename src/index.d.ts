@@ -177,6 +177,11 @@ export interface Request {
     androidDisplayNotificationProgress?: boolean;
 
     /*
+     * Use this to set the title shown in the Android notifications center.
+     */
+    androidNotificationTitle?: string;
+
+    /*
      * Use this to set if files should be deleted automatically after upload
      */
     androidAutoDeleteAfterUpload?: boolean;

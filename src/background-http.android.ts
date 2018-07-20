@@ -189,7 +189,10 @@ class Task extends ObservableBase {
 
         const displayNotificationProgress = typeof options.androidDisplayNotificationProgress === "boolean" ? options.androidDisplayNotificationProgress : true;
         if (displayNotificationProgress) {
-            request.setNotificationConfig(new net.gotev.uploadservice.UploadNotificationConfig());
+            const uploadNotificationConfig = new net.gotev.uploadservice.UploadNotificationConfig();
+            const notificationTitle = typeof options.androidNotificationTitle === "string" ? options.androidNotificationTitle : 'File Upload';
+            uploadNotificationConfig.setTitleForAllStatuses(notificationTitle);
+            request.setNotificationConfig(uploadNotificationConfig);
         }
         const autoDeleteAfterUpload = typeof options.androidAutoDeleteAfterUpload === "boolean" ? options.androidAutoDeleteAfterUpload : false;
         if (autoDeleteAfterUpload) {
@@ -261,7 +264,10 @@ class Task extends ObservableBase {
 
         const displayNotificationProgress = typeof options.androidDisplayNotificationProgress === "boolean" ? options.androidDisplayNotificationProgress : true;
         if (displayNotificationProgress) {
-            request.setNotificationConfig(new net.gotev.uploadservice.UploadNotificationConfig());
+            const uploadNotificationConfig = new net.gotev.uploadservice.UploadNotificationConfig();
+            const notificationTitle = typeof options.androidNotificationTitle === "string" ? options.androidNotificationTitle : 'File Upload';
+            uploadNotificationConfig.setTitleForAllStatuses(notificationTitle);
+            request.setNotificationConfig(uploadNotificationConfig);
         }
 
         const headers = options.headers;
