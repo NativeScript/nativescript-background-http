@@ -189,11 +189,18 @@ class Task extends ObservableBase {
 
         const displayNotificationProgress = typeof options.androidDisplayNotificationProgress === "boolean" ? options.androidDisplayNotificationProgress : true;
         if (displayNotificationProgress) {
-            request.setNotificationConfig(new net.gotev.uploadservice.UploadNotificationConfig());
+            const uploadNotificationConfig = new net.gotev.uploadservice.UploadNotificationConfig();
+            const notificationTitle = typeof options.androidNotificationTitle === "string" ? options.androidNotificationTitle : 'File Upload';
+            uploadNotificationConfig.setTitleForAllStatuses(notificationTitle);
+            request.setNotificationConfig(uploadNotificationConfig);
         }
         const autoDeleteAfterUpload = typeof options.androidAutoDeleteAfterUpload === "boolean" ? options.androidAutoDeleteAfterUpload : false;
         if (autoDeleteAfterUpload) {
             request.setAutoDeleteFilesAfterSuccessfulUpload(true);
+        }
+        const maxRetryCount = typeof options.androidMaxRetries === "number" ? options.androidMaxRetries : undefined;
+        if (maxRetryCount) {
+            request.setMaxRetries(maxRetryCount);
         }
 
         const headers = options.headers;
@@ -261,7 +268,18 @@ class Task extends ObservableBase {
 
         const displayNotificationProgress = typeof options.androidDisplayNotificationProgress === "boolean" ? options.androidDisplayNotificationProgress : true;
         if (displayNotificationProgress) {
-            request.setNotificationConfig(new net.gotev.uploadservice.UploadNotificationConfig());
+            const uploadNotificationConfig = new net.gotev.uploadservice.UploadNotificationConfig();
+            const notificationTitle = typeof options.androidNotificationTitle === "string" ? options.androidNotificationTitle : 'File Upload';
+            uploadNotificationConfig.setTitleForAllStatuses(notificationTitle);
+            request.setNotificationConfig(uploadNotificationConfig);
+        }
+        const autoDeleteAfterUpload = typeof options.androidAutoDeleteAfterUpload === "boolean" ? options.androidAutoDeleteAfterUpload : false;
+        if (autoDeleteAfterUpload) {
+            request.setAutoDeleteFilesAfterSuccessfulUpload(true);
+        }
+        const maxRetryCount = typeof options.androidMaxRetries === "number" ? options.androidMaxRetries : undefined;
+        if (maxRetryCount) {
+            request.setMaxRetries(maxRetryCount);
         }
 
         const headers = options.headers;
