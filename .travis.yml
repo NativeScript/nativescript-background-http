@@ -6,7 +6,7 @@ matrix:
     - stage: "Lint"
       language: node_js
       os: linux
-      node_js: "6"
+      node_js: "8"
       script: cd ../demo && npm run build.plugin && npm run ci.tslint
     - stage: "Build and webpack"
       os: osx
@@ -19,7 +19,10 @@ matrix:
       before_script:
         - cd ../demo && tns platform add ios@next
         - cd ../demo-angular && tns platform add ios@next
-      script: cd ../demo && npm run build.plugin && npm i && tns build ios --bundle --env.uglify && cd ../demo-angular && npm i && tns build ios --bundle --env.uglify --env.aot
+      script:
+        - cd ../demo && npm run build.plugin && npm i && tns build ios --bundle --env.uglify
+        - cd ../publish && sh pack.sh && cp package/*.tgz ../demo-angular/package.tgz
+        - cd ../demo-angular && tns plugin add package.tgz && npm i && tns build ios --bundle --env.uglify --env.aot
     - os: linux
       language: android
       env:
@@ -29,7 +32,10 @@ matrix:
       before_script:
         - cd ../demo && tns platform add android@next
         - cd ../demo-angular && tns platform add android@next
-      script: cd ../demo && npm run build.plugin && npm i && tns build android --bundle --env.uglify --env.snapshot && cd ../demo-angular && tns build android --bundle --env.uglify --env.snapshot --env.aot
+      script:
+        - cd ../demo && npm run build.plugin && npm i && tns build android --bundle --env.uglify
+        - cd ../publish && sh pack.sh && cp package/*.tgz ../demo-angular/package.tgz
+        - cd ../demo-angular && tns plugin add package.tgz && npm i && tns build android --bundle --env.uglify --env.aot
     - os: linux
       env: 
         - BuildAndroid="26"
@@ -72,11 +78,14 @@ install:
     - cd src
     - npm uninstall tns-core-modules -D && npm install tns-core-modules@next -D
     - cd ../demo
-    - npm uninstall tns-core-modules -P && npm install tns-core-modules@next -P
     - npm uninstall nativescript-dev-webpack -D && npm install nativescript-dev-webpack@next -D
+    - ./node_modules/.bin/update-ns-webpack --deps
+    - npm uninstall tns-core-modules -P && npm install tns-core-modules@next -P
     - npm uninstall nativescript-dev-typescript -D && npm install nativescript-dev-typescript@next -D
     - cd ../demo-angular
+    - npm uninstall nativescript-dev-webpack -D && npm install nativescript-dev-webpack@next -D
+    - ./node_modules/.bin/update-ns-webpack --deps
+    - ./node_modules/.bin/update-app-ng-deps
     - npm uninstall tns-core-modules -P && npm install tns-core-modules@next -P
     - npm uninstall nativescript-angular -P && npm install nativescript-angular@next -P
-    - npm uninstall nativescript-dev-webpack -D && npm install nativescript-dev-webpack@next -D
     - npm uninstall nativescript-dev-typescript -D && npm install nativescript-dev-typescript@next -D
