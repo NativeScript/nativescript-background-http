@@ -23,7 +23,7 @@ matrix:
         - WebPack="Android"
       jdk: oraclejdk8
       before_install: nvm install 6.10.3
-      script: cd demo && npm run build.plugin && npm i && tns build android --bundle --env.uglify --env.snapshot && cd ../demo-angular && tns build android --bundle --env.uglify --env.snapshot --env.aot
+      script: cd demo && npm run build.plugin && npm i && tns build android --bundle --env.uglify --env.snapshot && cd ../demo-angular && npm i && tns build android --bundle --env.uglify --env.snapshot --env.aot
     - language: android
       env: 
         - BuildAndroid="26"
@@ -31,7 +31,7 @@ matrix:
       jdk: oraclejdk8
       before_install: nvm install stable
       script:
-        - cd src && npm i && npm run tsc && cd ../demo && tns build android && cd ../demo-angular && tns build android
+        - cd src && npm i && npm run tsc && cd ../demo && npm i && tns build android && cd ../demo-angular && npm i && tns build android
     - os: osx
       env: 
         - BuildiOS="11"
@@ -41,7 +41,7 @@ matrix:
       node_js: "6"
       jdk: oraclejdk8
       script: 
-        - cd src && npm i && npm run tsc && cd ../demo && tns build ios && cd ../demo-angular && tns build ios
+        - cd src && npm i && npm run tsc && cd ../demo && npm i && tns build ios && cd ../demo-angular && npm i && tns build ios
 
 android:
   components:
