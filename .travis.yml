@@ -12,7 +12,7 @@ matrix:
       os: osx
       env:
         - Webpack="iOS"
-      osx_image: xcode9.3
+      osx_image: xcode9.2
       language: node_js 
       node_js: "8"
       jdk: oraclejdk8
@@ -28,7 +28,7 @@ matrix:
       env:
         - Webpack="Android"
       jdk: oraclejdk8
-      before_install: nvm install 8.9.4
+      before_install: nvm install 8.11.4
       before_script:
         - cd ../demo && tns platform add android@next
         - cd ../demo-angular && tns platform add android@next
@@ -41,7 +41,7 @@ matrix:
         - BuildAndroid="26"
       language: android
       jdk: oraclejdk8
-      before_install: nvm install 8.9.4
+      before_install: nvm install 8.11.4
       before_script:
         - cd ../demo && tns platform add android@next
         - cd ../demo-angular && tns platform add android@next
@@ -50,8 +50,8 @@ matrix:
     - os: osx
       env: 
         - BuildiOS="11"
-        - Xcode="9.3"
-      osx_image: xcode9.3
+        - Xcode="9.2"
+      osx_image: xcode9.2
       language: node_js 
       node_js: "8"
       jdk: oraclejdk8
