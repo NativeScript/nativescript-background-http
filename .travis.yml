@@ -30,7 +30,7 @@ matrix:
       env:
         - WebPack="Android"
       jdk: oraclejdk8
-      before_install: nvm install 8
+      before_install: nvm install 8.11.4
       script:
         - cd demo && npm run build.plugin && npm i && tns build android --bundle --env.uglify --env.snapshot
         - cd ../publish 
@@ -45,7 +45,7 @@ matrix:
         - BuildAndroid="26"
       os: linux
       jdk: oraclejdk8
-      before_install: nvm install 8
+      before_install: nvm install 8.11.4
       script:
         - cd src && npm i && npm run tsc && cd ../demo && npm i && tns build android && cd ../demo-angular && npm i && tns build android
     - os: osx
