@@ -8,7 +8,9 @@ exec('tns --version', (err, stdout, stderr) => {
         return;
     }
 
-    const tnsVersion = semver.major(stdout);
+    console.log("------- " + stdout);
+    console.log("------- coerce " + semver.coerce(stdout));
+    const tnsVersion = semver.major(semver.coerce(stdout));
 
     // execute 'tns plugin build' for {N} version > 4. This command builds .aar in platforms/android folder.
     if (tnsVersion >= 4) {
