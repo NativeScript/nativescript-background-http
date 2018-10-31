@@ -18,7 +18,7 @@ export interface ErrorEventData extends observable.EventData {
     responseCode: number;
 
     // The response from server
-    response: net.gotev.uploadservice.ServerResponse
+    response: any; // net.gotev.uploadservice.ServerResponse
 }
 
 /**
