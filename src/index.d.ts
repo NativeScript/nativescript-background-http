@@ -16,6 +16,9 @@ export interface ErrorEventData extends observable.EventData {
     error: any /*NSError | java.lang.Exception*/;
     /** HTTP response code if response object is present, otherwise -1 */
     responseCode: number;
+
+    // The response from server
+    response: any; // net.gotev.uploadservice.ServerResponse
 }
 
 /**
