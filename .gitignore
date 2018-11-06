@@ -6,6 +6,7 @@
 *.js.map
 *.log
 *.esm.json
+*.tns.json
 src/*.d.ts
 !src/index.d.ts
 !src/references.d.ts
