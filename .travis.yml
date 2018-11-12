@@ -92,3 +92,4 @@ install:
     - npm uninstall tns-core-modules -P && npm install tns-core-modules@next -P
     - npm uninstall nativescript-angular -P && npm install nativescript-angular@next -P
     - npm uninstall nativescript-dev-typescript -D && npm install nativescript-dev-typescript@next -D
+    - npm install typescript@3.1.6 -D
