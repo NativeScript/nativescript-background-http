@@ -51,9 +51,9 @@
     "license": "Apache-2.0",
     "homepage": "https://github.com/NativeScript/nativescript-background-http/issues",
     "devDependencies": {
-        "tns-core-modules": "^5.0.1",
+        "tns-core-modules": "^5.0.0",
         "tns-platform-declarations": "^5.0.0",
-        "typescript": "~3.1.1",
+        "typescript": "~3.1.6",
         "rimraf": "~2.6.2",
         "tslint": "~5.11.0",
         "semver": "~5.6.0"
