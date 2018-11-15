@@ -17,28 +17,27 @@
     "ci.tslint": "npm i && tslint --config '../tslint.json' 'app/**/*.ts' --exclude '**/node_modules/**'"
   },
   "dependencies": {
-    "@angular/animations": "~6.1.0",
-    "@angular/common": "~6.1.0",
-    "@angular/compiler": "~6.1.0",
-    "@angular/core": "~6.1.0",
-    "@angular/forms": "~6.1.0",
-    "@angular/http": "~6.1.0",
-    "@angular/platform-browser": "~6.1.0",
-    "@angular/platform-browser-dynamic": "~6.1.0",
-    "@angular/router": "~6.1.0",
-    "nativescript-angular": "~6.2.0",
+    "@angular/animations": "~7.0.0",
+    "@angular/common": "~7.0.0",
+    "@angular/compiler": "~7.0.0",
+    "@angular/core": "~7.0.0",
+    "@angular/forms": "~7.0.0",
+    "@angular/http": "~7.0.0",
+    "@angular/platform-browser": "~7.0.0",
+    "@angular/platform-browser-dynamic": "~7.0.0",
+    "@angular/router": "~7.0.0",
+    "nativescript-angular": "~7.0.0",
     "nativescript-background-http": "../src",
     "nativescript-theme-core": "~1.0.4",
     "reflect-metadata": "~0.1.10",
-    "rxjs": "~6.2.0",
-    "tns-core-modules": "^5.0.1",
+    "rxjs": "^6.3.3",
+    "tns-core-modules": "^5.0.0",
     "tns-platform-declarations": "^5.0.0",
     "zone.js": "~0.8.26"
   },
   "devDependencies": {
-    "nativescript-dev-typescript": "~0.7.4",
-    "nativescript-dev-webpack": "~0.17.0",
-    "typescript": "~2.8.2",
+    "nativescript-dev-typescript": "~0.7.0",
+    "nativescript-dev-webpack": "~0.18.0",
     "tslint": "~5.11.0"
   }
 }
