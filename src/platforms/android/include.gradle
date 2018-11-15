@@ -1,10 +1,5 @@
 //default elements
 android {
-  productFlavors {
-    "nativescript-background-http" {
-      dimension "nativescript-background-http"
-    }
-  }
 }
 
 //optional elements
