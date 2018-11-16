@@ -61,6 +61,18 @@ In order to have a successful upload, the following must be taken into account:
 - the file must be accessible from your app. This may require additional permissions (e.g. access documents and files on the device). Usually this is not a problem - e.g. if you use another plugin to select the file, which already adds the required permissions.
 - the URL must not be blocked by the OS. Android Pie or later devices require TLS (HTTPS) connection by default and will not upload to an insecure (HTTP) URL.
 
+### Upload task API
+
+The task object has the following properties and methods, that can be used to get information about the upload:
+
+Name | Type | Description
+--- | --- | ---
+upload | `number` | Bytes uploaded.
+totalUpload | `number` | Total number of bytes to upload.
+status | `string` | One of the following: `error`, `uploading`, `complete`, `pending`,
+description | `string` | The description set in the request used to create the upload task.
+cancel()| `void` | Call this method to cancel an upload in progress.
+
 ### Handling upload events
 
 After the upload task is created you can monitor its progress using the following events:
