@@ -18,7 +18,7 @@ The below attached code snippets demonstrate how to use `nativescript-background
 
 ### Uploading files
 
-Sample code for configuring the upload session. Each session and the file upload task created from the session should have a unique id. The id is passed as a parameter when creating the session (the `image-upload` string in the code bellow):
+Sample code for configuring the upload session. Each session must have a unique `id`, but it can have multiple tasks running simultaneously. The `id` is passed as a parameter when creating the session (the `image-upload` string in the code bellow):
 
 ```JavaScript
 
@@ -82,13 +82,14 @@ task.on("progress", progressHandler);
 task.on("error", errorHandler);
 task.on("responded", respondedHandler);
 task.on("complete", completeHandler);
-task.on("cancelled", cancelledHandler);
+task.on("cancelled", cancelledHandler); // Android only
 ```
 
 Each event handler will receive a single parameter with event arguments:
 
 ```JavaScript
 // event arguments:
+// task: Task
 // currentBytes: number
 // totalBytes: number
 function progressHandler(e) {
@@ -96,6 +97,7 @@ function progressHandler(e) {
 }
 
 // event arguments:
+// task: Task
 // responseCode: number
 // error: java.lang.Exception (Android) / NSError (iOS)
 // response: net.gotev.uploadservice.ServerResponse (Android) / NSHTTPURLResponse (iOS)
@@ -106,6 +108,7 @@ function errorHandler(e) {
 
 
 // event arguments:
+// task: Task
 // responseCode: number
 // data: string
 function respondedHandler(e) {
@@ -113,11 +116,18 @@ function respondedHandler(e) {
 }
 
 // event arguments:
+// task: Task
 // responseCode: number
 // response: net.gotev.uploadservice.ServerResponse (Android) / NSHTTPURLResponse (iOS)
 function completeHandler(e) {
     alert("received " + e.responseCode + " code");
     var serverResponse = e.response;
+}
+
+// event arguments:
+// task: Task
+function cancelledHandler(e) {
+    alert("upload cancelled");
 }
 ```
 
