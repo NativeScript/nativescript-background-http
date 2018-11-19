@@ -69,7 +69,7 @@ Name | Type | Description
 --- | --- | ---
 upload | `number` | Bytes uploaded.
 totalUpload | `number` | Total number of bytes to upload.
-status | `string` | One of the following: `error`, `uploading`, `complete`, `pending`, `canceled`.
+status | `string` | One of the following: `error`, `uploading`, `complete`, `pending`, `cancelled`.
 description | `string` | The description set in the request used to create the upload task.
 cancel()| `void` | Call this method to cancel an upload in progress.
 
