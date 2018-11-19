@@ -98,7 +98,7 @@ function progressHandler(e) {
 // event arguments:
 // responseCode: number
 // error: java.lang.Exception (Android) / NSError (iOS)
-// serverResponse: net.gotev.uploadservice.ServerResponse (Android) / NSHTTPURLResponse (iOS)
+// response: net.gotev.uploadservice.ServerResponse (Android) / NSHTTPURLResponse (iOS)
 function errorHandler(e) {
     alert("received " + e.responseCode + " code.");
     var serverResponse = e.response;
@@ -114,7 +114,7 @@ function respondedHandler(e) {
 
 // event arguments:
 // responseCode: number
-// serverResponse: net.gotev.uploadservice.ServerResponse (Android) / NSHTTPURLResponse (iOS)
+// response: net.gotev.uploadservice.ServerResponse (Android) / NSHTTPURLResponse (iOS)
 function completeHandler(e) {
     alert("received " + e.responseCode + " code");
     var serverResponse = e.response;
