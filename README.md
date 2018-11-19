@@ -73,7 +73,7 @@ headers | `object` | Used to specify additional headers.
 description | `string` | Used to help identify the upload task locally - not sent to the remote server.
 utf8 | `boolean` | (Android only/multipart only) If true, sets the charset for the multipart request to UTF-8. Default is false.
 androidDisplayNotificationProgress | `boolean` | (Android only) Used to set if progress notifications should be displayed or not. Please note that since API26, Android requires developers to use notifications when running background tasks. https://developer.android.com/about/versions/oreo/background
-androidNotificationTitle | `boolean` | (Android only) Used to set the title shown in the Android notifications center.
+androidNotificationTitle | `string` | (Android only) Used to set the title shown in the Android notifications center.
 androidAutoDeleteAfterUpload | `boolean` | (Android only) Used to set if files should be deleted automatically after upload.
 androidMaxRetries | `number` | (Android only) Used to set the maximum retry count. The default retry count is 0. https://github.com/gotev/android-upload-service/wiki/Recipes#backoff
 
