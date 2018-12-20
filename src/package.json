@@ -25,8 +25,10 @@
         "plugin.tscwatch": "npm run tsc -- -w",
         "demo.ios": "npm i && npm run tsc && cd ../demo && tns run ios --syncAllFiles",
         "demo-angular.ios": "npm i && npm run tsc && cd ../demo-angular && tns run ios --syncAllFiles",
+        "demo-vue.ios": "npm i && npm run tsc && cd ../demo-vue && tns run ios --syncAllFiles --bundle",
         "demo.android": "npm i && npm run tsc && cd ../demo && tns run android --syncAllFiles",
         "demo-angular.android": "npm i && npm run tsc && cd ../demo-angular && tns run android --syncAllFiles",
+        "demo-vue.android": "npm i && npm run tsc && cd ../demo-vue && tns run android --syncAllFiles",
         "demo.reset": "cd ../demo && rimraf platforms",
         "demo-angular.reset": "cd ../demo-angular && rimraf platforms",
         "server": "cd ../demo-server && npm run start",
@@ -51,12 +53,12 @@
     "license": "Apache-2.0",
     "homepage": "https://github.com/NativeScript/nativescript-background-http/issues",
     "devDependencies": {
-        "rimraf": "~2.6.2",
-        "semver": "~5.6.0",
         "tns-core-modules": "^5.1.0",
         "tns-platform-declarations": "^5.1.0",
-        "tslint": "~5.11.0",
-        "typescript": "~3.1.6"
+        "typescript": "~3.1.6",
+        "rimraf": "~2.6.2",
+        "semver": "~5.6.0",
+        "tslint": "~5.11.0"
     },
     "bootstrapper": "nativescript-plugin-seed"
 }
