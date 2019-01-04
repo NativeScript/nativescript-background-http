@@ -89,7 +89,7 @@ export default {
 
       let task; // bgHttp.Task;
       let lastEvent = "";
-      
+
       if (isMulti) {
         const params = [
           { name: "test", value: "value" },
@@ -101,24 +101,24 @@ export default {
       }
 
       function onEvent(e) {
-          if (lastEvent !== e.eventName) {
+        if (lastEvent !== e.eventName) {
           // suppress all repeating progress events and only show the first one
           lastEvent = e.eventName;
-          } else {
+        } else {
           return;
-          }
+        }
 
-          this.events.push({
+        this.events.push({
           eventTitle: e.eventName + " " + e.object.description,
           eventData: JSON.stringify({
-              error: e.error ? e.error.toString() : e.error,
-              currentBytes: e.currentBytes,
-              totalBytes: e.totalBytes,
-              body: e.data
+            error: e.error ? e.error.toString() : e.error,
+            currentBytes: e.currentBytes,
+            totalBytes: e.totalBytes,
+            body: e.data
           })
-          });
+        });
 
-          this.$set(this.tasks, this.tasks.indexOf(task), task);
+        this.$set(this.tasks, this.tasks.indexOf(task), task);
       }
 
       task.on("progress", onEvent.bind(this));
@@ -126,7 +126,7 @@ export default {
       task.on("responded", onEvent.bind(this));
       task.on("complete", onEvent.bind(this));
       lastEvent = "";
-      
+
       this.tasks.push(task);
     },
     onItemLoading(args) {
