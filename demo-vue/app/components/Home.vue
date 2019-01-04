@@ -5,7 +5,7 @@
     </ActionBar>
 
     <GridLayout rows="3*,10, 2*, auto" columns="*, *, *">
-      <ListView colspan="3" for="item in tasks">
+      <ListView colSpan="3" for="item in tasks">
         <v-template>
           <StackLayout>
             <Label :text="item.description"></Label>
@@ -14,17 +14,9 @@
             <Label :text="'Status: ' + item.status"></Label>
           </StackLayout>
         </v-template>
-        <!-- <ng-template let-item="item">
-            <StackLayout>
-                <Label [text]="item.description"></Label>
-                <Progress [value]="item.upload" [maxValue]="item.totalUpload"></Progress>
-                <Label [text]="'Uploading: ' + item.upload + ' / ' + item.totalUpload"></Label>
-                <Label [text]="'Status: ' + item.status"></Label>
-            </StackLayout>
-        </ng-template>-->
       </ListView>
-      <StackLayout class="hr-dark" row="1" colspan="3"></StackLayout>
-      <ListView row="2" colspan="3" for="item in events">
+      <StackLayout class="hr-dark" row="1" colSpan="3"></StackLayout>
+      <ListView row="2" colSpan="3" for="item in events">
         <v-template let-item="item">
           <StackLayout>
             <Label :text="item.eventTitle"></Label>
@@ -33,40 +25,37 @@
         </v-template>
       </ListView>
       <Button row="3" margin="2" text="Upload!" @tap="onUploadTap"></Button>
-      <Button row="3" col="1" margin="2" text="Error-Up!" @tap="upload_error"></Button>
+      <Button row="3" col="1" margin="2" text="Error-Up!" @tap="onUploadWithErrorTap"></Button>
       <Button row="3" col="2" margin="2" text="MultiPart-Up!" @tap="onUploadMultiTap"></Button>
     </GridLayout>
-
-    <!-- <GridLayout>
-            <Label class="info" horizontalAlignment="center" verticalAlignment="center">
-                <FormattedString>
-                    <Span class="fa" text.decode="&#xf135; "/>
-                    <Span :text="message"/>
-                </FormattedString>
-            </Label>
-    </GridLayout>-->
   </Page>
 </template>
 
 <script>
 const bgHttp = require("nativescript-background-http");
+const fs = require("file-system");
+const platform = require("platform");
 
 export default {
-  computed: {
-    message() {
-      return "Blank {N}-Vue app";
-    }
-  },
   data() {
     return {
       tasks: [],
       events: [],
-      file: "",
-      url: "http://localhost:8080",
-      session: bgHttp.session("image-upload")
+      file: fs.path.normalize(
+        fs.knownFolders.currentApp().path + "/bigpic.jpg"
+      ),
+      // NOTE: This works for emulator. Real device will need other address.
+      url: platform.isIOS ? "http://localhost:8080" : "http://10.0.2.2:8080",
+      session: bgHttp.session("image-upload"),
+      counter: 0
     };
   },
   methods: {
+    onUploadWithErrorTap: function(e) {
+      this.session = bgHttp.session("image-upload");
+
+      this.startUpload(true, false);
+    },
     onUploadTap: function(e) {
       this.startUpload(false, false);
     },
@@ -75,7 +64,7 @@ export default {
     },
     startUpload: function(shouldFail, isMulti) {
       console.log(
-        (should_fail ? "Testing error during upload of " : "Uploading file: ") +
+        (shouldFail ? "Testing error during upload of " : "Uploading file: ") +
           this.file +
           (isMulti ? " using multipart." : "")
       );
@@ -94,12 +83,13 @@ export default {
         androidNotificationTitle: "NativeScript HTTP background"
       };
 
-      if (should_fail) {
+      if (shouldFail) {
         request.headers["Should-Fail"] = true;
       }
 
-      let task; //: bgHttp.Task;
+      let task; // bgHttp.Task;
       let lastEvent = "";
+      
       if (isMulti) {
         const params = [
           { name: "test", value: "value" },
@@ -111,22 +101,24 @@ export default {
       }
 
       function onEvent(e) {
-        if (lastEvent !== e.eventName) {
+          if (lastEvent !== e.eventName) {
           // suppress all repeating progress events and only show the first one
           lastEvent = e.eventName;
-        } else {
+          } else {
           return;
-        }
+          }
 
-        this.events.push({
+          this.events.push({
           eventTitle: e.eventName + " " + e.object.description,
           eventData: JSON.stringify({
-            error: e.error ? e.error.toString() : e.error,
-            currentBytes: e.currentBytes,
-            totalBytes: e.totalBytes,
-            body: e.data
+              error: e.error ? e.error.toString() : e.error,
+              currentBytes: e.currentBytes,
+              totalBytes: e.totalBytes,
+              body: e.data
           })
-        });
+          });
+
+          this.$set(this.tasks, this.tasks.indexOf(task), task);
       }
 
       task.on("progress", onEvent.bind(this));
@@ -134,6 +126,7 @@ export default {
       task.on("responded", onEvent.bind(this));
       task.on("complete", onEvent.bind(this));
       lastEvent = "";
+      
       this.tasks.push(task);
     },
     onItemLoading(args) {

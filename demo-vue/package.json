@@ -22,8 +22,10 @@
         "@babel/preset-env": "~7.1.0",
         "babel-loader": "~8.0.0",
         "nativescript-dev-webpack": "^0.18.5",
+        "nativescript-dev-typescript": "~0.7.0",
         "nativescript-vue-template-compiler": "~2.0.0",
         "node-sass": "~4.9.0",
+        "ts-loader": "^5.3.1",
         "vue-loader": "~15.4.0"
     },
     "readme": "NativeScript Application"
