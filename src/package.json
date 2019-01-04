@@ -28,7 +28,7 @@
         "demo-vue.ios": "npm i && npm run tsc && cd ../demo-vue && tns run ios --syncAllFiles --bundle",
         "demo.android": "npm i && npm run tsc && cd ../demo && tns run android --syncAllFiles",
         "demo-angular.android": "npm i && npm run tsc && cd ../demo-angular && tns run android --syncAllFiles",
-        "demo-vue.android": "npm i && npm run tsc && cd ../demo-vue && tns run android --syncAllFiles",
+        "demo-vue.android": "npm i && npm run tsc && cd ../demo-vue && tns run android --syncAllFiles --bundle",
         "demo.reset": "cd ../demo && rimraf platforms",
         "demo-angular.reset": "cd ../demo-angular && rimraf platforms",
         "server": "cd ../demo-server && npm run start",
