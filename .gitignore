@@ -35,3 +35,4 @@ demo-angular/hooks
 /publish/package/*.tgz
 /src/package
 /src/package-lock.json
+!demo-vue/app/app.js
