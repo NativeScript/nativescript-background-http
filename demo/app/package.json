@@ -3,7 +3,5 @@
     "v8Flags": "--expose_gc",
     "requireModules": ["nativescript-background-http"]
   },
-  "main": "app.js",
-  "name": "tns-template-blank-ts",
-  "version": "4.0.0"
+  "main": "app.js"
 }
