@@ -131,7 +131,7 @@ function ensureReceiver() {
     }
 }
 
-export function session(id: string) {
+export function session(id: string, foreground?: boolean) {
     // TODO: Cache.
     return new Session(id);
 }

@@ -3,8 +3,9 @@ import * as observable from "tns-core-modules/data/observable";
 /**
  * Get or create a background download/upload session by id.
  * @param id The session id.
+ * @param foreground iOS only, create a foreground session (allows workaround for response statusCode)
  */
-export function session(id: string): Session;
+export function session(id: string, foreground?: boolean): Session;
 
 /**
  * Provides error information for error notifications.

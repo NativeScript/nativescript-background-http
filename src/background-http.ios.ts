@@ -2,6 +2,7 @@ import { Observable } from "tns-core-modules/data/observable";
 import * as common from "./index";
 import * as fileSystemModule from "tns-core-modules/file-system";
 import * as utils from "tns-core-modules/utils/utils";
+declare const NSURLSessionResponseAllow;
 
 const main_queue = dispatch_get_current_queue();
 let zonedOnProgress = null;
@@ -19,15 +20,28 @@ function onProgress(nsSession, nsTask, sent, expectedTotal) {
     });
 }
 
-function onError(session, nsTask, error) {
+function onResponded(session, dataTask, response, data) {
+    const jsTask = Task.getTask(session, dataTask);
+    const jsonString = NSString.alloc().initWithDataEncoding(data, NSUTF8StringEncoding);
+
+    jsTask.notify(<common.ResultEventData>{
+        eventName: "responded",
+        object: jsTask,
+        data: jsonString.toString(),
+        responseCode: response ? response.statusCode : -1
+    });
+}
+
+function onError(session, nsTask, responseArg, error, data) {
     const task = Task.getTask(session, nsTask);
     if (task._fileToCleanup) {
         const fileManager = utils.ios.getter(NSFileManager, NSFileManager.defaultManager);
         fileManager.removeItemAtPathError(task._fileToCleanup);
     }
-    let response = nsTask && nsTask.response ? <NSHTTPURLResponse>nsTask.response : null;
+    let response = responseArg ? responseArg : (nsTask ? nsTask.response : null);
     if (error) {
         task.notifyPropertyChange("status", task.status);
+        onResponded(session, nsTask, response, data);
         task.notify(<common.ErrorEventData>{
             eventName: "error",
             object: task,
@@ -44,6 +58,7 @@ function onError(session, nsTask, error) {
             currentBytes: nsTask.countOfBytesSent,
             totalBytes: nsTask.countOfBytesExpectedToSend
         });
+        onResponded(session, nsTask, response, data);
         task.notify(<common.CompleteEventData>{
             eventName: "complete",
             object: task,
@@ -58,6 +73,15 @@ function onError(session, nsTask, error) {
 class BackgroundUploadDelegate extends NSObject implements NSURLSessionDelegate, NSURLSessionTaskDelegate, NSURLSessionDataDelegate, NSURLSessionDownloadDelegate {
 
     static ObjCProtocols = [NSURLSessionDelegate, NSURLSessionTaskDelegate, NSURLSessionDataDelegate, NSURLSessionDownloadDelegate];
+
+    private response: NSURLResponse;
+    private data: NSMutableData;
+
+    static new(): BackgroundUploadDelegate {
+        const val = <BackgroundUploadDelegate> super.new();
+        val.data = NSMutableData.alloc().init();
+        return val;
+    }
 
     // NSURLSessionDelegate
     URLSessionDidBecomeInvalidWithError(session, error) {
@@ -80,7 +104,7 @@ class BackgroundUploadDelegate extends NSObject implements NSURLSessionDelegate,
     // NSURLSessionTaskDelegate
     URLSessionTaskDidCompleteWithError(session: NSURLSession, nsTask: NSURLSessionTask, error: NSError) {
         dispatch_async(main_queue, () => {
-            zonedOnError(session, nsTask, error);
+            zonedOnError(session, nsTask, this.response, error, this.data);
         });
     }
 
@@ -107,9 +131,10 @@ class BackgroundUploadDelegate extends NSObject implements NSURLSessionDelegate,
     }
 
     // NSURLSessionDataDelegate
-    URLSessionDataTaskDidReceiveResponseCompletionHandler(session, dataTask, response, completionHandler) {
+    URLSessionDataTaskDidReceiveResponseCompletionHandler(session: NSURLSession, dataTask: NSURLSessionDataTask, response: NSURLResponse, completionHandler: (disposition: NSURLSessionResponseDisposition) => void) {
         // console.log("URLSessionDataTaskDidReceiveResponseCompletionHandler");
-        const disposition = null;
+        this.response = response;
+        const disposition = NSURLSessionResponseAllow;
         completionHandler(disposition);
     }
 
@@ -118,19 +143,9 @@ class BackgroundUploadDelegate extends NSObject implements NSURLSessionDelegate,
     }
 
     URLSessionDataTaskDidReceiveData(session: NSURLSession, dataTask: NSURLSessionDataTask, data: NSData) {
-        dispatch_async(main_queue, () => {
-            // console.log("URLSessionDataTaskDidReceiveData");
-            // we have a response in the data...
-            const jsTask = Task.getTask(session, dataTask);
-            const jsonString = NSString.alloc().initWithDataEncoding(data, NSUTF8StringEncoding);
-
-            jsTask.notify(<common.ResultEventData>{
-                eventName: "responded",
-                object: jsTask,
-                data: jsonString.toString(),
-                responseCode: dataTask && dataTask.response ? (<NSHTTPURLResponse>dataTask.response).statusCode : -1
-            });
-        });
+        // console.log("URLSessionDataTaskDidReceiveData");
+        // we have a response in the data...
+        this.data.appendData(data);
     }
 
     URLSessionDataTaskWillCacheResponseCompletionHandler() {
@@ -157,9 +172,15 @@ class Session implements common.Session {
 
     private _session: NSURLSession;
 
-    constructor(id: string) {
-        const delegate = BackgroundUploadDelegate.alloc().init();
-        const configuration = NSURLSessionConfiguration.backgroundSessionConfigurationWithIdentifier(id);
+    constructor(id: string, foreground: boolean = false) {
+        const delegate = BackgroundUploadDelegate.new();
+        let configuration;
+        if (foreground) {
+            configuration = NSURLSessionConfiguration.defaultSessionConfiguration;
+        } else {
+            configuration = NSURLSessionConfiguration.backgroundSessionConfigurationWithIdentifier(id);
+        }
+        
         this._session = NSURLSession.sessionWithConfigurationDelegateDelegateQueue(configuration, delegate, null);
         zonedOnProgress = global.zonedCallback(onProgress);
         zonedOnError = global.zonedCallback(onError);
@@ -236,12 +257,12 @@ class Session implements common.Session {
         (<any>task)._fileToCleanup = uploadFile;
         return task;
     }
-    static getSession(id: string): common.Session {
+    static getSession(id: string, foreground?: boolean): common.Session {
         let jsSession = Session._sessions[id];
         if (jsSession) {
             return jsSession;
         }
-        jsSession = new Session(id);
+        jsSession = new Session(id, foreground);
         Session._sessions[id] = jsSession;
         return jsSession;
     }
@@ -304,8 +325,8 @@ class Task extends Observable {
     }
 }
 
-export function session(id: string): common.Session {
-    return Session.getSession(id);
+export function session(id: string, foreground: boolean = false): common.Session {
+    return Session.getSession(id, foreground);
 }
 
 class MultiMultiPartForm {
