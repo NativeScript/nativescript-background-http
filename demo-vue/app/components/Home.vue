@@ -114,7 +114,8 @@ export default {
             error: e.error ? e.error.toString() : e.error,
             currentBytes: e.currentBytes,
             totalBytes: e.totalBytes,
-            body: e.data
+            body: e.data,
+            responseCode: e.responseCode
           })
         });
 
