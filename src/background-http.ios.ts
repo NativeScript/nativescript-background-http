@@ -25,7 +25,7 @@ function onError(session, nsTask, error) {
         const fileManager = utils.ios.getter(NSFileManager, NSFileManager.defaultManager);
         fileManager.removeItemAtPathError(task._fileToCleanup);
     }
-    let response = nsTask && nsTask.performSelector("response") ? <NSHTTPURLResponse>nsTask.performSelector("response") : null;
+    const response = nsTask && <NSHTTPURLResponse>nsTask.performSelector("response");
     if (error) {
         task.notifyPropertyChange("status", task.status);
         task.notify(<common.ErrorEventData>{
@@ -318,19 +318,6 @@ class Task extends Observable {
 
     public cancel(): void {
         this._task.cancel();
-    }
-
-    private readProp<T>(object: NSObject, prop: string, type: interop.Type<T>): T {
-        const sig = object.methodSignatureForSelector(prop);
-        const invocation = NSInvocation.invocationWithMethodSignature(sig);
-        invocation.selector = prop;
-
-        invocation.invokeWithTarget(object);
-
-        const ret = new interop.Reference<T>(type, new interop.Pointer());
-        invocation.getReturnValue(ret);
-
-        return ret.value;
     }
 }
 
