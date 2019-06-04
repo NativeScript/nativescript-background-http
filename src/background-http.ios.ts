@@ -25,7 +25,7 @@ function onError(session, nsTask, error) {
         const fileManager = utils.ios.getter(NSFileManager, NSFileManager.defaultManager);
         fileManager.removeItemAtPathError(task._fileToCleanup);
     }
-    let response = nsTask && nsTask.response ? <NSHTTPURLResponse>nsTask.response : null;
+    const response = nsTask && <NSHTTPURLResponse>nsTask.performSelector("response");
     if (error) {
         task.notifyPropertyChange("status", task.status);
         task.notify(<common.ErrorEventData>{
@@ -61,20 +61,15 @@ class BackgroundUploadDelegate extends NSObject implements NSURLSessionDelegate,
 
     // NSURLSessionDelegate
     URLSessionDidBecomeInvalidWithError(session, error) {
-        // console.log("URLSessionDidBecomeInvalidWithError:");
-        // console.log(" - session: " + session);
-        // console.log(" - error:   " + error);
     }
 
     URLSessionDidReceiveChallengeCompletionHandler(session, challenge, comlpetionHandler) {
-        // console.log("URLSessionDidFinishEventsForBackgroundURLSession: " + session + " " + challenge);
         const disposition = null;
         const credential = null;
         comlpetionHandler(disposition, credential);
     }
 
     URLSessionDidFinishEventsForBackgroundURLSession(session) {
-        // console.log("URLSessionDidFinishEventsForBackgroundURLSession: " + session);
     }
 
     // NSURLSessionTaskDelegate
@@ -85,7 +80,6 @@ class BackgroundUploadDelegate extends NSObject implements NSURLSessionDelegate,
     }
 
     URLSessionTaskDidReceiveChallengeCompletionHandler(session, task, challenge, completionHandler) {
-        // console.log("URLSessionTaskDidReceiveChallengeCompletionHandler: " + session + " " + task + " " + challenge);
         const disposition = null;
         const credential = null;
         completionHandler(disposition, credential);
@@ -98,28 +92,23 @@ class BackgroundUploadDelegate extends NSObject implements NSURLSessionDelegate,
     }
 
     URLSessionTaskNeedNewBodyStream(session, task, need) {
-        // console.log("URLSessionTaskNeedNewBodyStream");
     }
 
     URLSessionTaskWillPerformHTTPRedirectionNewRequestCompletionHandler(session, task, redirect, request, completionHandler) {
-        // console.log("URLSessionTaskWillPerformHTTPRedirectionNewRequestCompletionHandler");
         completionHandler(request);
     }
 
     // NSURLSessionDataDelegate
     URLSessionDataTaskDidReceiveResponseCompletionHandler(session, dataTask, response, completionHandler) {
-        // console.log("URLSessionDataTaskDidReceiveResponseCompletionHandler");
         const disposition = null;
         completionHandler(disposition);
     }
 
     URLSessionDataTaskDidBecomeDownloadTask(session, dataTask, downloadTask) {
-        // console.log("URLSessionDataTaskDidBecomeDownloadTask");
     }
 
     URLSessionDataTaskDidReceiveData(session: NSURLSession, dataTask: NSURLSessionDataTask, data: NSData) {
         dispatch_async(main_queue, () => {
-            // console.log("URLSessionDataTaskDidReceiveData");
             // we have a response in the data...
             const jsTask = Task.getTask(session, dataTask);
             const jsonString = NSString.alloc().initWithDataEncoding(data, NSUTF8StringEncoding);
@@ -134,20 +123,16 @@ class BackgroundUploadDelegate extends NSObject implements NSURLSessionDelegate,
     }
 
     URLSessionDataTaskWillCacheResponseCompletionHandler() {
-        // console.log("URLSessionDataTaskWillCacheResponseCompletionHandler");
     }
 
     // NSURLSessionDownloadDelegate
     URLSessionDownloadTaskDidResumeAtOffsetExpectedTotalBytes(session, task, offset, expects) {
-        // console.log("URLSessionDownloadTaskDidResumeAtOffsetExpectedTotalBytes");
     }
 
     URLSessionDownloadTaskDidWriteDataTotalBytesWrittenTotalBytesExpectedToWrite(session, task, data, written, expected) {
-        // console.log("URLSessionDownloadTaskDidWriteDataTotalBytesWrittenTotalBytesExpectedToWrite");
     }
 
     URLSessionDownloadTaskDidFinishDownloadingToURL(session, task, url) {
-        // console.log("URLSessionDownloadTaskDidFinishDownloadingToURL");
     }
 }
 
@@ -247,8 +232,38 @@ class Session implements common.Session {
     }
 }
 
+class NativePropertyReader {
+    private _invocationCache = new Map<string, NSInvocation>();
+
+    private getInvocationObject(object: NSObject, selector: string): NSInvocation {
+        let invocation = this._invocationCache.get(selector);
+        if (!invocation) {
+            const sig = object.methodSignatureForSelector(selector);
+            invocation = NSInvocation.invocationWithMethodSignature(sig);
+            invocation.selector = selector;
+
+            this._invocationCache[selector] = invocation;
+        }
+
+        return invocation;
+    }
+
+    public readProp<T>(object: NSObject, prop: string, type: interop.Type<T>): T {
+        const invocation = this.getInvocationObject(object, prop);
+        invocation.invokeWithTarget(object);
+
+        const ret = new interop.Reference<T>(type, new interop.Pointer());
+        invocation.getReturnValue(ret);
+
+        return ret.value;
+    }
+}
+
 class Task extends Observable {
     public static _tasks = new Map<NSURLSessionTask, Task>();
+    public static tasksReader = new NativePropertyReader();
+    private static is64BitArchitecture = interop.sizeof(interop.types.id) === 8;
+    public static NSIntegerType = Task.is64BitArchitecture ? interop.types.int64 : interop.types.int32;
 
     public _fileToCleanup: string;
     private _task: NSURLSessionTask;
@@ -269,18 +284,19 @@ class Task extends Observable {
     }
 
     get upload(): number {
-        return this._task.countOfBytesSent;
+        return Task.tasksReader.readProp(this._task, "countOfBytesSent", interop.types.int64);
     }
 
     get totalUpload(): number {
-        return this._task.countOfBytesExpectedToSend;
+        return Task.tasksReader.readProp(this._task, "countOfBytesExpectedToSend", interop.types.int64);
     }
 
     get status(): string {
-        if (this._task.error) {
+        if (Task.tasksReader.readProp(this._task, "error", Task.NSIntegerType)) {
             return "error";
         }
-        switch (this._task.state) {
+        // NSURLSessionTaskState : NSInteger, so we should pass number format here
+        switch (Task.tasksReader.readProp(this._task, "state", Task.NSIntegerType) as NSURLSessionTaskState) {
             case NSURLSessionTaskState.Running: return "uploading";
             case NSURLSessionTaskState.Completed: return "complete";
             case NSURLSessionTaskState.Canceling: return "error";
@@ -299,6 +315,7 @@ class Task extends Observable {
 
         return task;
     }
+
     public cancel(): void {
         this._task.cancel();
     }
