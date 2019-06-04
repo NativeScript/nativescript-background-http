@@ -233,7 +233,7 @@ class Session implements common.Session {
 }
 
 class NativePropertyReader {
-    public _invocationCache = new Map<string, NSInvocation>();
+    private _invocationCache = new Map<string, NSInvocation>();
 
     private getInvocationObject(object: NSObject, selector: string): NSInvocation {
         let invocation = this._invocationCache.get(selector);
@@ -315,6 +315,7 @@ class Task extends Observable {
 
         return task;
     }
+
     public cancel(): void {
         this._task.cancel();
     }
