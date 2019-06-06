@@ -3,67 +3,73 @@ branches:
     - next
 matrix:
   include:
-    - stage: "Lint"
-      language: node_js
-      os: linux
-      node_js: "8"
-      script: cd ../demo && npm run build.plugin && npm run ci.tslint
-    - stage: "Build and webpack"
+    - stage: "WebPack, Build and Test"
       os: osx
       env:
-        - Webpack="iOS"
+        - WebPack="iOS"
       osx_image: xcode10.0
       language: node_js 
-      node_js: "8"
+      node_js: "10"
       jdk: oraclejdk8
       before_script:
         - cd ../demo && tns platform add ios@next
         - cd ../demo-angular && tns platform add ios@next
-      script:
-        - cd ../demo && npm run build.plugin && npm i && tns build ios --bundle --env.uglify
-        - cd ../publish && sh pack.sh && cp package/*.tgz ../demo-angular/package.tgz
-        - cd ../demo-angular && tns plugin add package.tgz && npm i && tns build ios --bundle --env.uglify --env.aot
-    - os: linux
-      language: android
+      script: 
+        - cd ../demo && npm run build.plugin && npm i && tns build ios --bundle --env.uglify 
+        - cd ../publish
+        - sh pack.sh
+        - cp package/*.tgz ../demo-angular/package.tgz
+        - cd ../demo-angular 
+        - sed -i -e 's/\"..\/src\"/"package.tgz"/g' package.json
+        - npm i
+        - tns build ios --bundle --env.uglify --env.aot
+    - language: android
+      os: linux
+      dist: trusty
       env:
-        - Webpack="Android"
+        - WebPack="Android"
       jdk: oraclejdk8
-      before_install: nvm install 8.11.4
+      before_install: nvm install 10
       before_script:
         - cd ../demo && tns platform add android@next
         - cd ../demo-angular && tns platform add android@next
       script:
-        - cd ../demo && npm run build.plugin && npm i && tns build android --bundle --env.uglify
-        - cd ../publish && sh pack.sh && cp package/*.tgz ../demo-angular/package.tgz
-        - cd ../demo-angular && tns plugin add package.tgz && npm i && tns build android --bundle --env.uglify --env.aot
-    - os: linux
+        - cd ../demo && npm run build.plugin && npm i && tns build android --bundle --env.uglify --env.snapshot
+        - cd ../publish 
+        - sh pack.sh
+        - cp package/*.tgz ../demo-angular/package.tgz
+        - cd ../demo-angular
+        - sed -i -e 's/\"..\/src\"/"package.tgz"/g' package.json
+        - npm i
+        - tns build android --bundle --env.uglify --env.aot
+    - language: android
+      os: linux
+      dist: trusty
       env: 
-        - BuildAndroid="26"
-      language: android
+        - BuildAndroid="28"
       jdk: oraclejdk8
-      before_install: nvm install 8.11.4
+      before_install: nvm install 10
       before_script:
         - cd ../demo && tns platform add android@next
         - cd ../demo-angular && tns platform add android@next
       script:
-        - cd ../src && npm i && npm run tsc && cd ../demo && tns build android && cd ../demo-angular && tns build android
+        - cd ../src && npm i && npm run tsc && cd ../demo && npm i && tns build android && cd ../demo-angular && npm i && tns build android
     - os: osx
       env: 
         - BuildiOS="12.0"
         - Xcode="10.0"
       osx_image: xcode10.0
       language: node_js 
-      node_js: "8"
+      node_js: "10"
       jdk: oraclejdk8
       before_script:
         - cd ../demo && tns platform add ios@next
         - cd ../demo-angular && tns platform add ios@next
       script: 
-        - cd ../src && npm i && npm run tsc && cd ../demo && tns build ios && cd ../demo-angular && tns build ios
+        - cd ../src && npm i && npm run tsc && cd ../demo && npm i && tns build ios && cd ../demo-angular && npm i && tns build ios
 
 android:
   components:
-    - tools
     - tools
     - platform-tools
     - build-tools-28.0.3
@@ -92,3 +98,4 @@ install:
     - npm install nativescript-dev-typescript@next -D
     - ./node_modules/.bin/update-ns-webpack --deps --configs
     - ./node_modules/.bin/update-app-ng-deps
+    
