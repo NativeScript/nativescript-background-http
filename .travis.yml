@@ -85,17 +85,20 @@ install:
     - tns usage-reporting disable
     - tns error-reporting disable
     - cd src
-    - npm install tns-core-modules@next -D
+    - npm install tns-core-modules@next -D --save-exact
+    - npm install tns-platform-declarations@next -D --save-exact
     - cd ../demo
-    - npm install tns-core-modules@next -P
+    - npm install tns-core-modules@next -P --save-exact
+    - npm install tns-platform-declarations@next -D --save-exact
     - npm install nativescript-dev-webpack@next -D --save-exact
-    - npm install nativescript-dev-typescript@next -D
+    - npm install nativescript-dev-typescript@next -D --save-exact
     - ./node_modules/.bin/update-ns-webpack --deps --configs
     - cd ../demo-angular
-    - npm install tns-core-modules@next -P
-    - npm install nativescript-angular@next -P
+    - npm install tns-core-modules@next -P --save-exact
+    - npm install tns-platform-declarations@next -D --save-exact
+    - npm install nativescript-angular@next -P --save-exact
     - npm install nativescript-dev-webpack@next -D --save-exact
-    - npm install nativescript-dev-typescript@next -D
+    - npm install nativescript-dev-typescript@next -D --save-exact
     - ./node_modules/.bin/update-ns-webpack --deps --configs
     - ./node_modules/.bin/update-app-ng-deps
     
