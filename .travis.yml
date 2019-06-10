@@ -88,13 +88,13 @@ install:
     - npm install tns-core-modules@next -D
     - cd ../demo
     - npm install tns-core-modules@next -P
-    - npm install nativescript-dev-webpack@next -D
+    - npm install nativescript-dev-webpack@next -D --save-exact
     - npm install nativescript-dev-typescript@next -D
     - ./node_modules/.bin/update-ns-webpack --deps --configs
     - cd ../demo-angular
     - npm install tns-core-modules@next -P
     - npm install nativescript-angular@next -P
-    - npm install nativescript-dev-webpack@next -D
+    - npm install nativescript-dev-webpack@next -D --save-exact
     - npm install nativescript-dev-typescript@next -D
     - ./node_modules/.bin/update-ns-webpack --deps --configs
     - ./node_modules/.bin/update-app-ng-deps
