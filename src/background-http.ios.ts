@@ -1,7 +1,6 @@
 import { Observable } from "tns-core-modules/data/observable";
 import * as common from "./index";
 import * as fileSystemModule from "tns-core-modules/file-system";
-import * as utils from "tns-core-modules/utils/utils";
 
 const main_queue = dispatch_get_current_queue();
 let zonedOnProgress = null;
@@ -22,8 +21,7 @@ function onProgress(nsSession, nsTask, sent, expectedTotal) {
 function onError(session, nsTask, error) {
     const task = Task.getTask(session, nsTask);
     if (task._fileToCleanup) {
-        const fileManager = utils.ios.getter(NSFileManager, NSFileManager.defaultManager);
-        fileManager.removeItemAtPathError(task._fileToCleanup);
+        NSFileManager.defaultManager.removeItemAtPathError(task._fileToCleanup);
     }
     const response = nsTask && <NSHTTPURLResponse>nsTask.performSelector("response");
     if (error) {
@@ -401,9 +399,7 @@ class MultiMultiPartForm {
         newData = tempString.dataUsingEncoding(NSUTF8StringEncoding);
         combinedData.appendData(newData);
 
-
-        const fileManager = utils.ios.getter(NSFileManager, NSFileManager.defaultManager);
-        fileManager.createFileAtPathContentsAttributes(fileName, combinedData, null);
+        NSFileManager.defaultManager.createFileAtPathContentsAttributes(fileName, combinedData, null);
 
         return fileName;
     }
