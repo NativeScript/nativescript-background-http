@@ -48,7 +48,8 @@ matrix:
       script:
         - cd demo && npm run build.plugin
         - tns build android --bundle --env.uglify --env.snapshot
-    - os: linux
+    - language: android
+      os: linux
       dist: trusty
       env:
         - WebPack="Android"
