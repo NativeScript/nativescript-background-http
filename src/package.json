@@ -1,12 +1,12 @@
 {
     "name": "nativescript-background-http",
-    "version": "3.4.1",
+    "version": "4.0.0",
     "main": "background-http",
     "typings": "index.d.ts",
     "nativescript": {
         "platforms": {
-            "android": "4.0.0",
-            "ios": "4.0.0"
+            "android": "6.0.0",
+            "ios": "6.0.0"
         }
     },
     "repository": {
@@ -53,8 +53,8 @@
     "license": "Apache-2.0",
     "homepage": "https://github.com/NativeScript/nativescript-background-http/issues",
     "devDependencies": {
-        "tns-core-modules": "^5.0.0",
-        "tns-platform-declarations": "^5.0.0",
+        "tns-core-modules": "^6.0.0",
+        "tns-platform-declarations": "^6.0.0",
         "typescript": "~3.1.6",
         "rimraf": "~2.6.2",
         "semver": "~5.6.0",
