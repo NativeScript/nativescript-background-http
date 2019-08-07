@@ -85,12 +85,12 @@ export interface Task {
      * Cancel the Upload Task.
      */
     cancel(): void;
-   /**
-     * Subscribe for a general event.
-     * @param event The name of the event to subscribe for.
-     * @param handler The handler called when the event occure.
-     * @event
-     */
+    /**
+      * Subscribe for a general event.
+      * @param event The name of the event to subscribe for.
+      * @param handler The handler called when the event occure.
+      * @event
+      */
     on(event: string, handler: (e: observable.EventData) => void): void;
 
     /**
@@ -194,4 +194,9 @@ export interface Request {
     * https://github.com/gotev/android-upload-service/wiki/Recipes#backoff
     */
     androidMaxRetries?: number;
+
+    /*
+     * Use this to set if notifications should be cleared automatically upon upload completion
+     */
+    androidAutoClearNotification?: boolean;
 }

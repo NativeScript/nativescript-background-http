@@ -307,7 +307,16 @@ function setRequestOptions(request: any, options: common.Request) {
     if (displayNotificationProgress) {
         const uploadNotificationConfig = new net.gotev.uploadservice.UploadNotificationConfig();
         const notificationTitle = typeof options.androidNotificationTitle === "string" ? options.androidNotificationTitle : 'File Upload';
+        const autoClearNotifications = typeof options.androidAutoClearNotification === "boolean" ? options.androidAutoClearNotification : false;
+
         uploadNotificationConfig.setTitleForAllStatuses(notificationTitle);
+
+        if (autoClearNotifications) {
+            uploadNotificationConfig.getCompleted().autoClear = autoClearNotifications;
+            uploadNotificationConfig.getCancelled().autoClear = autoClearNotifications;
+            uploadNotificationConfig.getError().autoClear = autoClearNotifications;
+        }
+
         request.setNotificationConfig(uploadNotificationConfig);
     }
     const autoDeleteAfterUpload = typeof options.androidAutoDeleteAfterUpload === "boolean" ? options.androidAutoDeleteAfterUpload : false;
