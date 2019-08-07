@@ -77,6 +77,7 @@ androidNotificationTitle | `string` | (Android only) Used to set the title shown
 androidAutoDeleteAfterUpload | `boolean` | (Android only) Used to set if files should be deleted automatically after upload.
 androidMaxRetries | `number` | (Android only) Used to set the maximum retry count. The default retry count is 0. https://github.com/gotev/android-upload-service/wiki/Recipes#backoff
 androidAutoClearNotification | `boolean` | (Android only) Used to set if notifications should be cleared automatically upon upload completion. Default is false.
+androidRingToneEnabled | `boolean` | (Android only) Used to set if a ringtone should be played upon upload completion. Default is true.
 
 The task object has the following properties and methods, that can be used to get information about the upload:
 

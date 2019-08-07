@@ -199,4 +199,9 @@ export interface Request {
      * Use this to set if notifications should be cleared automatically upon upload completion
      */
     androidAutoClearNotification?: boolean;
+
+    /*
+     * Use this to set if a ringtone should be played upon upload completion
+     */
+    androidRingToneEnabled?: boolean;
 }
