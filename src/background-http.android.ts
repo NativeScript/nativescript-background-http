@@ -309,9 +309,14 @@ function setRequestOptions(request: any, options: common.Request) {
         const notificationTitle = typeof options.androidNotificationTitle === "string" ? options.androidNotificationTitle : 'File Upload';
         const autoClearNotifications = typeof options.androidAutoClearNotification === "boolean" ? options.androidAutoClearNotification : false;
         const ringToneEnabled = typeof options.androidRingToneEnabled === "boolean" ? options.androidRingToneEnabled : true;
+        const channelID = typeof options.androidNotificationChannelID === "string" ? options.androidNotificationChannelID : undefined;
 
         uploadNotificationConfig.setTitleForAllStatuses(notificationTitle);
         uploadNotificationConfig.setRingToneEnabled(new java.lang.Boolean(ringToneEnabled));
+
+        if (channelID) {
+            uploadNotificationConfig.setNotificationChannelId(channelID);
+        }
 
         uploadNotificationConfig.getCompleted().autoClear = autoClearNotifications;
         uploadNotificationConfig.getCancelled().autoClear = autoClearNotifications;
