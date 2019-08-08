@@ -307,20 +307,22 @@ function setRequestOptions(request: any, options: common.Request) {
     if (displayNotificationProgress) {
         const uploadNotificationConfig = new net.gotev.uploadservice.UploadNotificationConfig();
         const notificationTitle = typeof options.androidNotificationTitle === "string" ? options.androidNotificationTitle : 'File Upload';
-        const autoClearNotifications = typeof options.androidAutoClearNotification === "boolean" ? options.androidAutoClearNotification : false;
-        const ringToneEnabled = typeof options.androidRingToneEnabled === "boolean" ? options.androidRingToneEnabled : true;
-        const channelID = typeof options.androidNotificationChannelID === "string" ? options.androidNotificationChannelID : undefined;
 
         uploadNotificationConfig.setTitleForAllStatuses(notificationTitle);
-        uploadNotificationConfig.setRingToneEnabled(new java.lang.Boolean(ringToneEnabled));
 
-        if (channelID) {
-            uploadNotificationConfig.setNotificationChannelId(channelID);
+        if (typeof options.androidRingToneEnabled === "boolean") {
+            uploadNotificationConfig.setRingToneEnabled(new java.lang.Boolean(options.androidRingToneEnabled));
         }
 
-        uploadNotificationConfig.getCompleted().autoClear = autoClearNotifications;
-        uploadNotificationConfig.getCancelled().autoClear = autoClearNotifications;
-        uploadNotificationConfig.getError().autoClear = autoClearNotifications;
+        if (typeof options.androidAutoClearNotification === "boolean") {
+            uploadNotificationConfig.getCompleted().autoClear = options.androidAutoClearNotification;
+            uploadNotificationConfig.getCancelled().autoClear = options.androidAutoClearNotification;
+            uploadNotificationConfig.getError().autoClear = options.androidAutoClearNotification;
+        }
+
+        if (typeof options.androidNotificationChannelID === "string" && options.androidNotificationChannelID) {
+            uploadNotificationConfig.setNotificationChannelId(options.androidNotificationChannelID);
+        }
 
         request.setNotificationConfig(uploadNotificationConfig);
     }
