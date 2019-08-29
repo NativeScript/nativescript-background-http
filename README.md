@@ -76,6 +76,9 @@ androidDisplayNotificationProgress | `boolean` | (Android only) Used to set if p
 androidNotificationTitle | `string` | (Android only) Used to set the title shown in the Android notifications center.
 androidAutoDeleteAfterUpload | `boolean` | (Android only) Used to set if files should be deleted automatically after upload.
 androidMaxRetries | `number` | (Android only) Used to set the maximum retry count. The default retry count is 0. https://github.com/gotev/android-upload-service/wiki/Recipes#backoff
+androidAutoClearNotification | `boolean` | (Android only) Used to set if notifications should be cleared automatically upon upload completion. Default is false. Please note that setting this to true will also disable the ringtones.
+androidRingToneEnabled | `boolean` | (Android only) Used to set if a ringtone should be played upon upload completion. Default is true. Please note that this flag has no effect when `androidAutoClearNotification` is set to true.
+androidNotificationChannelID | `string` | (Android only) Used to set the channel ID for the notifications.
 
 The task object has the following properties and methods, that can be used to get information about the upload:
 

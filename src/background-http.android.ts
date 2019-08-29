@@ -307,7 +307,23 @@ function setRequestOptions(request: any, options: common.Request) {
     if (displayNotificationProgress) {
         const uploadNotificationConfig = new net.gotev.uploadservice.UploadNotificationConfig();
         const notificationTitle = typeof options.androidNotificationTitle === "string" ? options.androidNotificationTitle : 'File Upload';
+
         uploadNotificationConfig.setTitleForAllStatuses(notificationTitle);
+
+        if (typeof options.androidRingToneEnabled === "boolean") {
+            uploadNotificationConfig.setRingToneEnabled(new java.lang.Boolean(options.androidRingToneEnabled));
+        }
+
+        if (typeof options.androidAutoClearNotification === "boolean") {
+            uploadNotificationConfig.getCompleted().autoClear = options.androidAutoClearNotification;
+            uploadNotificationConfig.getCancelled().autoClear = options.androidAutoClearNotification;
+            uploadNotificationConfig.getError().autoClear = options.androidAutoClearNotification;
+        }
+
+        if (typeof options.androidNotificationChannelID === "string" && options.androidNotificationChannelID) {
+            uploadNotificationConfig.setNotificationChannelId(options.androidNotificationChannelID);
+        }
+
         request.setNotificationConfig(uploadNotificationConfig);
     }
     const autoDeleteAfterUpload = typeof options.androidAutoDeleteAfterUpload === "boolean" ? options.androidAutoDeleteAfterUpload : false;
