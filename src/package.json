@@ -1,6 +1,6 @@
 {
     "name": "nativescript-background-http",
-    "version": "4.0.0",
+    "version": "4.1.0",
     "main": "background-http",
     "typings": "index.d.ts",
     "nativescript": {
