@@ -4,7 +4,7 @@ A cross platform plugin for [the NativeScript framework](http://www.nativescript
 
 [There is a stock NativeScript `http` module that can handle GET/POST requests that work with strings and JSONs](http://docs.nativescript.org/ApiReference/http/HOW-TO). It however comes short in features when it comes to really large files.
 
-The plugin uses [NSURLSession with background session configuration for iOS](https://developer.apple.com/library/ios/documentation/Foundation/Reference/NSURLSessionConfiguration_class/index.html#//apple_ref/occ/clm/NSURLSessionConfiguration/backgroundSessionConfigurationWithIdentifier:); and the [alexbbb/android-upload-service](https://github.com/alexbbb/android-upload-service) library for Android.
+The plugin uses [NSURLSession with background session configuration for iOS](https://developer.apple.com/library/ios/documentation/Foundation/Reference/NSURLSessionConfiguration_class/index.html#//apple_ref/occ/clm/NSURLSessionConfiguration/backgroundSessionConfigurationWithIdentifier:); and [a fork](https://github.com/NativeScript/android-upload-service) of the [gotev/android-upload-service](https://github.com/gotev/android-upload-service) library for Android.
 
 ## Installation
 
