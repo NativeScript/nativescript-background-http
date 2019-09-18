@@ -7,5 +7,4 @@ tsconfig.json
 *.tgz
 /package
 /platforms/android/**/*
-!platforms/android/include.gradle
-!platforms/android/nativescript_background_http.aar
+!platforms/android/uploadservice-release.aar

@@ -1,8 +1,0 @@
-//default elements
-android {
-}
-
-//optional elements
-dependencies {
-    implementation 'net.gotev:uploadservice:3.5.2'
-}
