@@ -17,12 +17,9 @@
     "scripts": {
         "tsc": "tsc -skipLibCheck",
         "build": "npm i && tsc",
-        "postclone": "npm i && node scripts/postclone.js && cd ../demo && npm i && cd ../src && npm run plugin.link",
         "test.android": "npm i && npm run tsc && npm run tslint && cd ../demo && tns build android && tns test android --justlaunch",
         "test.ios": "npm i && npm run tsc && npm run tslint && cd ../demo && tns build ios && tns test ios --justlaunch",
         "tslint": "cd .. && tslint \"**/*.ts\" --config tslint.json --exclude \"**/node_modules/**\"",
-        "plugin.link": "npm link && cd ../demo && npm link nativescript-background-http && cd ../src",
-        "plugin.tscwatch": "npm run tsc -- -w",
         "demo.ios": "npm i && npm run tsc && cd ../demo && tns run ios",
         "demo-angular.ios": "npm i && npm run tsc && cd ../demo-angular && tns run ios",
         "demo-vue.ios": "npm i && npm run tsc && cd ../demo-vue && tns run ios",
@@ -34,8 +31,7 @@
         "server": "cd ../demo-server && npm run start",
         "plugin.prepare": "npm run tsc && cd ../demo && tns plugin remove nativescript-background-http && tns plugin add ../src",
         "clean": "cd ../demo && rimraf hooks node_modules platforms && cd ../src && rimraf node_modules && npm run plugin.link",
-        "ci.tslint": "npm i && tslint '**/*.ts' --config '../tslint.json' --exclude '**/node_modules/**'",
-        "prepare": "node scripts/prepare.js"
+        "ci.tslint": "npm i && tslint '**/*.ts' --config '../tslint.json' --exclude '**/node_modules/**'"
     },
     "keywords": [
         "background",
