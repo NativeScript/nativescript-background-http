@@ -278,17 +278,18 @@ function getMultipartRequest(taskId: string, options: common.Request, params: an
         if (typeof curParam.name === 'undefined') {
             throw new Error("You must have a `name` value");
         }
-        if (curParam.filename) {
-            let fileName = curParam.filename;
-            if (fileName.startsWith("~/")) {
-                fileName = fileName.replace("~/", fileSystemModule.knownFolders.currentApp().path + "/");
-            }
-            const destFileName = curParam.destFilename || fileName.substring(fileName.lastIndexOf('/') + 1, fileName.length);
-            request.addFileToUpload(fileName, curParam.name, destFileName, curParam.mimeType);
+
+        if (typeof curParam.filename === 'undefined') {
+            request.addParameter(curParam.name.toString(), curParam.value.toString());
+            continue;
         }
-        else {
-            request.addParameter(params[i].name, params[i].value);
+
+        let fileName = curParam.filename;
+        if (fileName.startsWith("~/")) {
+            fileName = fileName.replace("~/", fileSystemModule.knownFolders.currentApp().path + "/");
         }
+        const destFileName = curParam.destFilename || fileName.substring(fileName.lastIndexOf('/') + 1, fileName.length);
+        request.addFileToUpload(fileName, curParam.name, destFileName, curParam.mimeType);
     }
 
     const utf8 = options.utf8;
