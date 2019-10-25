@@ -68,6 +68,8 @@ export class HomeComponent {
         if (isMulti) {
             const params = [
                 { name: "test", value: "value" },
+                { name: "testInt", value: 10 },
+                { name: "bool", value: true },
                 { name: "fileToUpload", filename: this.file, mimeType: 'image/jpeg' }
             ];
             task = this.session.multipartUpload(params, request);
