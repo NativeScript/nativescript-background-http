@@ -93,7 +93,9 @@ export default {
       if (isMulti) {
         const params = [
           { name: "test", value: "value" },
-          { name: "fileToUpload", filename: this.file, mimeType: "image/jpeg" }
+          { name: "testInt", value: 10 },
+          { name: "bool", value: true },
+          { name: "fileToUpload", filename: this.file, mimeType: 'image/jpeg' }
         ];
         task = this.session.multipartUpload(params, request);
       } else {

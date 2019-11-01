@@ -1,7 +1,10 @@
 {
   "android": {
     "v8Flags": "--expose_gc",
-    "requireModules": ["nativescript-background-http"]
+    "requireModules": [
+      "nativescript-background-http"
+    ],
+    "markingMode": "none"
   },
   "main": "app.js"
 }
