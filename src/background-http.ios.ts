@@ -53,6 +53,88 @@ function onError(session, nsTask, error) {
     }
 }
 
+function getAssetData(asset: string, fileHandle: NSFileHandle = null): Promise<any> {
+    let handle = fileHandle, opened = false;
+    const fileName = fileSystemModule.knownFolders.documents().path + "/temp-MPA-" + Math.floor(Math.random() * 100000000000) + ".tmp";
+    if (fileHandle == null) {
+        NSFileManager.defaultManager.createFileAtPathContentsAttributes(fileName, null, null);
+        handle = NSFileHandle.fileHandleForWritingAtPath(fileName);
+        opened = true;
+    } else {
+        handle.seekToEndOfFile();
+    }
+    if (!handle) {
+        return Promise.resolve(null);
+    }
+
+    return new Promise(resolve => {
+
+        // Get the Asset
+        PHPhotoLibrary.requestAuthorization( (status) => {
+            if (status !== PHAuthorizationStatus.Authorized) {
+                return resolve(null);
+            }
+            const nurl = NSURL.URLWithString(asset);
+            const assets = PHAsset.fetchAssetsWithALAssetURLsOptions(NSArray.arrayWithArray([nurl]), null);
+
+            // No Asset matching
+            if (assets.count == 0) {
+                let isWritten = false;
+                if (opened) {
+                    handle.closeFile();
+                    opened = false;
+                }
+                try {
+                    isWritten = NSFileManager.defaultManager.copyItemAtURLToURLError(nurl, NSURL.fileURLWithPath(fileName));
+                } catch (err) {
+                    // Do Nothing....
+                }
+                return resolve(isWritten ? fileName : null);
+            }
+
+            if (assets[0].mediaType === PHAssetMediaTypeImage) {
+                const options = PHImageRequestOptions.alloc().init();
+                options.synchronous = true;
+                options.isNetworkAccessAllowed = true;
+                PHImageManager.defaultManager().requestImageDataForAssetOptionsResultHandler(assets[0], options, function (imageData, dataUTI, orientation, info) {
+                    handle.writeData(imageData);
+                    handle.synchronizeFile();
+                    if (opened) {
+                        handle.closeFile();
+                    }
+                    resolve(fileName);
+                });
+                return;
+            } else if (assets[0].mediaType === PHAssetMediaTypeVideo) {
+                const options = PHVideoRequestOptions.alloc().init();
+                options.version = PHVideoRequestOptionsVersionOriginal;
+//                options.deliveryMode = PHVideoRequestOptionsDeliveryMode.HighQualityFormat;
+
+                PHImageManager.defaultManager().requestAVAssetForVideoOptionsResultHandler(assets[0], options, function (asset, audioMix, info) {
+                    handle.writeData(NSData.dataWithContentsOfURL(asset.URL));
+                    handle.synchronizeFile();
+                    if (opened) {
+                        handle.closeFile();
+                    }
+                    resolve(fileName);
+                });
+            } else {
+                if (opened) {
+                    handle.closeFile();
+                }
+                let fURL = NSURL.fileURLWithPath(fileName);
+                let written = NSFileManager.defaultManager.copyItemAtURLToURLError(nurl, fURL);
+                if (opened) {
+                    opened = false;
+                } else {
+                    handle.writeData(NSData.dataWithContentsOfURL(fURL));
+                }
+                resolve(fileName);
+            }
+        });
+    });
+}
+
 class BackgroundUploadDelegate extends NSObject implements NSURLSessionDelegate, NSURLSessionTaskDelegate, NSURLSessionDataDelegate, NSURLSessionDownloadDelegate {
 
     static ObjCProtocols = [NSURLSessionDelegate, NSURLSessionTaskDelegate, NSURLSessionDataDelegate, NSURLSessionDownloadDelegate];
@@ -152,8 +234,7 @@ class Session implements common.Session {
         return this._session;
     }
 
-
-    public uploadFile(fileUri: string, options: common.Request): common.Task {
+    public uploadFile(fileUri: string, options: common.Request): Promise<common.Task> {
         if (!fileUri) {
             throw new Error("File must be provided.");
         }
@@ -176,48 +257,79 @@ class Session implements common.Session {
         }
 
         let fileURL: NSURL;
-        if (fileUri.substr(0, 7) === "file://") {
-            // File URI in string format
-            fileURL = NSURL.URLWithString(fileUri);
-        } else if (fileUri.charAt(0) === "/") {
-            // Absolute path with leading slash
-            fileURL = NSURL.fileURLWithPath(fileUri);
-        }
+        const handleUpload = (fileURL: string, deleteAfter: boolean, resolve) => {
+            console.log("In Handle", fileURL);
+            const newTask = this._session.uploadTaskWithRequestFromFile(request, fileURL);
+            newTask.taskDescription = options.description;
+            newTask.resume();
+            const retTask: common.Task = <any>Task.getTask(this._session, newTask);
+            if (deleteAfter) {
+                console.log("Setting Cleanup");
+                (<any>retTask)._fileToCleanup = fileURL;
+            }
+            console.log("Done");
+            resolve(retTask);
+        };
 
-        const newTask = this._session.uploadTaskWithRequestFromFile(request, fileURL);
-        newTask.taskDescription = options.description;
-        newTask.resume();
-        const retTask: common.Task = <any>Task.getTask(this._session, newTask);
-        return retTask;
+        return new Promise( (resolve) => {
+            if (fileUri.startsWith("file://")) {
+                // File URI in string format
+                fileURL = NSURL.URLWithString(fileUri);
+                handleUpload(fileURL, false, resolve);
+            } else if (fileUri.charAt(0) === "/") {
+                // Absolute path with leading slash
+                fileURL = NSURL.fileURLWithPath(fileUri);
+                handleUpload(fileURL, false, resolve);
+            } else if (fileUri.startsWith("assets-library://")) {
+                getAssetData(fileUri).then(fileName => {
+                    console.log("Back from GAD", fileName);
+                    if (fileName == null) {
+                        return resolve(null);
+                    }
+                    fileURL = NSURL.fileURLWithPath(fileName);
+                    handleUpload(fileURL, true, resolve);
+                }).catch(err => {
+                    console.log("Error in uploadFile", err);
+                    resolve(null);
+                });
+            }
+
+        });
     }
-    public multipartUpload(params: any[], options: any): common.Task {
+
+    public multipartUpload(params: any[], options: any): Promise<common.Task> {
         const MPF = new MultiMultiPartForm();
-        for (let i = 0; i < params.length; i++) {
-            const curParam = params[i];
-            if (typeof curParam.name === 'undefined') {
-                throw new Error("You must have a `name` value");
+
+        return new Promise( (resolve) => {
+            for (let i = 0; i < params.length; i++) {
+                const curParam = params[i];
+                if (typeof curParam.name === 'undefined') {
+                    throw new Error("You must have a `name` value");
+                }
+
+                if (curParam.filename) {
+                    const destFileName = curParam.destFilename || curParam.filename.substring(curParam.filename.lastIndexOf('/') + 1, curParam.filename.length);
+                    MPF.appendParam(curParam.name, null, curParam.filename, curParam.mimeType, destFileName);
+                } else {
+                    MPF.appendParam(curParam.name, curParam.value);
+                }
             }
+            const header = MPF.getHeader();
+            MPF.generateFile().then( (uploadFileName: string) => {
+                if (!options.headers) {
+                    options.headers = {};
+                }
+                options.headers['Content-Type'] = header['Content-Type'];
 
-            if (curParam.filename) {
-                const destFileName = curParam.destFilename || curParam.filename.substring(curParam.filename.lastIndexOf('/') + 1, curParam.filename.length);
-                MPF.appendParam(curParam.name, null, curParam.filename, curParam.mimeType, destFileName);
-            } else {
-                MPF.appendParam(curParam.name, curParam.value);
-            }
-        }
-        const header = MPF.getHeader();
-        const uploadFile = MPF.generateFile();
-
-        if (!options.headers) {
-            options.headers = {};
-        }
-        options.headers['Content-Type'] = header['Content-Type'];
-
-        const task = this.uploadFile(uploadFile, options);
-
-        // Tag the file to be deleted and cleanup after upload
-        (<any>task)._fileToCleanup = uploadFile;
-        return task;
+                this.uploadFile(uploadFileName, options).then(task => {
+                    // Tag the file to be deleted and cleanup after upload
+                    (<any>task)._fileToCleanup = uploadFileName;
+                    resolve(task);
+                });
+            }).catch((err) => {
+                console.log("Error", err, err.stack);
+            });
+        });
     }
     static getSession(id: string): common.Session {
         let jsSession = Session._sessions[id];
@@ -266,6 +378,7 @@ class Task extends Observable {
     public _fileToCleanup: string;
     private _task: NSURLSessionTask;
     private _session: NSURLSession;
+    private _canceled: boolean = false;
 
     constructor(nsSession: NSURLSession, nsTask: NSURLSessionTask) {
         super();
@@ -357,54 +470,100 @@ class MultiMultiPartForm {
         this.fields.push({ name: name, filename: filename, destFilename: finalName, mimeType: mimeType });
     }
 
-    public generateFile(): string {
+    private _appendStringData(stringData: string, fileHandle: NSFileHandle) {
+        const tempString = NSString.stringWithString(stringData);
+        const newData = tempString.dataUsingEncoding(NSUTF8StringEncoding);
+        fileHandle.writeData(newData);
+    }
+
+    private _copyAsset(asset, fileHandle=null): string {
+        let handle = fileHandle, opened=false;
+        const fileName = fileSystemModule.knownFolders.documents().path + "/temp-MPA-" + Math.floor(Math.random() * 100000000000) + ".tmp";
+        if (fileHandle == null) {
+            NSFileManager.defaultManager.createFileAtPathContentsAttributes(fileName, null, null);
+            handle = NSFileHandle.fileHandleForWritingAtPath(fileName);
+            opened = true;
+        } else {
+            handle.seekToEndOfFile();
+        }
+        if (!handle) { return null; }
+
+        const BufferSize = 1024*1024;
+
+        const rep = asset.defaultRepresentation;
+        const buffer = calloc(BufferSize, 1);
+        let offset=0, bytesRead=0;
+        try {
+            do {
+                try {
+                    bytesRead = asset.defaultRepresentation.getBytesFromOffsetLengthError(buffer, offset, BufferSize, null);
+                    handle.writeData(NSData.dataWithBytesNoCopyLengthFreeWhenDone(buffer, bytesRead, false));
+                    offset += bytesRead;
+                } catch (err) {
+                    return null;
+                }
+            } while (bytesRead > 0);
+            return fileName;
+        } finally {
+            if (opened) {
+                handle.closeFile();
+            }
+            free(buffer);
+        }
+    }
+
+    public generateFile(): Promise<string> {
         const CRLF = "\r\n";
 
         const fileName = fileSystemModule.knownFolders.documents().path + "/temp-MPF-" + Math.floor(Math.random() * 100000000000) + ".tmp";
+        NSFileManager.defaultManager.createFileAtPathContentsAttributes(fileName, null, null);
+        let handle = NSFileHandle.fileHandleForWritingAtPath(fileName);
 
-        const combinedData = NSMutableData.alloc().init();
-
-        let results: string = "";
-        let tempString: NSString;
-        let newData: any;
-        for (let i = 0; i < this.fields.length; i++) {
-            results += "--" + this.boundary + CRLF;
-            results += 'Content-Disposition: form-data; name="' + this.fields[i].name + '"';
-            if (!this.fields[i].filename) {
-                results += CRLF + CRLF + this.fields[i].value + CRLF;
-            } else {
-                results += '; filename="' + this.fields[i].destFilename + '"';
-                if (this.fields[i].mimeType) {
-                    results += CRLF + "Content-Type: " + this.fields[i].mimeType;
+        return new Promise(  async (resolve) => {
+            let results = "";
+            for (let i = 0; i < this.fields.length; i++) {
+                results += "--" + this.boundary + CRLF;
+                results += 'Content-Disposition: form-data; name="' + this.fields[i].name + '"';
+                if (!this.fields[i].filename) {
+                    results += CRLF + CRLF + this.fields[i].value + CRLF;
+                } else {
+                    results += '; filename="' + this.fields[i].destFilename + '"';
+                    if (this.fields[i].mimeType) {
+                        results += CRLF + "Content-Type: " + this.fields[i].mimeType;
+                    }
+                    results += CRLF + CRLF;
                 }
-                results += CRLF + CRLF;
+
+                this._appendStringData(results, handle);
+                results = "";
+
+
+                if (this.fields[i].filename) {
+                    let fileData;
+                    if (this.fields[i].filename.startsWith("assets-library://")) {
+                        await getAssetData(this.fields[i].filename, handle);
+                        console.log("Done awaiting")
+                    } else {
+//                        this._copyAsset(this.fields[i].filename, handle);
+                        const fileData = NSData.alloc().initWithContentsOfFile(this.fields[i].filename);
+                        handle.writeData(fileData);
+                    }
+                    results = CRLF;
+                }
+
             }
+            // Add final part of it...
+            results += "--" + this.boundary + "--" + CRLF;
+            this._appendStringData(results, handle);
+            handle.closeFile();
 
-            tempString = NSString.stringWithString(results);
-            results = "";
-            newData = tempString.dataUsingEncoding(NSUTF8StringEncoding);
-            combinedData.appendData(newData);
-
-
-            if (this.fields[i].filename) {
-                const fileData = NSData.alloc().initWithContentsOfFile(this.fields[i].filename);
-                combinedData.appendData(fileData);
-                results = CRLF;
-            }
-
-        }
-        // Add final part of it...
-        results += "--" + this.boundary + "--" + CRLF;
-        tempString = NSString.stringWithString(results);
-        newData = tempString.dataUsingEncoding(NSUTF8StringEncoding);
-        combinedData.appendData(newData);
-
-        NSFileManager.defaultManager.createFileAtPathContentsAttributes(fileName, combinedData, null);
-
-        return fileName;
+            resolve(fileName);
+        });
     }
 
     public getHeader(): string {
         return this.header;
     }
 }
+
+

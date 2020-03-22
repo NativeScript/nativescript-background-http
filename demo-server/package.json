@@ -5,6 +5,7 @@
     "start": "npm i && node server.js 8080"
   },
   "dependencies": {
+    "formidable": "^1.2.2",
     "stream-throttle": "*"
   }
 }

@@ -135,8 +135,8 @@ export interface Session {
      * @param fileUri A file path to upload.
      * @param options Options for the upload, sets uri, headers, task description etc.
      */
-    uploadFile(fileUri: string, options: Request): Task;
-    multipartUpload(params: Array<any>, options: Request): Task;
+    uploadFile(fileUri: string, options: Request): Promise<Task>;
+    multipartUpload(params: Array<any>, options: Request): Promise<Task>;
 
 }
 
