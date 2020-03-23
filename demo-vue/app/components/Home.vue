@@ -87,7 +87,7 @@ export default {
         request.headers["Should-Fail"] = true;
       }
 
-      let task; // bgHttp.Task;
+      let taskPromise; // Promise<Task>
       let lastEvent = "";
 
       if (isMulti) {
@@ -97,9 +97,9 @@ export default {
           { name: "bool", value: true },
           { name: "fileToUpload", filename: this.file, mimeType: 'image/jpeg' }
         ];
-        task = this.session.multipartUpload(params, request);
+        taskPromise = this.session.multipartUpload(params, request);
       } else {
-        task = this.session.uploadFile(this.file, request);
+        taskPromise = this.session.uploadFile(this.file, request);
       }
 
       function onEvent(e) {
@@ -124,13 +124,15 @@ export default {
         this.$set(this.tasks, this.tasks.indexOf(task), task);
       }
 
-      task.on("progress", onEvent.bind(this));
-      task.on("error", onEvent.bind(this));
-      task.on("responded", onEvent.bind(this));
-      task.on("complete", onEvent.bind(this));
-      lastEvent = "";
+      taskPromise.then( (task) => {
+        task.on("progress", onEvent.bind(this));
+        task.on("error", onEvent.bind(this));
+        task.on("responded", onEvent.bind(this));
+        task.on("complete", onEvent.bind(this));
+        lastEvent = "";
+        this.tasks.push(task);
+      });
 
-      this.tasks.push(task);
     },
     onItemLoading(args) {
       let label = args.view.getViewById("imageLabel");

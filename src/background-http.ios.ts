@@ -77,7 +77,8 @@ function getAssetData(asset: string, fileHandle: NSFileHandle = null): Promise<a
             const nurl = NSURL.URLWithString(asset);
             const assets = PHAsset.fetchAssetsWithALAssetURLsOptions(NSArray.arrayWithArray([nurl]), null);
 
-            // No Asset matching
+            // No Asset matching via PHAsset System, try direct copy then...
+            // This path probably is NEVER hit, but for the sake of completeness, it is included...
             if (assets.count == 0) {
                 let isWritten = false;
                 if (opened) {
@@ -104,11 +105,10 @@ function getAssetData(asset: string, fileHandle: NSFileHandle = null): Promise<a
                     }
                     resolve(fileName);
                 });
-                return;
+
             } else if (assets[0].mediaType === PHAssetMediaTypeVideo) {
                 const options = PHVideoRequestOptions.alloc().init();
                 options.version = PHVideoRequestOptionsVersionOriginal;
-//                options.deliveryMode = PHVideoRequestOptionsDeliveryMode.HighQualityFormat;
 
                 PHImageManager.defaultManager().requestAVAssetForVideoOptionsResultHandler(assets[0], options, function (asset, audioMix, info) {
                     handle.writeData(NSData.dataWithContentsOfURL(asset.URL));
@@ -476,42 +476,6 @@ class MultiMultiPartForm {
         fileHandle.writeData(newData);
     }
 
-    private _copyAsset(asset, fileHandle=null): string {
-        let handle = fileHandle, opened=false;
-        const fileName = fileSystemModule.knownFolders.documents().path + "/temp-MPA-" + Math.floor(Math.random() * 100000000000) + ".tmp";
-        if (fileHandle == null) {
-            NSFileManager.defaultManager.createFileAtPathContentsAttributes(fileName, null, null);
-            handle = NSFileHandle.fileHandleForWritingAtPath(fileName);
-            opened = true;
-        } else {
-            handle.seekToEndOfFile();
-        }
-        if (!handle) { return null; }
-
-        const BufferSize = 1024*1024;
-
-        const rep = asset.defaultRepresentation;
-        const buffer = calloc(BufferSize, 1);
-        let offset=0, bytesRead=0;
-        try {
-            do {
-                try {
-                    bytesRead = asset.defaultRepresentation.getBytesFromOffsetLengthError(buffer, offset, BufferSize, null);
-                    handle.writeData(NSData.dataWithBytesNoCopyLengthFreeWhenDone(buffer, bytesRead, false));
-                    offset += bytesRead;
-                } catch (err) {
-                    return null;
-                }
-            } while (bytesRead > 0);
-            return fileName;
-        } finally {
-            if (opened) {
-                handle.closeFile();
-            }
-            free(buffer);
-        }
-    }
-
     public generateFile(): Promise<string> {
         const CRLF = "\r\n";
 
@@ -537,14 +501,10 @@ class MultiMultiPartForm {
                 this._appendStringData(results, handle);
                 results = "";
 
-
                 if (this.fields[i].filename) {
-                    let fileData;
                     if (this.fields[i].filename.startsWith("assets-library://")) {
                         await getAssetData(this.fields[i].filename, handle);
-                        console.log("Done awaiting")
                     } else {
-//                        this._copyAsset(this.fields[i].filename, handle);
                         const fileData = NSData.alloc().initWithContentsOfFile(this.fields[i].filename);
                         handle.writeData(fileData);
                     }
