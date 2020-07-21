@@ -340,7 +340,11 @@ function setRequestOptions(request: any, options: common.Request) {
         for (const header in headers) {
             const value = headers[header];
             if (value !== null && value !== void 0) {
-                request.addHeader(header, value.toString());
+                if (header == 'User-Agent') {
+                    request.setCustomUserAgent(value.toString());
+                } else {
+                    request.addHeader(header, value.toString());
+                }
             }
         }
     }
