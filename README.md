@@ -1,3 +1,10 @@
+## NativeScript 7
+
+* Use `@nativescript/background-http`: `~5.0.0`
+* [Source managed here](https://github.com/NativeScript/plugins)
+
+## If using 6 and below, see the following:
+
 # Background Upload NativeScript plugin [![Build Status](https://travis-ci.org/NativeScript/nativescript-background-http.svg?branch=master)](https://travis-ci.org/NativeScript/nativescript-background-http)
 
 A cross platform plugin for [the NativeScript framework](http://www.nativescript.org), that provides background upload for iOS and Android.
