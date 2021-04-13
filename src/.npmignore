@@ -1,4 +1,5 @@
-scripts/*
+scripts/
+typings/*
 *.map
 /node_modules
 *.ts

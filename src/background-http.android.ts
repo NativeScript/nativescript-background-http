@@ -149,12 +149,12 @@ class Session {
         this._id = id;
     }
 
-    public uploadFile(fileUri: string, options: common.Request): Task {
-        return Task.create(this, fileUri, options);
+    public uploadFile(fileUri: string, options: common.Request): Promise<Task> {
+            return Promise.resolve( Task.create(this, fileUri, options) );
     }
 
-    public multipartUpload(params: Array<any>, options: common.Request): Task {
-        return Task.createMultiPart(this, params, options);
+    public multipartUpload(params: Array<any>, options: common.Request): Promise<Task> {
+            return Promise.resolve( Task.createMultiPart(this, params, options) );
     }
 
     get id(): string {

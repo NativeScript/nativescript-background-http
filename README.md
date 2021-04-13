@@ -19,9 +19,15 @@ The plugin uses [NSURLSession with background session configuration for iOS](htt
 tns plugin add nativescript-background-http
 ```
 
+## Breaking Change
+In v5.0 `.uploadFile` and `.multipartUpload` returns a promise with the task instead of a task directly.
+This is to allow ios "assets-library" urls to be uploaded (& easily in future ios PHAsset urls).
+
+
 ## Usage
 
 The below attached code snippets demonstrate how to use `nativescript-background-http` to upload single or multiple files.
+
 
 ### Uploading files
 
@@ -30,14 +36,14 @@ Sample code for configuring the upload session. Each session must have a unique 
 ```JavaScript
 
 // file path and url
-var file =  "/some/local/file/path/and/file/name.jpg";
-var url = "https://some.remote.service.com/path";
-var name = file.substr(file.lastIndexOf("/") + 1);
+const file =  "/some/local/file/path/and/file/name.jpg";
+const url = "https://some.remote.service.com/path";
+const name = file.substr(file.lastIndexOf("/") + 1);
 
 // upload configuration
-var bghttp = require("nativescript-background-http");
-var session = bghttp.session("image-upload");
-var request = {
+const bghttp = require("nativescript-background-http");
+const session = bghttp.session("image-upload");
+const request = {
         url: url,
         method: "POST",
         headers: {
@@ -50,23 +56,28 @@ var request = {
 For a single file upload, use the following code:
 
 ```JavaScript
-var task = session.uploadFile(file, request);
+session.uploadFile(file, request).then( (task) => { /* Do something with Task */ });
 ```
 
 For multiple files or to pass additional data, use the multipart upload method. All parameter values must be strings:
 
 ```JavaScript
-var params = [
+const params = [
    { name: "test", value: "value" },
    { name: "fileToUpload", filename: file, mimeType: "image/jpeg" }
 ];
-var task = session.multipartUpload(params, request);
+session.multipartUpload(params, request).then( (task) => { /* Do something with Task */ } );
 ```
 
 In order to have a successful upload, the following must be taken into account:
 
 - the file must be accessible from your app. This may require additional permissions (e.g. access documents and files on the device). Usually this is not a problem - e.g. if you use another plugin to select the file, which already adds the required permissions.
 - the URL must not be blocked by the OS. Android Pie or later devices require TLS (HTTPS) connection by default and will not upload to an insecure (HTTP) URL.
+- If you are going to upload or allow uploading assets-library urls on iOS (i.e. URL's received from the Gallery) you need to add the following to your ios's Info.plist file:
+```
+<key>NSPhotoLibraryUsageDescription</key>^M
+<string>Requires access to photo library.</string>^M
+``` 
 
 ### Upload request and task API
 
@@ -127,7 +138,7 @@ function progressHandler(e) {
 // response: net.gotev.uploadservice.ServerResponse (Android) / NSHTTPURLResponse (iOS)
 function errorHandler(e) {
     alert("received " + e.responseCode + " code.");
-    var serverResponse = e.response;
+    let serverResponse = e.response;
 }
 
 
@@ -145,7 +156,7 @@ function respondedHandler(e) {
 // response: net.gotev.uploadservice.ServerResponse (Android) / NSHTTPURLResponse (iOS)
 function completeHandler(e) {
     alert("received " + e.responseCode + " code");
-    var serverResponse = e.response;
+    let serverResponse = e.response;
 }
 
 // event arguments:

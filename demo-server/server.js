@@ -1,6 +1,7 @@
 var http = require("http");
 var fs = require("fs");
 var path = require("path");
+var formidable = require('formidable');
 
 function start(port, logger) {
 
@@ -9,13 +10,33 @@ function start(port, logger) {
     try {
       var Throttle = require("stream-throttle").Throttle;
 
+      if (request.headers["content-type"] && request.headers["content-type"].startsWith("multipart/form-data")) {
+        const form = formidable({ multiples: true, uploadDir: outDir, keepExtensions: true });
+        form.parse(request, (err, fields, files) => {
+
+          // Make the files array look nicer...
+          let uploads={};
+          for (let key in files) {
+            uploads[key] = files[key].path;
+          }
+          console.log("Fields", fields, "Files:", uploads);
+          logger.log("Done!");
+
+          var body = "Upload complete!";
+          response.writeHead(200, "Done!", { "Content-Type": "text/plain", "Content-Length": body.length });
+          response.write(body);
+          response.end();
+        });
+        return;
+      }
+
       var fileName = request.headers["file-name"];
       if (logger) {
         logger.log(request.method + "Request! Content-Length: " + request.headers["content-length"] + ", file-name: " + fileName);
         logger.dir(request.headers);
       }
 
-      var out = path.join(outDir, "upload-" + new Date().getTime() + "-" + fileName);
+      var out = path.join(outDir, "upload-" + new Date().getTime() );
       if (logger) {
         logger.log("Output in: " + out);
       }
@@ -26,7 +47,7 @@ function start(port, logger) {
       var shouldFail = request.headers["should-fail"];
 
       // throttle write speed to 4MB/s
-      request.pipe(new Throttle({ rate: 1024 * 4096 })).pipe(fs.createWriteStream(out, { flags: 'w', encoding: null, fd: null, mode: 0666 }));
+      request.pipe(new Throttle({ rate: 1024 * 8192 })).pipe(fs.createWriteStream(out, { flags: 'w', encoding: null, fd: null, mode: 0666 }));
 
       request.on('data', function(chunk) {
         current += chunk.length;
@@ -45,7 +66,7 @@ function start(port, logger) {
           }
         } else {
           if (logger) {
-            logger.log("Data [" + out + "]: " + current + " / " + total + "  " + Math.floor(100 * current / total) + "%");
+            //logger.log("Data [" + out + "]: " + current + " / " + total + "  " + Math.floor(100 * current / total) + "%");
           }
         }
       });
@@ -93,4 +114,6 @@ exports.start = start;
 if (process.argv.length === 3) {
   var port = parseInt(process.argv[2]);
   start(port, console);
+} else {
+  console.log("Args", process.argv.length);
 }

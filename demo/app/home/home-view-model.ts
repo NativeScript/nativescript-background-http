@@ -63,7 +63,7 @@ export class HomeViewModel extends Observable {
             request.headers["Should-Fail"] = true;
         }
 
-        let task: bghttp.Task;
+        let taskPromise: Promise<bghttp.Task>;
         let lastEvent = "";
         if (isMulti) {
             const params = [
@@ -72,9 +72,9 @@ export class HomeViewModel extends Observable {
                 { name: "bool", value: true },
                 { name: "fileToUpload", filename: this.file, mimeType: 'image/jpeg' }
             ];
-            task = this.session.multipartUpload(params, request);
+            taskPromise = this.session.multipartUpload(params, request);
         } else {
-            task = this.session.uploadFile(this.file, request);
+            taskPromise = this.session.uploadFile(this.file, request);
         }
 
         function onEvent(e) {
@@ -97,11 +97,13 @@ export class HomeViewModel extends Observable {
             });
         }
 
-        task.on("progress", onEvent.bind(this));
-        task.on("error", onEvent.bind(this));
-        task.on("responded", onEvent.bind(this));
-        task.on("complete", onEvent.bind(this));
-        lastEvent = "";
-        this.tasks.push(task);
+        taskPromise.then( (task: bghttp.Task ) => {
+            task.on("progress", onEvent.bind(this));
+            task.on("error", onEvent.bind(this));
+            task.on("responded", onEvent.bind(this));
+            task.on("complete", onEvent.bind(this));
+            lastEvent = "";
+            this.tasks.push(task);
+        });
     }
 }
